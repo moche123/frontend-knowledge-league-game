@@ -1,0 +1,96 @@
+<div class="antialiased min-h-screen flex flex-col md:flex-row bg-background">
+  <app-side-nav brand="Liga del Saber" tone="surface">
+    <div side-nav-header class="mb-8 flex flex-col items-center px-2">
+      <app-avatar
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9GU5ZlDzW03Ituw6IWv-X-i2nX0mqdpFUhLE5QkrOdZHswQL-vmTTtf8Zk4xa2VMJcaMnScAPDhsvD0UFy-dUu2NnSiPbNG6YBo_rexEz4Lz_nKWpK5DnsRU1l9_apy3ptbpNMIjjPe1hNXU6dwKe7FcnFovowTLiULk-CkgeTi3avNFoc5DIl1ewx86XCqfz_KpCQJuXvCNpecvih8KP8BYfhcYS4PC9WkXLWAXm6pNQ2TSvdgbV"
+        size="lg"
+        ring="primary"
+        class="mb-4"
+      />
+      <h2 class="font-title-sm text-title-sm text-primary mb-1">Elite Scholar</h2>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">Rank #42</p>
+    </div>
+
+    <div side-nav-body class="flex flex-col gap-2">
+      <app-nav-item icon="dashboard" label="Home" />
+      <app-nav-item icon="swords" label="Active Matches" />
+      <app-nav-item icon="gavel" label="Disputes" [active]="true" />
+      <app-nav-item icon="military_tech" label="Leaderboard" />
+      <app-nav-item icon="settings" label="Settings" />
+    </div>
+
+    <div side-nav-footer class="flex flex-col gap-2 px-2">
+      <button
+        type="button"
+        class="w-full flex items-center justify-center gap-2 bg-accent text-on-primary-fixed font-title-sm text-title-sm font-bold py-3 rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-[0_0_10px_rgba(100,255,218,0.3)] mb-4"
+      >
+        <app-icon name="add" size="sm" />
+        New Tournament
+      </button>
+      <div class="flex flex-col gap-1">
+        <app-nav-item icon="help" label="Help" />
+        <a href="#" (click)="$event.preventDefault()" class="flex items-center gap-3 px-4 py-2 rounded-xl text-error hover:bg-error-container/20 transition-all">
+          <app-icon name="logout" />
+          <span class="font-body-sm text-body-sm">Logout</span>
+        </a>
+      </div>
+    </div>
+  </app-side-nav>
+
+  <main class="flex-1 md:ml-64 pt-20 md:pt-12 px-margin-mobile md:px-margin-desktop pb-24 mx-auto w-full flex flex-col gap-stack-lg min-h-screen">
+    <header class="mb-4 shrink-0">
+      <h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-2 tracking-tight">
+        Formulario de Reclamo
+      </h1>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+        Presenta tus argumentos técnicos o académicos si consideras que la evaluación de la IA requiere revisión.
+      </p>
+    </header>
+
+    <section class="bg-surface-container-low border border-secondary-container rounded-xl p-6 relative overflow-hidden shrink-0">
+      <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+        <app-icon name="sports_esports" size="decorative" />
+      </div>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-title-sm text-title-sm text-primary flex items-center gap-2">
+          <app-icon name="info" size="lg" /> Resumen del Encuentro
+        </h3>
+        <span class="font-label-caps text-label-caps bg-surface-variant text-on-surface-variant px-2 py-1 rounded-sm">ID: MTCH-8492</span>
+      </div>
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6 bg-background rounded-lg p-4 border border-surface-variant">
+        <div class="flex items-center gap-4 w-full md:w-auto justify-center md:justify-start">
+          <div class="text-center">
+            <div class="mx-auto mb-2 w-fit">
+              <app-avatar [src]="playerAvatar" size="md" ring="primary" />
+            </div>
+            <span class="font-body-sm text-body-sm text-on-surface block truncate w-24">Tú (Elite)</span>
+          </div>
+          <div class="flex flex-col items-center px-4">
+            <span class="font-display-lg-mobile text-display-lg-mobile text-on-surface font-bold">85</span>
+            <span class="font-label-caps text-label-caps text-on-surface-variant">Puntos</span>
+          </div>
+        </div>
+        <div class="text-on-surface-variant font-title-sm text-title-sm px-4">VS</div>
+        <div class="flex items-center gap-4 w-full md:w-auto justify-center md:justify-end flex-row-reverse">
+          <div class="text-center">
+            <div class="mx-auto mb-2 w-fit opacity-80 grayscale">
+              <app-avatar [src]="opponentAvatar" size="md" ring="outline" />
+            </div>
+            <span class="font-body-sm text-body-sm text-on-surface-variant block truncate w-24">Oponente</span>
+          </div>
+          <div class="flex flex-col items-center px-4">
+            <span class="font-display-lg-mobile text-display-lg-mobile text-on-surface-variant font-bold">92</span>
+            <span class="font-label-caps text-label-caps text-on-surface-variant">Puntos</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <app-chat-panel
+      matchLabel="Partida #MTCH-8492"
+      sendTone="primary"
+      [messages]="messages()"
+      (send)="onSend($event)"
+    />
+  </main>
+</div>

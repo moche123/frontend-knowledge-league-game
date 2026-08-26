@@ -1,0 +1,83 @@
+<div class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
+  <app-side-nav brand="Liga del Saber" tone="surface">
+    <div side-nav-header class="mb-10 flex flex-col gap-2 px-2">
+      <div class="flex items-center gap-3 mb-2">
+        <img [src]="logoUrl" alt="Liga del Saber" class="w-12 h-12 object-contain" />
+      </div>
+      <h1 class="font-headline-md text-headline-md text-primary">Liga del Saber</h1>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">Elite Tournament Platform</p>
+    </div>
+
+    <div side-nav-body class="flex flex-col gap-1 font-label-caps text-label-caps">
+      <app-nav-item icon="emoji_events" label="Mis torneos" [active]="true" />
+      <app-nav-item icon="leaderboard" label="Ranking" />
+      <app-nav-item icon="person" label="Perfil" />
+    </div>
+
+    <div side-nav-footer class="px-2 flex flex-col gap-4">
+      <app-button variant="outline" [fullWidth]="true">Start Quiz</app-button>
+      <div class="flex flex-col gap-2 font-label-caps text-label-caps border-t border-outline-variant pt-6">
+        <app-nav-item icon="help" label="Help" />
+        <app-nav-item icon="logout" label="Logout" />
+      </div>
+    </div>
+  </app-side-nav>
+
+  <div class="flex-1 flex flex-col min-w-0 md:ml-64">
+    <header class="hidden md:flex border-b border-outline-variant bg-surface-container-low h-20 items-center justify-between px-margin-desktop w-full max-w-container-max mx-auto">
+      <h2 class="font-headline-md text-headline-md text-primary">Dashboard</h2>
+      <div class="flex items-center gap-6">
+        <div class="flex flex-col items-end mr-4">
+          <span class="font-title-sm text-title-sm text-tertiary-fixed font-bold">12,450 pts</span>
+          <span class="font-label-caps text-label-caps text-on-surface-variant">Grandmaster Rank</span>
+        </div>
+        <div class="flex items-center gap-4 text-on-surface-variant">
+          <button type="button" class="hover:text-primary transition-colors p-2 hover:bg-primary-container rounded-full">
+            <app-icon name="notifications" [fill]="true" />
+          </button>
+          <button type="button" class="hover:text-primary transition-colors p-2 hover:bg-primary-container rounded-full">
+            <app-icon name="settings" [fill]="true" />
+          </button>
+        </div>
+        <div class="flex items-center gap-3 border-l border-outline-variant pl-6">
+          <span class="font-title-sm text-title-sm hidden lg:block">Alejandro Silva</span>
+          <app-avatar
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMzJ-_BefSihRwqWaEtLWww3HRFO_0oqAtqX4L-pDneg8MVfeCIERZpr1OPJQLsgzuGR18BFNcIGsUKM6-xdo-H_WoOWrgKXOt4BcCzrYgGccp7MmHmqkRYG5Cuef7FOxCnXLuh4A2spYQbCaiol5YuVgobBsUNiopc-9j8PciWW3JAyO2RTuFBfW99AMsZe2zVyqmbrm6A_xqqO21_TB5yl1PUWVlhEj9tHUD_jbeSGBhZ0yiTxgt"
+            ring="outline"
+          />
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full overflow-y-auto">
+      <div class="mb-stack-lg">
+        <h3 class="font-display-lg-mobile md:font-display-lg text-primary mb-6">Mis Torneos</h3>
+        <app-tabs variant="underline" [tabs]="tabs" [active]="activeTab()" (activeChange)="activeTab.set($event)" />
+      </div>
+
+      <div class="mt-8">
+        <h4 class="font-headline-md text-headline-md text-on-surface mb-stack-md flex items-center gap-2">
+          <app-icon name="bolt" class="text-tertiary-fixed" />
+          Eventos Activos
+        </h4>
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-gutter">
+          @for (tournament of tournaments; track tournament.id) {
+            <app-tournament-card
+              [category]="tournament.category"
+              [categoryTone]="tournament.categoryTone"
+              [glowClass]="tournament.glowClass"
+              [progressTone]="tournament.progressTone"
+              [title]="tournament.title"
+              [points]="tournament.points"
+              [date]="tournament.date"
+              [enrolled]="tournament.enrolled"
+              [capacity]="tournament.capacity"
+              [progress]="progressOf(tournament)"
+              [full]="isFull(tournament)"
+            />
+          }
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

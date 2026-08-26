@@ -1,0 +1,172 @@
+<div class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body-md overflow-hidden">
+  <app-side-nav brand="Liga del Saber" tone="surface">
+    <div side-nav-header class="mb-stack-lg flex flex-col items-center px-2">
+      <app-avatar
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDffAtGLqIZY2Na0DtPBwV_e0fHF7YacVC5fGMp04vJhsVle-SpMoSzWR6qHGTiNDCTR9kq7fKgY8a_OF_mXwDLQCskKpJFVdAKjggE0wFGXO0lbwjcb0nQklN1ZG25zyggOqAGeN3CpgD5bd5aNOr1RlTnsu6r7D_QUnWkBHia8VWI_C1KUe2BZ7o6X55KAKK0lpVla84fAeBY1sGCyS3ZRBI4OD4HEyTK_Mf1wdxgfGus-n_1sgA9"
+        size="lg"
+        ring="gold"
+        class="mb-stack-md"
+      />
+      <h2 class="font-title-sm text-title-sm text-primary text-center">Alejandro Silva</h2>
+      <p class="font-body-sm text-body-sm text-tertiary text-center">Grandmaster Rank</p>
+      <p class="font-body-sm text-body-sm text-on-surface-variant text-center mt-1">12,450 pts</p>
+    </div>
+
+    <div side-nav-body class="flex flex-col gap-1">
+      <app-nav-item icon="dashboard" label="Dashboard" />
+      <app-nav-item icon="workspace_premium" label="Tournaments" />
+      <app-nav-item icon="psychology" label="AI Evaluation" />
+      <app-nav-item icon="gavel" label="Arbiter Panel" />
+      <app-nav-item icon="military_tech" label="Hall of Fame" [active]="true" />
+    </div>
+
+    <div side-nav-footer class="flex flex-col gap-4 px-2">
+      <button
+        type="button"
+        class="w-full py-2 bg-gradient-to-r from-tertiary to-tertiary-fixed-dim text-on-tertiary font-title-sm text-title-sm rounded flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+      >
+        <app-icon name="emoji_events" />
+        Claim Trophy
+      </button>
+      <div class="flex flex-col gap-1 pt-stack-md border-t border-outline-variant/30">
+        <app-nav-item icon="help_outline" label="Support" />
+        <app-nav-item icon="logout" label="Sign Out" />
+      </div>
+    </div>
+  </app-side-nav>
+
+  <div class="flex-grow flex flex-col h-screen overflow-hidden bg-primary-container relative md:ml-64">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-tertiary/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <header class="bg-background border-b border-primary-container z-10 shrink-0">
+      <div class="flex justify-between items-center px-margin-desktop py-base w-full max-w-container-max mx-auto h-20">
+        <div class="flex items-center gap-4">
+          <span class="font-display-lg-mobile text-display-lg-mobile text-tertiary tracking-tighter uppercase xl:font-display-lg xl:text-display-lg hidden sm:block">
+            Liga del Saber
+          </span>
+        </div>
+        <div class="flex items-center gap-6">
+          <button type="button" class="text-on-surface-variant hover:text-tertiary transition-colors duration-200">
+            <app-icon name="military_tech" size="lg" />
+          </button>
+          <button type="button" class="text-on-surface-variant hover:text-tertiary transition-colors duration-200 relative">
+            <app-icon name="notifications" size="lg" />
+            <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+          </button>
+          <button type="button" class="text-on-surface-variant hover:text-tertiary transition-colors duration-200">
+            <app-icon name="settings" size="lg" />
+          </button>
+          <div class="flex items-center gap-3 pl-4 border-l border-outline-variant/30">
+            <div class="text-right hidden md:block">
+              <p class="font-title-sm text-title-sm text-primary">Alejandro Silva</p>
+              <p class="font-label-caps text-label-caps text-tertiary">Grandmaster | 12,450 pts</p>
+            </div>
+            <app-avatar [src]="selfRow.avatarUrl" ring="gold" />
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow overflow-y-auto px-margin-mobile md:px-margin-desktop py-stack-lg z-10 scrollbar-elite">
+      <div class="max-w-container-max mx-auto space-y-stack-lg pb-24">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container/40 p-6 rounded-xl border border-outline-variant/20 backdrop-blur-md">
+          <div>
+            <h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-primary tracking-tight">
+              Ranking Global
+            </h1>
+            <p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-xl">
+              El salón de la fama de la Liga del Saber. Solo los más eruditos alcanzan la cima.
+            </p>
+          </div>
+          <app-select variant="filled" [options]="filterOptions" [value]="filter()" (valueChange)="filter.set($event)" />
+        </div>
+
+        <div class="flex justify-center items-end gap-2 md:gap-6 pt-12 pb-8">
+          @for (slot of podium; track slot.rank) {
+            <app-podium-slot
+              [rank]="slot.rank"
+              [name]="slot.name"
+              [points]="slot.points"
+              [avatarUrl]="slot.avatarUrl"
+              [winRate]="slot.winRate ?? 0"
+              [matches]="slot.matches ?? 0"
+              [isSelf]="slot.isSelf ?? false"
+            />
+          }
+        </div>
+
+        <div class="bg-surface-container border border-outline-variant/30 rounded-xl overflow-hidden shadow-lg">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-outline-variant/30 bg-surface-container-high/50">
+                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider w-20 text-center">Posición</th>
+                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Jugador</th>
+                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-center hidden sm:table-cell">Rango</th>
+                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-center hidden md:table-cell">Torneos Jugados</th>
+                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-right">Puntaje Global</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/10">
+                @for (row of rows; track row.position) {
+                  <tr class="hover:bg-surface-bright/20 transition-colors group">
+                    <td class="py-4 px-6 text-center">
+                      <span class="font-headline-md text-headline-md text-on-surface-variant/70 group-hover:text-primary transition-colors">{{ row.position }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                      <div class="flex items-center gap-4">
+                        <app-avatar [src]="row.avatarUrl" />
+                        <div>
+                          <p class="font-title-sm text-title-sm text-primary">{{ row.name }}</p>
+                          <p class="font-body-sm text-body-sm text-on-surface-variant md:hidden">{{ row.tier }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-4 px-6 text-center hidden sm:table-cell">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-container text-primary border border-primary/20">{{ row.tier }}</span>
+                    </td>
+                    <td class="py-4 px-6 text-center text-on-surface-variant hidden md:table-cell">{{ row.tournaments }}</td>
+                    <td class="py-4 px-6 text-right font-headline-md text-headline-md text-primary">{{ row.points }}</td>
+                  </tr>
+                }
+                <tr>
+                  <td class="py-2 text-center text-on-surface-variant/50" colspan="5">
+                    <app-icon name="more_vert" size="sm" />
+                  </td>
+                </tr>
+                <tr class="bg-tertiary-container/10 border-l-4 border-tertiary">
+                  <td class="py-4 px-6 text-center">
+                    <span class="font-headline-md text-headline-md text-tertiary font-bold">{{ selfRow.position }}</span>
+                  </td>
+                  <td class="py-4 px-6">
+                    <div class="flex items-center gap-4">
+                      <app-avatar [src]="selfRow.avatarUrl" ring="gold" />
+                      <div>
+                        <p class="font-title-sm text-title-sm text-tertiary font-bold">
+                          {{ selfRow.name }}
+                          <span class="text-xs font-normal text-on-surface-variant ml-2">(Tú)</span>
+                        </p>
+                        <p class="font-body-sm text-body-sm text-tertiary/70 md:hidden">{{ selfRow.tier }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-4 px-6 text-center hidden sm:table-cell">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-tertiary-container text-tertiary border border-tertiary/30 shadow-[0_0_10px_rgba(231,191,153,0.2)]">{{ selfRow.tier }}</span>
+                  </td>
+                  <td class="py-4 px-6 text-center text-on-surface-variant hidden md:table-cell">{{ selfRow.tournaments }}</td>
+                  <td class="py-4 px-6 text-right font-headline-md text-headline-md text-tertiary font-bold">{{ selfRow.points }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="p-4 border-t border-outline-variant/30 flex justify-center bg-surface-container-low/50">
+            <button type="button" class="px-6 py-2 border border-outline-variant rounded-lg font-title-sm text-title-sm text-primary hover:bg-secondary-container/20 hover:border-secondary transition-all flex items-center gap-2">
+              Cargar más
+              <app-icon name="expand_more" size="sm" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

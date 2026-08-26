@@ -1,0 +1,263 @@
+<div
+  class="font-body-md text-body-md min-h-screen flex flex-col md:flex-row bg-background"
+  style="background: linear-gradient(135deg, var(--color-background) 0%, var(--color-primary-container) 100%)"
+>
+  <app-side-nav brand="Knowledge Coliseum Admin" tone="brand">
+    <div side-nav-header class="mb-8 flex flex-col items-center gap-stack-sm">
+      <div class="w-20 h-20 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden mb-2 border-2 border-tertiary-fixed">
+        <img
+          alt="Liga del Saber"
+          class="w-full h-full object-cover"
+          src="https://lh3.googleusercontent.com/aida/AEtjO1XINWzavwId3se-vwYMWWTdNIGQdnsy4L-3LGMVD39EqMIVWE5xnJz2j0PS4RBibmyc-6FXsDSTzqsqrvHhLWAcbzlEs_ILdKri7jd8bUlC4jWS79mfrq1R3c6hCCVumwb1ijJDhLoqEcOYei1EVY7Mj5fCDkAv70ut7Vs-b9DNb3dxNMJxe0ptzE-uP1LkSZl7cerpV_Pqzp_7r8mlytXE6PS9LSAbOZAMXCmyx_hNkNiktK5HDHlLYtw"
+        />
+      </div>
+      <h1 class="font-title-sm text-title-sm text-on-surface font-bold text-center">Tournament Control</h1>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">Elite Administrator</p>
+      <div class="w-full mt-4">
+        <app-button variant="accent" [fullWidth]="true" (click)="togglePanel()">
+          <app-icon name="add" size="sm" [fill]="true" />
+          New Tournament
+        </app-button>
+      </div>
+    </div>
+
+    <div side-nav-body class="flex flex-col gap-2">
+      <app-nav-item icon="event" label="Events" [active]="true" />
+      <app-nav-item icon="database" label="Question Bank" />
+      <app-nav-item icon="gavel" label="Disputes" />
+    </div>
+
+    <div side-nav-footer class="flex flex-col gap-1 px-2">
+      <app-nav-item icon="settings" label="Settings" />
+      <app-nav-item icon="help" label="Support" />
+    </div>
+  </app-side-nav>
+
+  <div class="md:ml-64 flex flex-col flex-1 w-full relative">
+    <header class="bg-background/80 backdrop-blur-md sticky top-0 z-30 border-b border-outline-variant shadow-sm flex justify-between items-center h-16 px-gutter">
+      <div class="font-headline-md text-headline-md font-bold text-tertiary">Knowledge Coliseum Admin</div>
+      <nav class="hidden lg:flex gap-6">
+        <a class="text-tertiary border-b-2 border-tertiary pb-1 font-label-caps text-label-caps" href="#" (click)="$event.preventDefault()">Dashboard</a>
+        <a class="text-on-surface-variant hover:text-tertiary-fixed transition-all font-label-caps text-label-caps" href="#" (click)="$event.preventDefault()">Analytics</a>
+        <a class="text-on-surface-variant hover:text-tertiary-fixed transition-all font-label-caps text-label-caps" href="#" (click)="$event.preventDefault()">Logs</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <button type="button" class="text-tertiary font-label-caps text-label-caps border border-tertiary/30 px-3 py-1.5 rounded hover:bg-tertiary/10 transition-colors">
+          System Status
+        </button>
+        <div class="flex gap-2 text-on-surface-variant">
+          <button type="button" class="hover:text-tertiary-fixed transition-all rounded-full p-1">
+            <app-icon name="notifications" />
+          </button>
+          <button type="button" aria-label="Admin Profile" class="hover:text-tertiary-fixed transition-all rounded-full p-1">
+            <app-icon name="account_circle" />
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-gutter overflow-y-auto bg-transparent pb-32">
+      <div class="flex justify-between items-end mb-stack-lg border-b border-outline-variant/30 pb-4">
+        <div>
+          <h2 class="font-display-lg text-display-lg text-on-surface mb-2">Gestión de Eventos</h2>
+          <p class="text-on-surface-variant font-body-md text-body-md">Administra y supervisa todos los torneos activos y pasados.</p>
+        </div>
+        <app-button variant="accent" (click)="togglePanel()">
+          Crear nuevo evento
+        </app-button>
+      </div>
+
+      <div class="bg-secondary-container/20 border border-secondary-container rounded-xl overflow-hidden shadow-lg">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container-high border-b border-outline-variant/50 font-label-caps text-label-caps text-on-surface-variant">
+                <th class="p-4 font-semibold">Nombre</th>
+                <th class="p-4 font-semibold">Temática</th>
+                <th class="p-4 font-semibold">Fecha</th>
+                <th class="p-4 font-semibold">Estado</th>
+                <th class="p-4 font-semibold text-center">Inscritos</th>
+                <th class="p-4 font-semibold">Árbitro</th>
+                <th class="p-4 font-semibold text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="font-body-sm text-body-sm text-on-surface divide-y divide-outline-variant/30">
+              @for (event of events; track event.id) {
+                <tr class="hover:bg-surface-container-highest/50 transition-colors" [class]="event.status === 'live' ? 'bg-primary-container/20' : ''">
+                  <td class="p-4">
+                    <div class="font-title-sm text-title-sm font-semibold flex items-center gap-2" [class]="event.status === 'live' ? 'text-accent' : 'text-on-surface'">
+                      {{ event.name }}
+                      @if (event.status === 'live') {
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                        </span>
+                      }
+                    </div>
+                    <div class="text-on-surface-variant text-xs mt-1">ID: {{ event.code }}</div>
+                  </td>
+                  <td class="p-4">
+                    <app-badge variant="secondary" [icon]="event.themeIcon">{{ event.themeLabel }}</app-badge>
+                  </td>
+                  <td class="p-4 text-on-surface-variant">{{ event.date }}<br /><span class="text-xs">{{ event.time }}</span></td>
+                  <td class="p-4">
+                    <app-badge [variant]="statusBadge[event.status]" [dot]="event.status !== 'finished'" [pulse]="event.status === 'live'">
+                      {{ statusLabel[event.status] }}
+                    </app-badge>
+                  </td>
+                  <td class="p-4 text-center">
+                    <div class="flex items-center justify-center gap-2">
+                      <div class="w-16">
+                        <app-progress-bar [value]="progressOf(event)" [tone]="statusProgressTone[event.status]" />
+                      </div>
+                      <span class="font-mono">{{ event.enrolled }}/{{ event.capacity }}</span>
+                    </div>
+                  </td>
+                  <td class="p-4">
+                    <div class="flex items-center gap-2">
+                      <div class="w-6 h-6 rounded-full bg-tertiary-container text-tertiary flex items-center justify-center text-xs font-bold">{{ event.refereeInitials }}</div>
+                      <span>{{ event.refereeName }}</span>
+                    </div>
+                  </td>
+                  <td class="p-4 text-right">
+                    <button type="button" class="text-on-surface-variant hover:text-tertiary transition-colors p-1">
+                      <app-icon [name]="actionIcon[event.action]" [fill]="event.status === 'live'" />
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Creation drawer -->
+  @if (panelOpen()) {
+    <div class="fixed inset-0 bg-background/60 backdrop-blur-sm z-40" (click)="togglePanel()"></div>
+  }
+  <div
+    class="fixed inset-y-0 right-0 w-[450px] max-w-full bg-surface-container-lowest border-l border-outline-variant shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col"
+    [class.translate-x-full]="!panelOpen()"
+    [class.translate-x-0]="panelOpen()"
+  >
+    <div class="flex items-center justify-between p-6 border-b border-outline-variant/30 bg-surface-container-high/50">
+      <div>
+        <h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Configurar Evento</h3>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Define los parámetros del nuevo torneo.</p>
+      </div>
+      <button type="button" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-variant transition-colors" (click)="togglePanel()">
+        <app-icon name="close" />
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-stack-lg scrollbar-elite">
+      <div class="flex flex-col gap-2">
+        <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+          <app-icon name="title" size="sm" /> Nombre del evento
+        </label>
+        <app-text-field placeholder="Ej. Copa de Matemáticas 2024" [value]="eventName()" (valueChange)="eventName.set($event)" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+          <app-icon name="category" size="sm" /> Temática
+        </label>
+        <app-select placeholder="Selecciona una temática..." [options]="themeOptions" [value]="theme()" (valueChange)="theme.set($event)" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-2">
+          <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+            <app-icon name="calendar_today" size="sm" /> Inicio
+          </label>
+          <app-text-field type="datetime-local" />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+            <app-icon name="event_busy" size="sm" /> Fin
+          </label>
+          <app-text-field type="datetime-local" />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+          <app-icon name="groups" size="sm" /> Máximo de jugadores (Potencias de 2)
+        </label>
+        <div class="grid grid-cols-4 gap-2">
+          @for (count of playerCounts; track count) {
+            <button
+              type="button"
+              (click)="maxPlayers.set(count)"
+              class="border py-2 rounded font-mono font-bold transition-colors"
+              [class]="maxPlayers() === count
+                ? 'bg-surface-container border-accent text-accent shadow-[0_0_10px_rgba(100,255,218,0.3)]'
+                : 'bg-surface-container border-outline-variant text-on-surface-variant hover:border-accent hover:text-accent'"
+            >
+              {{ count }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 border-t border-outline-variant/30 pt-6 mt-2">
+        <div class="flex flex-col gap-2">
+          <label class="font-label-caps text-label-caps text-on-surface-variant">Preguntas p/ enfrentamiento</label>
+          <input
+            type="number"
+            min="1"
+            max="50"
+            [value]="questionsPerMatch()"
+            (input)="questionsPerMatch.set($any($event.target).valueAsNumber)"
+            class="w-full bg-surface-container text-center font-mono font-bold text-lg text-on-surface border-0 border-b-2 border-outline-variant focus:border-accent focus:ring-0 px-4 py-2 rounded-t transition-colors"
+          />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="font-label-caps text-label-caps text-on-surface-variant">Puntaje Máximo</label>
+          <input
+            type="number"
+            min="100"
+            step="100"
+            [value]="maxScore()"
+            (input)="maxScore.set($any($event.target).valueAsNumber)"
+            class="w-full bg-surface-container text-center font-mono font-bold text-lg text-gold border-0 border-b-2 border-outline-variant focus:border-gold focus:ring-0 px-4 py-2 rounded-t transition-colors"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2 border-t border-outline-variant/30 pt-6 mt-2">
+        <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+          <app-icon name="sports" size="sm" /> Selector de Árbitro
+        </label>
+        <div class="bg-error-container/20 border border-error/50 rounded-lg p-3 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-error-container text-on-error-container flex items-center justify-center font-bold text-sm">DR</div>
+              <div>
+                <div class="font-title-sm text-title-sm text-on-surface font-semibold">Dra. D. Reyes</div>
+                <div class="text-xs text-on-surface-variant">Especialista en Ciencias</div>
+              </div>
+            </div>
+            <button type="button" class="text-error hover:text-error/80">
+              <app-icon name="swap_horiz" />
+            </button>
+          </div>
+          <div class="flex items-start gap-2 text-error text-xs bg-error-container/10 p-2 rounded mt-1">
+            <app-icon name="warning" size="sm" />
+            <p class="font-medium">Solapamiento de fechas: Este árbitro ya tiene un evento activo ("Desafío de Ciencias") en el rango seleccionado.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 border-t border-outline-variant/30 bg-surface-container-high/50 flex gap-4">
+      <app-button variant="outline-neutral" [fullWidth]="true" (click)="togglePanel()">Cancelar</app-button>
+      <app-button variant="accent" [fullWidth]="true" [disabled]="true">
+        <app-icon name="save" size="sm" />
+        Guardar Evento
+      </app-button>
+    </div>
+  </div>
+</div>

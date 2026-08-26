@@ -1,0 +1,36 @@
+<!-- Mobile top bar -->
+<header
+  class="md:hidden flex items-center justify-between px-margin-mobile h-16 w-full sticky top-0 z-40 border-b border-outline-variant"
+  [class]="tone() === 'brand' ? 'bg-primary-container' : 'bg-surface-container'"
+>
+  <span class="font-headline-md text-headline-md font-bold text-primary">{{ brand() }}</span>
+  <button
+    type="button"
+    class="p-2 text-on-surface-variant hover:text-on-surface transition-colors"
+    (click)="toggleMobile()"
+  >
+    <app-icon name="menu" />
+  </button>
+</header>
+
+<!-- Backdrop (mobile only, while open) -->
+@if (mobileOpen()) {
+  <div class="fixed inset-0 bg-background/60 backdrop-blur-sm z-30 md:hidden" (click)="closeMobile()"></div>
+}
+
+<aside
+  class="fixed inset-y-0 left-0 z-40 w-64 border-r border-outline-variant flex flex-col h-full py-8 transform transition-transform duration-300 md:translate-x-0"
+  [class]="tone() === 'brand' ? 'bg-primary-container' : 'bg-surface-container'"
+  [class.-translate-x-full]="!mobileOpen()"
+  [class.translate-x-0]="mobileOpen()"
+>
+  <div class="flex flex-col h-full px-4 overflow-y-auto scrollbar-elite">
+    <ng-content select="[side-nav-header]" />
+    <nav class="flex-1 flex flex-col gap-1 mt-2">
+      <ng-content select="[side-nav-body]" />
+    </nav>
+    <div class="mt-auto pt-4">
+      <ng-content select="[side-nav-footer]" />
+    </div>
+  </div>
+</aside>
