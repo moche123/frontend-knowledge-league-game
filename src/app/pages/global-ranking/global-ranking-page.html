@@ -1,5 +1,5 @@
 <div class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body-md overflow-hidden">
-  <app-side-nav brand="Liga del Saber" tone="surface">
+  <app-side-nav brand="Knowledge League" tone="surface">
     <div side-nav-header class="mb-stack-lg flex flex-col items-center px-2">
       <app-avatar
         src="https://lh3.googleusercontent.com/aida-public/AB6AXuDffAtGLqIZY2Na0DtPBwV_e0fHF7YacVC5fGMp04vJhsVle-SpMoSzWR6qHGTiNDCTR9kq7fKgY8a_OF_mXwDLQCskKpJFVdAKjggE0wFGXO0lbwjcb0nQklN1ZG25zyggOqAGeN3CpgD5bd5aNOr1RlTnsu6r7D_QUnWkBHia8VWI_C1KUe2BZ7o6X55KAKK0lpVla84fAeBY1sGCyS3ZRBI4OD4HEyTK_Mf1wdxgfGus-n_1sgA9"
@@ -42,7 +42,7 @@
       <div class="flex justify-between items-center px-margin-desktop py-base w-full max-w-container-max mx-auto h-20">
         <div class="flex items-center gap-4">
           <span class="font-display-lg-mobile text-display-lg-mobile text-tertiary tracking-tighter uppercase xl:font-display-lg xl:text-display-lg hidden sm:block">
-            Liga del Saber
+            Knowledge League
           </span>
         </div>
         <div class="flex items-center gap-6">
@@ -72,10 +72,10 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container/40 p-6 rounded-xl border border-outline-variant/20 backdrop-blur-md">
           <div>
             <h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-primary tracking-tight">
-              Ranking Global
+              Global Ranking
             </h1>
             <p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-xl">
-              El salón de la fama de la Liga del Saber. Solo los más eruditos alcanzan la cima.
+              The hall of fame of Knowledge League. Only the most learned reach the top.
             </p>
           </div>
           <app-select variant="filled" [options]="filterOptions" [value]="filter()" (valueChange)="filter.set($event)" />
@@ -100,11 +100,11 @@
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="border-b border-outline-variant/30 bg-surface-container-high/50">
-                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider w-20 text-center">Posición</th>
-                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Jugador</th>
-                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-center hidden sm:table-cell">Rango</th>
-                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-center hidden md:table-cell">Torneos Jugados</th>
-                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-right">Puntaje Global</th>
+                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider w-20 text-center">Position</th>
+                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Player</th>
+                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-center hidden sm:table-cell">Tier</th>
+                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-center hidden md:table-cell">Tournaments Played</th>
+                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-right">Global Score</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-outline-variant/10">
@@ -144,7 +144,7 @@
                       <div>
                         <p class="font-title-sm text-title-sm text-tertiary font-bold">
                           {{ selfRow.name }}
-                          <span class="text-xs font-normal text-on-surface-variant ml-2">(Tú)</span>
+                          <span class="text-xs font-normal text-on-surface-variant ml-2">(You)</span>
                         </p>
                         <p class="font-body-sm text-body-sm text-tertiary/70 md:hidden">{{ selfRow.tier }}</p>
                       </div>
@@ -161,7 +161,7 @@
           </div>
           <div class="p-4 border-t border-outline-variant/30 flex justify-center bg-surface-container-low/50">
             <button type="button" class="px-6 py-2 border border-outline-variant rounded-lg font-title-sm text-title-sm text-primary hover:bg-secondary-container/20 hover:border-secondary transition-all flex items-center gap-2">
-              Cargar más
+              Load more
               <app-icon name="expand_more" size="sm" />
             </button>
           </div>

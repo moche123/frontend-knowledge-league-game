@@ -27,10 +27,10 @@ export type ChatSendTone = 'primary' | 'gold';
   host: { class: 'contents' },
 })
 export class ChatPanel {
-  title = input('Chat de Reclamos');
+  title = input('Dispute Chat');
   matchLabel = input('');
   messages = input.required<ChatEntry[]>();
-  composerPlaceholder = input('Escribe un mensaje...');
+  composerPlaceholder = input('Write a message...');
   sendTone = input<ChatSendTone>('primary');
   showAiHint = input(false);
 

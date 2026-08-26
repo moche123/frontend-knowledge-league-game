@@ -34,10 +34,10 @@ interface RankingRow {
 })
 export class GlobalRankingPage {
   protected readonly filterOptions: SelectOption[] = [
-    { value: 'all', label: 'Todos los torneos' },
-    { value: 'history', label: 'Olimpiada de Historia' },
-    { value: 'science', label: 'Desafío de Ciencias' },
-    { value: 'math', label: 'Lógica Matemática' },
+    { value: 'all', label: 'All tournaments' },
+    { value: 'history', label: 'History Olympiad' },
+    { value: 'science', label: 'Science Challenge' },
+    { value: 'math', label: 'Math Logic' },
   ];
   protected filter = signal('all');
 

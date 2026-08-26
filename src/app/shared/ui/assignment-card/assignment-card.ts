@@ -16,7 +16,7 @@ interface StatusTheme {
 const THEME: Record<AssignmentStatus, StatusTheme> = {
   live: {
     badgeVariant: 'accent',
-    badgeLabel: 'En curso',
+    badgeLabel: 'Live',
     cardBorder: 'border-tertiary',
     glow: 'shadow-[0_0_10px_rgba(100,255,218,0.2)]',
     interactive: 'cursor-pointer',
@@ -24,7 +24,7 @@ const THEME: Record<AssignmentStatus, StatusTheme> = {
   },
   pending: {
     badgeVariant: 'gold',
-    badgeLabel: 'Pendiente',
+    badgeLabel: 'Pending',
     cardBorder: 'border-outline-variant hover:border-secondary-container',
     glow: '',
     interactive: 'cursor-pointer',
@@ -32,7 +32,7 @@ const THEME: Record<AssignmentStatus, StatusTheme> = {
   },
   closed: {
     badgeVariant: 'neutral',
-    badgeLabel: 'Cerrado',
+    badgeLabel: 'Closed',
     cardBorder: 'border-outline-variant/50',
     glow: '',
     interactive: 'cursor-not-allowed',

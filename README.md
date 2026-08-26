@@ -1,6 +1,21 @@
-# Frontend
+# Frontend — Knowledge League
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.2.
+Angular 22, generated with Angular CLI. Styled with Tailwind CSS (`@theme` in `src/styles.css`, tokens defined in `design-system.md` — "Academic Elite" palette, dark-mode-first).
+
+## Current status
+
+Mock screens only, **100% visual, no functional logic yet**: no connection to the backend (`backend/`), no real auth, no state shared between pages — each page carries its own hardcoded data in the component.
+
+- Basic routing in `src/app/app.routes.ts`, all pages lazy-loaded standalone:
+  - `/login` — login (mock)
+  - `/dashboard` — player dashboard
+  - `/answer-question` — a match's questionnaire
+  - `/disputes` — dispute chat
+  - `/judge-panel` — referee panel
+  - `/ranking` — global ranking (podium + table)
+  - `/events` — events management (admin)
+- Page components in `src/app/pages/*`, shared UI atoms (avatar, badge, chat-panel, side-nav, podium-slot, etc.) in `src/app/shared/ui/*`.
+- Responsive shell: `app-side-nav` (`host: { class: 'contents' }`) injects the mobile topbar + fixed sidebar as direct children of each page's wrapper — each page's root wrapper needs `flex flex-col md:flex-row` so the layout stacks correctly on mobile.
 
 ## Development server
 

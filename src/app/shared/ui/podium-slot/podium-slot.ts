@@ -99,7 +99,7 @@ const THEME: Record<PodiumRank, RankTheme> = {
         <span class="font-title-sm text-xs sm:text-title-sm text-center truncate w-full" [class]="theme().nameColor">
           {{ name() }}
           @if (isSelf()) {
-            <span class="text-[10px] sm:text-xs font-normal text-on-surface-variant">(Tú)</span>
+            <span class="text-[10px] sm:text-xs font-normal text-on-surface-variant">(You)</span>
           }
         </span>
         <span class="font-label-caps text-[10px] sm:text-label-caps" [class]="theme().pointsColor">{{ points() }} pts</span>

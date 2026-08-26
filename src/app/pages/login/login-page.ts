@@ -16,8 +16,8 @@ const LOGO_URL =
 export class LoginPage {
   protected readonly logoUrl = LOGO_URL;
   protected readonly tabs: TabItem[] = [
-    { id: 'login', label: 'INICIAR SESIÓN' },
-    { id: 'register', label: 'REGISTRARSE' },
+    { id: 'login', label: 'SIGN IN' },
+    { id: 'register', label: 'SIGN UP' },
   ];
 
   protected activeTab = signal('login');

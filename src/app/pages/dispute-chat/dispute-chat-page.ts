@@ -23,24 +23,24 @@ export class DisputeChatPage {
   protected readonly opponentAvatar = OPPONENT_AVATAR;
 
   protected messages = signal<ChatEntry[]>([
-    { id: 'sys-1', tone: 'system', align: 'left', text: 'Disputa abierta: Hoy 14:35' },
+    { id: 'sys-1', tone: 'system', align: 'left', text: 'Dispute opened: Today 14:35' },
     {
       id: 'msg-1',
       tone: 'self',
       align: 'left',
-      author: 'Tú (Elite)',
+      author: 'You (Elite)',
       time: '14:36',
       avatarInitial: 'T',
-      text: 'Árbitro, la pregunta 4 sobre la Revolución Francesa tiene una ambigüedad en la fecha límite de la Asamblea Constituyente. Mis fuentes indican 1791.',
+      text: 'Referee, question 4 about the French Revolution has an ambiguity in the National Constituent Assembly deadline. My sources indicate 1791.',
     },
     {
       id: 'msg-2',
       tone: 'opponent',
       align: 'right',
-      author: 'Oponente',
+      author: 'Opponent',
       time: '14:38',
       avatarInitial: 'O',
-      text: 'Estoy en desacuerdo. El texto oficial del torneo especifica septiembre de 1791, lo cual marqué correctamente en mi opción.',
+      text: "I disagree. The tournament's official text specifies September 1791, which I marked correctly in my answer.",
     },
     {
       id: 'msg-3',
@@ -49,14 +49,14 @@ export class DisputeChatPage {
       author: 'Dr. Julian Arango',
       time: '14:42',
       verified: true,
-      text: 'Revisando el manual oficial de la Liga del Saber (Ed. 2023), capítulo 4. La respuesta de Sofia es la aceptada por el comité académico. La puntuación se mantiene.',
+      text: "Reviewing the official Knowledge League manual (2023 Ed.), chapter 4. Sofia's answer is the one accepted by the academic committee. The score stands.",
     },
   ]);
 
   protected onSend(text: string): void {
     this.messages.update((current) => [
       ...current,
-      { id: `msg-${nextMessageId++}`, tone: 'self', align: 'left', author: 'Tú (Elite)', time: 'Ahora', avatarInitial: 'T', text },
+      { id: `msg-${nextMessageId++}`, tone: 'self', align: 'left', author: 'You (Elite)', time: 'Now', avatarInitial: 'T', text },
     ]);
   }
 }

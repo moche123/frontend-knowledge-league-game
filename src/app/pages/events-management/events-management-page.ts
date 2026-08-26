@@ -33,9 +33,9 @@ const STATUS_BADGE: Record<EventStatus, BadgeVariant> = {
 };
 
 const STATUS_LABEL: Record<EventStatus, string> = {
-  finished: 'Finalizado',
-  live: 'En curso',
-  open: 'Inscripción abierta',
+  finished: 'Finished',
+  live: 'Live',
+  open: 'Open Registration',
 };
 
 const STATUS_PROGRESS_TONE: Record<EventStatus, 'neutral' | 'accent' | 'gold'> = {
@@ -68,10 +68,10 @@ export class EventsManagementPage {
   protected readonly events: EventRow[] = [
     {
       id: 'e1',
-      name: 'Olimpiada de Historia',
+      name: 'History Olympiad',
       code: 'TRN-2023-089',
       themeIcon: 'history_edu',
-      themeLabel: 'Historia',
+      themeLabel: 'History',
       date: '15 Oct 2023',
       time: '10:00 - 14:00',
       status: 'finished',
@@ -83,11 +83,11 @@ export class EventsManagementPage {
     },
     {
       id: 'e2',
-      name: 'Desafío de Ciencias',
+      name: 'Science Challenge',
       code: 'TRN-2023-102',
       themeIcon: 'science',
-      themeLabel: 'Ciencias',
-      date: 'Hoy',
+      themeLabel: 'Science',
+      date: 'Today',
       time: '09:00 - 18:00',
       status: 'live',
       enrolled: 16,
@@ -98,10 +98,10 @@ export class EventsManagementPage {
     },
     {
       id: 'e3',
-      name: 'Maestría Literaria',
+      name: 'Literary Mastery',
       code: 'TRN-2023-115',
       themeIcon: 'menu_book',
-      themeLabel: 'Literatura',
+      themeLabel: 'Literature',
       date: '25 Nov 2023',
       time: '15:00 - 19:00',
       status: 'open',
@@ -114,10 +114,10 @@ export class EventsManagementPage {
   ];
 
   protected readonly themeOptions: SelectOption[] = [
-    { value: 'historia', label: 'Historia Universal' },
-    { value: 'ciencias', label: 'Ciencias Naturales' },
-    { value: 'literatura', label: 'Literatura Clásica' },
-    { value: 'matematicas', label: 'Matemáticas Avanzadas' },
+    { value: 'historia', label: 'World History' },
+    { value: 'ciencias', label: 'Natural Sciences' },
+    { value: 'literatura', label: 'Classic Literature' },
+    { value: 'matematicas', label: 'Advanced Mathematics' },
   ];
 
   protected panelOpen = signal(false);

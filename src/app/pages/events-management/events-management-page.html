@@ -6,7 +6,7 @@
     <div side-nav-header class="mb-8 flex flex-col items-center gap-stack-sm">
       <div class="w-20 h-20 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden mb-2 border-2 border-tertiary-fixed">
         <img
-          alt="Liga del Saber"
+          alt="Knowledge League"
           class="w-full h-full object-cover"
           src="https://lh3.googleusercontent.com/aida/AEtjO1XINWzavwId3se-vwYMWWTdNIGQdnsy4L-3LGMVD39EqMIVWE5xnJz2j0PS4RBibmyc-6FXsDSTzqsqrvHhLWAcbzlEs_ILdKri7jd8bUlC4jWS79mfrq1R3c6hCCVumwb1ijJDhLoqEcOYei1EVY7Mj5fCDkAv70ut7Vs-b9DNb3dxNMJxe0ptzE-uP1LkSZl7cerpV_Pqzp_7r8mlytXE6PS9LSAbOZAMXCmyx_hNkNiktK5HDHlLYtw"
         />
@@ -59,11 +59,11 @@
     <main class="flex-1 p-gutter overflow-y-auto bg-transparent pb-32">
       <div class="flex justify-between items-end mb-stack-lg border-b border-outline-variant/30 pb-4">
         <div>
-          <h2 class="font-display-lg text-display-lg text-on-surface mb-2">Gestión de Eventos</h2>
-          <p class="text-on-surface-variant font-body-md text-body-md">Administra y supervisa todos los torneos activos y pasados.</p>
+          <h2 class="font-display-lg text-display-lg text-on-surface mb-2">Events Management</h2>
+          <p class="text-on-surface-variant font-body-md text-body-md">Manage and oversee all active and past tournaments.</p>
         </div>
         <app-button variant="accent" (click)="togglePanel()">
-          Crear nuevo evento
+          Create new event
         </app-button>
       </div>
 
@@ -72,13 +72,13 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-surface-container-high border-b border-outline-variant/50 font-label-caps text-label-caps text-on-surface-variant">
-                <th class="p-4 font-semibold">Nombre</th>
-                <th class="p-4 font-semibold">Temática</th>
-                <th class="p-4 font-semibold">Fecha</th>
-                <th class="p-4 font-semibold">Estado</th>
-                <th class="p-4 font-semibold text-center">Inscritos</th>
-                <th class="p-4 font-semibold">Árbitro</th>
-                <th class="p-4 font-semibold text-right">Acciones</th>
+                <th class="p-4 font-semibold">Name</th>
+                <th class="p-4 font-semibold">Theme</th>
+                <th class="p-4 font-semibold">Date</th>
+                <th class="p-4 font-semibold">Status</th>
+                <th class="p-4 font-semibold text-center">Enrolled</th>
+                <th class="p-4 font-semibold">Referee</th>
+                <th class="p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="font-body-sm text-body-sm text-on-surface divide-y divide-outline-variant/30">
@@ -144,8 +144,8 @@
   >
     <div class="flex items-center justify-between p-6 border-b border-outline-variant/30 bg-surface-container-high/50">
       <div>
-        <h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Configurar Evento</h3>
-        <p class="font-body-sm text-body-sm text-on-surface-variant">Define los parámetros del nuevo torneo.</p>
+        <h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Configure Event</h3>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Define the parameters of the new tournament.</p>
       </div>
       <button type="button" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-variant transition-colors" (click)="togglePanel()">
         <app-icon name="close" />
@@ -155,28 +155,28 @@
     <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-stack-lg scrollbar-elite">
       <div class="flex flex-col gap-2">
         <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
-          <app-icon name="title" size="sm" /> Nombre del evento
+          <app-icon name="title" size="sm" /> Event name
         </label>
-        <app-text-field placeholder="Ej. Copa de Matemáticas 2024" [value]="eventName()" (valueChange)="eventName.set($event)" />
+        <app-text-field placeholder="E.g. Math Cup 2024" [value]="eventName()" (valueChange)="eventName.set($event)" />
       </div>
 
       <div class="flex flex-col gap-2">
         <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
-          <app-icon name="category" size="sm" /> Temática
+          <app-icon name="category" size="sm" /> Theme
         </label>
-        <app-select placeholder="Selecciona una temática..." [options]="themeOptions" [value]="theme()" (valueChange)="theme.set($event)" />
+        <app-select placeholder="Select a theme..." [options]="themeOptions" [value]="theme()" (valueChange)="theme.set($event)" />
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-2">
           <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
-            <app-icon name="calendar_today" size="sm" /> Inicio
+            <app-icon name="calendar_today" size="sm" /> Start
           </label>
           <app-text-field type="datetime-local" />
         </div>
         <div class="flex flex-col gap-2">
           <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
-            <app-icon name="event_busy" size="sm" /> Fin
+            <app-icon name="event_busy" size="sm" /> End
           </label>
           <app-text-field type="datetime-local" />
         </div>
@@ -184,7 +184,7 @@
 
       <div class="flex flex-col gap-3">
         <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
-          <app-icon name="groups" size="sm" /> Máximo de jugadores (Potencias de 2)
+          <app-icon name="groups" size="sm" /> Max players (Powers of 2)
         </label>
         <div class="grid grid-cols-4 gap-2">
           @for (count of playerCounts; track count) {
@@ -204,7 +204,7 @@
 
       <div class="grid grid-cols-2 gap-4 border-t border-outline-variant/30 pt-6 mt-2">
         <div class="flex flex-col gap-2">
-          <label class="font-label-caps text-label-caps text-on-surface-variant">Preguntas p/ enfrentamiento</label>
+          <label class="font-label-caps text-label-caps text-on-surface-variant">Questions per match</label>
           <input
             type="number"
             min="1"
@@ -215,7 +215,7 @@
           />
         </div>
         <div class="flex flex-col gap-2">
-          <label class="font-label-caps text-label-caps text-on-surface-variant">Puntaje Máximo</label>
+          <label class="font-label-caps text-label-caps text-on-surface-variant">Max Score</label>
           <input
             type="number"
             min="100"
@@ -229,7 +229,7 @@
 
       <div class="flex flex-col gap-2 border-t border-outline-variant/30 pt-6 mt-2">
         <label class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
-          <app-icon name="sports" size="sm" /> Selector de Árbitro
+          <app-icon name="sports" size="sm" /> Referee Selector
         </label>
         <div class="bg-error-container/20 border border-error/50 rounded-lg p-3 flex flex-col gap-2">
           <div class="flex items-center justify-between">
@@ -237,7 +237,7 @@
               <div class="w-8 h-8 rounded-full bg-error-container text-on-error-container flex items-center justify-center font-bold text-sm">DR</div>
               <div>
                 <div class="font-title-sm text-title-sm text-on-surface font-semibold">Dra. D. Reyes</div>
-                <div class="text-xs text-on-surface-variant">Especialista en Ciencias</div>
+                <div class="text-xs text-on-surface-variant">Science Specialist</div>
               </div>
             </div>
             <button type="button" class="text-error hover:text-error/80">
@@ -246,17 +246,17 @@
           </div>
           <div class="flex items-start gap-2 text-error text-xs bg-error-container/10 p-2 rounded mt-1">
             <app-icon name="warning" size="sm" />
-            <p class="font-medium">Solapamiento de fechas: Este árbitro ya tiene un evento activo ("Desafío de Ciencias") en el rango seleccionado.</p>
+            <p class="font-medium">Date overlap: This referee already has an active event ("Science Challenge") in the selected range.</p>
           </div>
         </div>
       </div>
     </div>
 
     <div class="p-6 border-t border-outline-variant/30 bg-surface-container-high/50 flex gap-4">
-      <app-button variant="outline-neutral" [fullWidth]="true" (click)="togglePanel()">Cancelar</app-button>
+      <app-button variant="outline-neutral" [fullWidth]="true" (click)="togglePanel()">Cancel</app-button>
       <app-button variant="accent" [fullWidth]="true" [disabled]="true">
         <app-icon name="save" size="sm" />
-        Guardar Evento
+        Save Event
       </app-button>
     </div>
   </div>

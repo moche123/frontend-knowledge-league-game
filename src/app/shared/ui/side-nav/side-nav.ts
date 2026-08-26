@@ -14,7 +14,7 @@ export type SideNavTone = 'surface' | 'brand';
   host: { class: 'contents' },
 })
 export class SideNav {
-  brand = input('Liga del Saber');
+  brand = input('Knowledge League');
   tone = input<SideNavTone>('surface');
 
   protected mobileOpen = signal(false);

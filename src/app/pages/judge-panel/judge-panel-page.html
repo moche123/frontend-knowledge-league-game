@@ -8,16 +8,16 @@
           <div class="font-title-sm text-title-sm text-on-surface truncate">Dr. Julian Arango</div>
           <div class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
             <span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_10px_rgba(100,255,218,0.2)]"></span>
-            5 Torneos Activos
+            5 Active Tournaments
           </div>
         </div>
       </div>
     </div>
 
     <div side-nav-body class="flex flex-col gap-1">
-      <app-nav-item icon="assignment" label="Asignaciones" [active]="true" />
-      <app-nav-item icon="history" label="Historial" />
-      <app-nav-item icon="bar_chart" label="Reportes" />
+      <app-nav-item icon="assignment" label="Assignments" [active]="true" />
+      <app-nav-item icon="history" label="History" />
+      <app-nav-item icon="bar_chart" label="Reports" />
     </div>
 
     <div side-nav-footer class="flex flex-col gap-1 px-2">
@@ -39,8 +39,8 @@
       <section class="w-full lg:w-1/3 xl:w-2/5 flex flex-col h-full bg-surface-container rounded-lg border border-secondary-container overflow-hidden">
         <div class="p-4 border-b border-outline-variant bg-surface-container-high flex justify-between items-center">
           <div>
-            <h2 class="font-headline-md text-headline-md text-on-surface">Partidas asignadas</h2>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Torneos activos bajo supervisión</p>
+            <h2 class="font-headline-md text-headline-md text-on-surface">Assigned Matches</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Active tournaments under supervision</p>
           </div>
           <button type="button" class="text-tertiary hover:text-tertiary-fixed transition-colors">
             <app-icon name="filter_list" />
@@ -62,7 +62,7 @@
 
       <div class="hidden lg:flex w-full lg:w-2/3 xl:w-3/5">
         <app-chat-panel
-          matchLabel="Partida #TRN-2023-102"
+          matchLabel="Match #TRN-2023-102"
           sendTone="gold"
           [showAiHint]="true"
           [messages]="messages()"

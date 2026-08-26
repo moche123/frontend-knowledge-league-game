@@ -20,7 +20,7 @@ export class AnswerQuestionPage {
   protected readonly questionNumber = 3;
   protected readonly questionCount = 5;
   protected readonly question =
-    '¿Cuál es el principio fundamental que establece que es imposible conocer simultáneamente con precisión arbitraria la posición y el momento de una partícula?';
+    'What fundamental principle states that it is impossible to simultaneously know, with arbitrary precision, the position and momentum of a particle?';
 
   protected answer = signal('');
   protected canSubmit = computed(() => this.answer().trim().length > 0);

@@ -5,9 +5,9 @@
 
   <main class="w-full max-w-md bg-inverse-surface rounded-xl shadow-2xl relative z-10 flex flex-col p-8 overflow-hidden">
     <div class="flex flex-col items-center mb-8">
-      <img class="w-28 h-28 object-contain mb-4 filter drop-shadow-md" [src]="logoUrl" alt="Liga del Saber" />
+      <img class="w-28 h-28 object-contain mb-4 filter drop-shadow-md" [src]="logoUrl" alt="Knowledge League" />
       <h1 class="font-display-lg-mobile text-display-lg-mobile text-on-primary-fixed text-center tracking-tighter">
-        LIGA DEL SABER
+        KNOWLEDGE LEAGUE
       </h1>
       <p class="font-label-caps text-label-caps text-on-primary-fixed-variant mt-2 tracking-widest uppercase">
         Tournament of Knowledge
@@ -21,28 +21,28 @@
     <div class="relative overflow-hidden w-full min-h-[300px]">
       @if (activeTab() === 'login') {
         <form class="w-full flex flex-col gap-stack-md">
-          <app-text-field icon="mail" type="email" placeholder="Correo electrónico" [required]="true" [value]="email()" (valueChange)="email.set($event)" />
-          <app-text-field icon="lock" type="password" placeholder="Contraseña" [required]="true" [value]="password()" (valueChange)="password.set($event)" />
+          <app-text-field icon="mail" type="email" placeholder="Email" [required]="true" [value]="email()" (valueChange)="email.set($event)" />
+          <app-text-field icon="lock" type="password" placeholder="Password" [required]="true" [value]="password()" (valueChange)="password.set($event)" />
           <div class="flex justify-end">
             <a class="font-body-sm text-body-sm text-on-primary-fixed-variant hover:text-on-primary-fixed transition-colors" href="#" (click)="$event.preventDefault()">
-              ¿Olvidaste tu contraseña?
+              Forgot your password?
             </a>
           </div>
           <div class="mt-stack-lg">
             <app-button variant="primary" type="submit" [fullWidth]="true">
-              INGRESAR
+              SIGN IN
               <app-icon name="login" size="sm" />
             </app-button>
           </div>
         </form>
       } @else {
         <form class="w-full flex flex-col gap-stack-md">
-          <app-text-field icon="person" placeholder="Nombre completo" [required]="true" [value]="fullName()" (valueChange)="fullName.set($event)" />
-          <app-text-field icon="mail" type="email" placeholder="Correo electrónico" [required]="true" [value]="registerEmail()" (valueChange)="registerEmail.set($event)" />
-          <app-text-field icon="lock" type="password" placeholder="Contraseña" [required]="true" [value]="registerPassword()" (valueChange)="registerPassword.set($event)" />
+          <app-text-field icon="person" placeholder="Full name" [required]="true" [value]="fullName()" (valueChange)="fullName.set($event)" />
+          <app-text-field icon="mail" type="email" placeholder="Email" [required]="true" [value]="registerEmail()" (valueChange)="registerEmail.set($event)" />
+          <app-text-field icon="lock" type="password" placeholder="Password" [required]="true" [value]="registerPassword()" (valueChange)="registerPassword.set($event)" />
           <div class="mt-stack-lg">
             <app-button variant="secondary" type="submit" [fullWidth]="true">
-              REGISTRARSE
+              SIGN UP
               <app-icon name="how_to_reg" size="sm" />
             </app-button>
           </div>

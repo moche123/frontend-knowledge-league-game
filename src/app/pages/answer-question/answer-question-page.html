@@ -2,8 +2,8 @@
   <header class="border-b border-outline-variant bg-surface-container-low w-full">
     <div class="flex justify-between items-center w-full px-margin-desktop h-20 max-w-container-max mx-auto">
       <div class="flex items-center gap-4">
-        <img [src]="logoUrl" alt="Liga del Saber" class="h-10 w-10 object-contain" />
-        <span class="font-display text-headline-md font-bold text-primary hidden md:block">Liga del Saber</span>
+        <img [src]="logoUrl" alt="Knowledge League" class="h-10 w-10 object-contain" />
+        <span class="font-display text-headline-md font-bold text-primary hidden md:block">Knowledge League</span>
       </div>
       <div class="flex items-center gap-6">
         <div class="flex items-center gap-2">
@@ -22,7 +22,7 @@
     <div class="w-full max-w-[800px] flex flex-col items-center">
       <div class="flex flex-col items-center mb-stack-lg w-full">
         <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mb-stack-sm">
-          Pregunta {{ questionNumber }} de {{ questionCount }}
+          Question {{ questionNumber }} of {{ questionCount }}
         </span>
         <div class="mt-4">
           <app-countdown-timer label="01:45" />
@@ -33,17 +33,17 @@
         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>
 
         <div class="self-start mb-6">
-          <app-badge variant="primary" icon="science">Física Cuántica</app-badge>
+          <app-badge variant="primary" icon="science">Quantum Physics</app-badge>
         </div>
 
         <h1 class="font-headline-md text-headline-md text-on-surface mb-8 leading-relaxed">{{ question }}</h1>
 
         <div class="flex flex-col gap-4 mt-4 w-full">
-          <label class="sr-only" for="answer-input">Tu respuesta</label>
+          <label class="sr-only" for="answer-input">Your answer</label>
           <app-textarea
             id="answer-input"
             [rows]="6"
-            placeholder="Escribe tu respuesta detallada aquí..."
+            placeholder="Write your detailed answer here..."
             [value]="answer()"
             (valueChange)="answer.set($event)"
           />
@@ -51,7 +51,7 @@
 
         <div class="mt-8 flex justify-end w-full">
           <app-button variant="primary" size="lg" [disabled]="!canSubmit()">
-            Enviar respuesta
+            Submit answer
             <app-icon name="send" />
           </app-button>
         </div>

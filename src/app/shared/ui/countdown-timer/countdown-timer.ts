@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Icon } from '../icon/icon';
 
 /** Big glowing per-question countdown. Switches to the error tone once `urgent`
- *  (design-system.md: "el temporizador se pondrá en rojo en los últimos 30 segundos"). */
+ *  (design-system.md: the timer turns red in the last 30 seconds). */
 @Component({
   selector: 'app-countdown-timer',
   imports: [Icon],
@@ -18,7 +18,7 @@ import { Icon } from '../icon/icon';
         >{{ label() }}</span>
       </div>
       <p class="font-body-sm text-body-sm text-on-surface-variant mt-2 text-center opacity-70">
-        El temporizador se pondrá en rojo en los últimos 30 segundos.
+        The timer turns red in the last 30 seconds.
       </p>
     </div>
   `,

@@ -1,17 +1,17 @@
 <div class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
-  <app-side-nav brand="Liga del Saber" tone="surface">
+  <app-side-nav brand="Knowledge League" tone="surface">
     <div side-nav-header class="mb-10 flex flex-col gap-2 px-2">
       <div class="flex items-center gap-3 mb-2">
-        <img [src]="logoUrl" alt="Liga del Saber" class="w-12 h-12 object-contain" />
+        <img [src]="logoUrl" alt="Knowledge League" class="w-12 h-12 object-contain" />
       </div>
-      <h1 class="font-headline-md text-headline-md text-primary">Liga del Saber</h1>
+      <h1 class="font-headline-md text-headline-md text-primary">Knowledge League</h1>
       <p class="font-body-sm text-body-sm text-on-surface-variant">Elite Tournament Platform</p>
     </div>
 
     <div side-nav-body class="flex flex-col gap-1 font-label-caps text-label-caps">
-      <app-nav-item icon="emoji_events" label="Mis torneos" [active]="true" />
+      <app-nav-item icon="emoji_events" label="My Tournaments" [active]="true" />
       <app-nav-item icon="leaderboard" label="Ranking" />
-      <app-nav-item icon="person" label="Perfil" />
+      <app-nav-item icon="person" label="Profile" />
     </div>
 
     <div side-nav-footer class="px-2 flex flex-col gap-4">
@@ -51,14 +51,14 @@
 
     <main class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full overflow-y-auto">
       <div class="mb-stack-lg">
-        <h3 class="font-display-lg-mobile md:font-display-lg text-primary mb-6">Mis Torneos</h3>
+        <h3 class="font-display-lg-mobile md:font-display-lg text-primary mb-6">My Tournaments</h3>
         <app-tabs variant="underline" [tabs]="tabs" [active]="activeTab()" (activeChange)="activeTab.set($event)" />
       </div>
 
       <div class="mt-8">
         <h4 class="font-headline-md text-headline-md text-on-surface mb-stack-md flex items-center gap-2">
           <app-icon name="bolt" class="text-tertiary-fixed" />
-          Eventos Activos
+          Active Events
         </h4>
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-gutter">
           @for (tournament of tournaments; track tournament.id) {

@@ -1,5 +1,5 @@
 <div class="antialiased min-h-screen flex flex-col md:flex-row bg-background">
-  <app-side-nav brand="Liga del Saber" tone="surface">
+  <app-side-nav brand="Knowledge League" tone="surface">
     <div side-nav-header class="mb-8 flex flex-col items-center px-2">
       <app-avatar
         src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9GU5ZlDzW03Ituw6IWv-X-i2nX0mqdpFUhLE5QkrOdZHswQL-vmTTtf8Zk4xa2VMJcaMnScAPDhsvD0UFy-dUu2NnSiPbNG6YBo_rexEz4Lz_nKWpK5DnsRU1l9_apy3ptbpNMIjjPe1hNXU6dwKe7FcnFovowTLiULk-CkgeTi3avNFoc5DIl1ewx86XCqfz_KpCQJuXvCNpecvih8KP8BYfhcYS4PC9WkXLWAXm6pNQ2TSvdgbV"
@@ -40,10 +40,10 @@
   <main class="flex-1 md:ml-64 pt-20 md:pt-12 px-margin-mobile md:px-margin-desktop pb-24 mx-auto w-full flex flex-col gap-stack-lg min-h-screen">
     <header class="mb-4 shrink-0">
       <h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-2 tracking-tight">
-        Formulario de Reclamo
+        Dispute Form
       </h1>
       <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-        Presenta tus argumentos técnicos o académicos si consideras que la evaluación de la IA requiere revisión.
+        Submit your technical or academic arguments if you believe the AI evaluation needs review.
       </p>
     </header>
 
@@ -53,7 +53,7 @@
       </div>
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-title-sm text-title-sm text-primary flex items-center gap-2">
-          <app-icon name="info" size="lg" /> Resumen del Encuentro
+          <app-icon name="info" size="lg" /> Match Summary
         </h3>
         <span class="font-label-caps text-label-caps bg-surface-variant text-on-surface-variant px-2 py-1 rounded-sm">ID: MTCH-8492</span>
       </div>
@@ -63,11 +63,11 @@
             <div class="mx-auto mb-2 w-fit">
               <app-avatar [src]="playerAvatar" size="md" ring="primary" />
             </div>
-            <span class="font-body-sm text-body-sm text-on-surface block truncate w-24">Tú (Elite)</span>
+            <span class="font-body-sm text-body-sm text-on-surface block truncate w-24">You (Elite)</span>
           </div>
           <div class="flex flex-col items-center px-4">
             <span class="font-display-lg-mobile text-display-lg-mobile text-on-surface font-bold">85</span>
-            <span class="font-label-caps text-label-caps text-on-surface-variant">Puntos</span>
+            <span class="font-label-caps text-label-caps text-on-surface-variant">Points</span>
           </div>
         </div>
         <div class="text-on-surface-variant font-title-sm text-title-sm px-4">VS</div>
@@ -76,18 +76,18 @@
             <div class="mx-auto mb-2 w-fit opacity-80 grayscale">
               <app-avatar [src]="opponentAvatar" size="md" ring="outline" />
             </div>
-            <span class="font-body-sm text-body-sm text-on-surface-variant block truncate w-24">Oponente</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant block truncate w-24">Opponent</span>
           </div>
           <div class="flex flex-col items-center px-4">
             <span class="font-display-lg-mobile text-display-lg-mobile text-on-surface-variant font-bold">92</span>
-            <span class="font-label-caps text-label-caps text-on-surface-variant">Puntos</span>
+            <span class="font-label-caps text-label-caps text-on-surface-variant">Points</span>
           </div>
         </div>
       </div>
     </section>
 
     <app-chat-panel
-      matchLabel="Partida #MTCH-8492"
+      matchLabel="Match #MTCH-8492"
       sendTone="primary"
       [messages]="messages()"
       (send)="onSend($event)"

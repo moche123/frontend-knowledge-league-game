@@ -33,19 +33,19 @@ export class PlayerDashboardPage {
   protected readonly logoUrl = LOGO_URL;
 
   protected readonly tabs: TabItem[] = [
-    { id: 'open', label: 'Inscripción abierta' },
-    { id: 'ongoing', label: 'En curso' },
+    { id: 'open', label: 'Open Registration' },
+    { id: 'ongoing', label: 'Ongoing' },
   ];
   protected activeTab = signal('open');
 
   protected readonly tournaments: Tournament[] = [
     {
       id: 'hist-1',
-      category: 'Edad Media',
+      category: 'Middle Ages',
       categoryTone: 'primary',
       glowClass: 'bg-primary',
       progressTone: 'primary',
-      title: 'Olimpiada de Historia Universal',
+      title: 'World History Olympiad',
       points: 500,
       date: '25 Oct, 2024',
       enrolled: 12,
@@ -53,11 +53,11 @@ export class PlayerDashboardPage {
     },
     {
       id: 'sci-1',
-      category: 'Física Cuántica',
+      category: 'Quantum Physics',
       categoryTone: 'secondary',
       glowClass: 'bg-secondary',
       progressTone: 'secondary',
-      title: 'Desafío de Ciencias Exactas',
+      title: 'Exact Sciences Challenge',
       points: 750,
       date: '28 Oct, 2024',
       enrolled: 8,
@@ -65,11 +65,11 @@ export class PlayerDashboardPage {
     },
     {
       id: 'lit-1',
-      category: 'Realismo Mágico',
+      category: 'Magical Realism',
       categoryTone: 'neutral',
       glowClass: 'bg-outline',
       progressTone: 'error',
-      title: 'Maestría Literaria',
+      title: 'Literary Mastery',
       points: 400,
       date: '02 Nov, 2024',
       enrolled: 15,

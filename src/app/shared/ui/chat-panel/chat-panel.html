@@ -17,7 +17,7 @@
     <button
       type="button"
       class="p-2 text-on-surface-variant hover:text-primary transition-colors bg-surface rounded-md border border-outline-variant hover:border-primary"
-      title="Ver Detalles de Partida"
+      title="View Match Details"
     >
       <app-icon name="info" />
     </button>
@@ -44,7 +44,7 @@
   <!-- Composer -->
   <div class="p-4 bg-surface-container border-t border-secondary-container relative z-10">
     <div class="flex items-end gap-2 bg-background p-2 rounded-lg border border-outline-variant focus-within:border-accent focus-within:ring-1 focus-within:ring-accent transition-all">
-      <button type="button" class="p-2 text-on-surface-variant hover:text-primary transition-colors shrink-0" title="Adjuntar evidencia">
+      <button type="button" class="p-2 text-on-surface-variant hover:text-primary transition-colors shrink-0" title="Attach evidence">
         <app-icon name="attach_file" />
       </button>
       <app-textarea
@@ -67,10 +67,10 @@
       <span class="text-[10px] text-on-surface-variant flex items-center gap-1">
         @if (showAiHint()) {
           <app-icon name="memory" size="sm" class="text-accent" />
-          Asistente IA de reglas activo
+          AI rules assistant active
         }
       </span>
-      <span class="text-[10px] text-on-surface-variant">Presiona Enter para enviar</span>
+      <span class="text-[10px] text-on-surface-variant">Press Enter to send</span>
     </div>
   </div>
 </section>
