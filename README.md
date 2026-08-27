@@ -1,5 +1,7 @@
 # Frontend — Knowledge League
 
+### Project in process....
+
 Angular 22, generated with Angular CLI. Styled with Tailwind CSS (`@theme` in `src/styles.css`, tokens defined in `design-system.md` — "Academic Elite" palette, dark-mode-first).
 
 ## Current status
