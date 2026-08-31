@@ -1,4 +1,7 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
+import { HOME_BY_ROLE } from '../../core/auth/home-by-role';
 import { Avatar } from '../../shared/ui/avatar/avatar';
 import { Icon } from '../../shared/ui/icon/icon';
 import { NavItem } from '../../shared/ui/nav-item/nav-item';
@@ -33,6 +36,14 @@ interface RankingRow {
   templateUrl: './global-ranking-page.html',
 })
 export class GlobalRankingPage {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
+  protected readonly homeUrl = computed(() => {
+    const user = this.authService.currentUser();
+    return user ? HOME_BY_ROLE[user.role] : '/login';
+  });
+
   protected readonly filterOptions: SelectOption[] = [
     { value: 'all', label: 'All tournaments' },
     { value: 'history', label: 'History Olympiad' },
@@ -110,4 +121,17 @@ export class GlobalRankingPage {
     avatarUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuAXfDoVd6pnfy8N1Td69eKpHnKfU1zgSDM7EaewkH9ygcIHItsANelL4O025AOgtNLlNkc5JKlelYNRpQnEIl-9lYqkrsSTUySxDfYVfEoD1mtjdqOVvncRiIEERshmgQpWWHE_2JuW5acv0WXqYvZ0b7iPFDZeIANmsaKyHL39AGO-v6Ow5B_ou14CTIGfrmStCCh4CsgJI0uGdecXAVI_MWEhnlfedaRvH-1wbbStGBR3SvpdpL6T',
   };
+
+  protected goHome(): void {
+    this.router.navigateByUrl(this.homeUrl());
+  }
+
+  protected goToArbiterPanel(): void {
+    this.router.navigateByUrl('/judge-panel');
+  }
+
+  protected logout(): void {
+    this.authService.logout();
+    this.router.navigateByUrl('/login');
+  }
 }

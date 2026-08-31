@@ -1,4 +1,7 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
+import { HOME_BY_ROLE } from '../../core/auth/home-by-role';
 import { Avatar } from '../../shared/ui/avatar/avatar';
 import { ChatEntry, ChatPanel } from '../../shared/ui/chat-panel/chat-panel';
 import { Icon } from '../../shared/ui/icon/icon';
@@ -19,8 +22,16 @@ let nextMessageId = 0;
   templateUrl: './dispute-chat-page.html',
 })
 export class DisputeChatPage {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   protected readonly playerAvatar = PLAYER_AVATAR;
   protected readonly opponentAvatar = OPPONENT_AVATAR;
+
+  protected readonly homeUrl = computed(() => {
+    const user = this.authService.currentUser();
+    return user ? HOME_BY_ROLE[user.role] : '/login';
+  });
 
   protected messages = signal<ChatEntry[]>([
     { id: 'sys-1', tone: 'system', align: 'left', text: 'Dispute opened: Today 14:35' },
@@ -66,5 +77,18 @@ export class DisputeChatPage {
         text,
       },
     ]);
+  }
+
+  protected goHome(): void {
+    this.router.navigateByUrl(this.homeUrl());
+  }
+
+  protected goToRanking(): void {
+    this.router.navigateByUrl('/ranking');
+  }
+
+  protected logout(): void {
+    this.authService.logout();
+    this.router.navigateByUrl('/login');
   }
 }

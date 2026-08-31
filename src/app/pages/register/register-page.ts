@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { EMPTY, Subject, catchError, of, startWith, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
-import { PublicUserDto } from '../../shared/dto/auth-response.dto';
+import { HOME_BY_ROLE } from '../../core/auth/home-by-role';
 import { RegisterDto } from '../../shared/dto/register.dto';
 import { Button } from '../../shared/ui/button/button';
 import { Icon } from '../../shared/ui/icon/icon';
@@ -12,12 +12,6 @@ import { TextField } from '../../shared/ui/text-field/text-field';
 
 const LOGO_URL =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuDLNhHpTehXPrCCL1sS-uxUC_Rr3yKIHXvzDByw40wKyTJjJI52hAu3_-qZ3KV6ikUh3g-SK9FMOAIMF4uUB1YHsz-2O8pAz4AKlhpr6qb_dAsD_a7NoyEuvQGjCikBjpMqgrUy7i8pc3bg2HXP2oKrWqgqPNZNcB55sC0thErJ8xQqxTPHe8AF05NQBZj5100vAvFMR7PwY_4Z7mbZt8bu3xbnGBk2T0V420kUMzga5YQ2J1srYT-s';
-
-const HOME_BY_ROLE: Record<PublicUserDto['role'], string> = {
-  admin: '/events',
-  referee: '/judge-panel',
-  player: '/dashboard',
-};
 
 interface RegisterState {
   loading: boolean;

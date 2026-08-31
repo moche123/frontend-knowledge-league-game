@@ -90,6 +90,10 @@ export class PlayerDashboardPage {
     return tournament.enrolled >= tournament.capacity;
   }
 
+  protected goToRanking(): void {
+    this.router.navigateByUrl('/ranking');
+  }
+
   protected logout(): void {
     this.authService.logout();
     this.router.navigateByUrl('/login');

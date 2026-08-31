@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 import { AssignmentCard, AssignmentStatus } from '../../shared/ui/assignment-card/assignment-card';
 import { Avatar } from '../../shared/ui/avatar/avatar';
 import { ChatEntry, ChatPanel } from '../../shared/ui/chat-panel/chat-panel';
@@ -28,6 +30,9 @@ let nextMessageId = 0;
   templateUrl: './judge-panel-page.html',
 })
 export class JudgePanelPage {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   protected readonly arbiterAvatar = ARBITER_AVATAR;
 
   protected readonly assignments: Assignment[] = [
@@ -111,5 +116,10 @@ export class JudgePanelPage {
         text,
       },
     ]);
+  }
+
+  protected logout(): void {
+    this.authService.logout();
+    this.router.navigateByUrl('/login');
   }
 }

@@ -10,7 +10,7 @@
 
     <div side-nav-body class="flex flex-col gap-1 font-label-caps text-label-caps">
       <app-nav-item icon="emoji_events" label="My Tournaments" [active]="true" />
-      <app-nav-item icon="leaderboard" label="Ranking" />
+      <app-nav-item icon="leaderboard" label="Ranking" (clicked)="goToRanking()" />
       <app-nav-item icon="person" label="Profile" />
     </div>
 

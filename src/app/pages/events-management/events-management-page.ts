@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 import { Badge, BadgeVariant } from '../../shared/ui/badge/badge';
 import { Button } from '../../shared/ui/button/button';
 import { Icon } from '../../shared/ui/icon/icon';
@@ -59,6 +61,9 @@ const PLAYER_COUNTS = [4, 8, 16, 32] as const;
   templateUrl: './events-management-page.html',
 })
 export class EventsManagementPage {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   protected readonly statusBadge = STATUS_BADGE;
   protected readonly statusLabel = STATUS_LABEL;
   protected readonly statusProgressTone = STATUS_PROGRESS_TONE;
@@ -133,5 +138,14 @@ export class EventsManagementPage {
 
   protected progressOf(event: EventRow): number {
     return Math.round((event.enrolled / event.capacity) * 100);
+  }
+
+  protected goToDisputes(): void {
+    this.router.navigateByUrl('/disputes');
+  }
+
+  protected logout(): void {
+    this.authService.logout();
+    this.router.navigateByUrl('/login');
   }
 }

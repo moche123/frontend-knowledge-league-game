@@ -15,10 +15,10 @@
     </div>
 
     <div side-nav-body class="flex flex-col gap-1">
-      <app-nav-item icon="dashboard" label="Dashboard" />
+      <app-nav-item icon="dashboard" label="Dashboard" (clicked)="goHome()" />
       <app-nav-item icon="workspace_premium" label="Tournaments" />
       <app-nav-item icon="psychology" label="AI Evaluation" />
-      <app-nav-item icon="gavel" label="Arbiter Panel" />
+      <app-nav-item icon="gavel" label="Arbiter Panel" (clicked)="goToArbiterPanel()" />
       <app-nav-item icon="military_tech" label="Hall of Fame" [active]="true" />
     </div>
 
@@ -32,7 +32,7 @@
       </button>
       <div class="flex flex-col gap-1 pt-stack-md border-t border-outline-variant/30">
         <app-nav-item icon="help_outline" label="Support" />
-        <app-nav-item icon="logout" label="Sign Out" />
+        <app-nav-item icon="logout" label="Sign Out" (clicked)="logout()" />
       </div>
     </div>
   </app-side-nav>

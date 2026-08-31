@@ -12,10 +12,10 @@
     </div>
 
     <div side-nav-body class="flex flex-col gap-2">
-      <app-nav-item icon="dashboard" label="Home" />
+      <app-nav-item icon="dashboard" label="Home" (clicked)="goHome()" />
       <app-nav-item icon="swords" label="Active Matches" />
       <app-nav-item icon="gavel" label="Disputes" [active]="true" />
-      <app-nav-item icon="military_tech" label="Leaderboard" />
+      <app-nav-item icon="military_tech" label="Leaderboard" (clicked)="goToRanking()" />
       <app-nav-item icon="settings" label="Settings" />
     </div>
 
@@ -31,7 +31,7 @@
         <app-nav-item icon="help" label="Help" />
         <a
           href="#"
-          (click)="$event.preventDefault()"
+          (click)="$event.preventDefault(); logout()"
           class="flex items-center gap-3 px-4 py-2 rounded-xl text-error hover:bg-error-container/20 transition-all"
         >
           <app-icon name="logout" />
