@@ -74,6 +74,7 @@ interface EventRow {
   capacity: number;
   progress: number;
   refereeAssigned: boolean;
+  readyToDraw: boolean;
 }
 
 interface EventWithRegistrationCount {
@@ -140,6 +141,7 @@ export class EventsManagementPage {
         capacity: event.maxPlayers,
         progress: Math.round((enrolled / event.maxPlayers) * 100),
         refereeAssigned: event.refereeId !== null,
+        readyToDraw: event.status === 'registration_open' && enrolled === event.maxPlayers,
       }))
       .sort((a, b) => a.startLabel.localeCompare(b.startLabel)),
   );
@@ -270,6 +272,48 @@ export class EventsManagementPage {
           this.toastService.error(message);
         },
       });
+  }
+
+  protected deletingEventId = signal<string | null>(null);
+  protected drawingEventId = signal<string | null>(null);
+
+  protected deleteEvent(event: EventRow): void {
+    const warning =
+      event.status === 'registration_open'
+        ? `Delete "${event.name}"? This cannot be undone.`
+        : `Delete "${event.name}"? This permanently erases its bracket, match history and any ranking points earned in it. This cannot be undone.`;
+
+    if (!confirm(warning)) {
+      return;
+    }
+
+    this.deletingEventId.set(event.id);
+    this.tournamentApi.deleteEvent(event.id).subscribe({
+      next: () => {
+        this.deletingEventId.set(null);
+        this.refresh$.next();
+        this.toastService.success(`Event "${event.name}" deleted.`);
+      },
+      error: () => {
+        this.deletingEventId.set(null);
+        this.toastService.error('Could not delete the event. Try again.');
+      },
+    });
+  }
+
+  protected generateMatches(event: EventRow): void {
+    this.drawingEventId.set(event.id);
+    this.tournamentApi.drawFirstStage(event.id).subscribe({
+      next: () => {
+        this.drawingEventId.set(null);
+        this.refresh$.next();
+        this.toastService.success(`Bracket drawn for "${event.name}".`);
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.drawingEventId.set(null);
+        this.toastService.error(error.error?.message ?? 'Could not draw the bracket. Try again.');
+      },
+    });
   }
 
   private resetForm(): void {

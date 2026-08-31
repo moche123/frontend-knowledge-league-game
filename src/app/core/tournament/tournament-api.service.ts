@@ -25,4 +25,12 @@ export class TournamentApi {
   registerSelf(eventId: string): Observable<RegistrationDto> {
     return this.http.post<RegistrationDto>(`${this.baseUrl}/events/${eventId}/registrations`, {});
   }
+
+  deleteEvent(eventId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/events/${eventId}`);
+  }
+
+  drawFirstStage(eventId: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/events/${eventId}/stages/draw`, {});
+  }
 }

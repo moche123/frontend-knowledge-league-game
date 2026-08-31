@@ -55,6 +55,7 @@
                 <th class="p-4 font-semibold">Status</th>
                 <th class="p-4 font-semibold text-center">Enrolled</th>
                 <th class="p-4 font-semibold">Referee</th>
+                <th class="p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody
@@ -113,10 +114,38 @@
                       {{ event.refereeAssigned ? 'Assigned' : 'Unassigned' }}
                     </app-badge>
                   </td>
+                  <td class="p-4">
+                    <div class="flex items-center justify-end gap-2">
+                      @if (event.status === 'registration_open') {
+                        <button
+                          type="button"
+                          [disabled]="!event.readyToDraw || drawingEventId() === event.id"
+                          [title]="
+                            event.readyToDraw
+                              ? 'Draw the bracket and start the tournament'
+                              : 'Needs ' + event.capacity + ' registered players (' + event.enrolled + ' so far)'
+                          "
+                          class="text-on-surface-variant hover:text-accent transition-colors p-1 disabled:opacity-30 disabled:hover:text-on-surface-variant disabled:cursor-not-allowed"
+                          (click)="generateMatches(event)"
+                        >
+                          <app-icon name="shuffle" />
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        [disabled]="deletingEventId() === event.id"
+                        title="Delete event"
+                        class="text-on-surface-variant hover:text-error transition-colors p-1 disabled:opacity-30"
+                        (click)="deleteEvent(event)"
+                      >
+                        <app-icon name="delete" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="6" class="p-6 text-center text-on-surface-variant">
+                  <td colspan="7" class="p-6 text-center text-on-surface-variant">
                     No events created yet.
                   </td>
                 </tr>
