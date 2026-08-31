@@ -1,5 +1,6 @@
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject, forkJoin, map, of, switchMap } from 'rxjs';
 import { ToastService } from '../../../core/toast/toast.service';
 import { TournamentApi } from '../../../core/tournament/tournament-api.service';
@@ -102,6 +103,7 @@ interface EventWithRegistrationCount {
 export class EventsManagementPage {
   private readonly tournamentApi = inject(TournamentApi);
   private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
 
   protected readonly statusBadge = STATUS_BADGE;
   protected readonly statusLabel = STATUS_LABEL;
@@ -276,6 +278,10 @@ export class EventsManagementPage {
 
   protected deletingEventId = signal<string | null>(null);
   protected drawingEventId = signal<string | null>(null);
+
+  protected goToQuestions(event: EventRow): void {
+    this.router.navigateByUrl(`/events/${event.id}/questions`);
+  }
 
   protected deleteEvent(event: EventRow): void {
     const warning =

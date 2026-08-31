@@ -14,6 +14,10 @@ export class TournamentApi {
     return this.http.get<EventDto[]>(`${this.baseUrl}/events`);
   }
 
+  getEvent(eventId: string): Observable<EventDto> {
+    return this.http.get<EventDto>(`${this.baseUrl}/events/${eventId}`);
+  }
+
   createEvent(dto: CreateEventDto): Observable<EventDto> {
     return this.http.post<EventDto>(`${this.baseUrl}/events`, dto);
   }
@@ -24,6 +28,17 @@ export class TournamentApi {
 
   registerSelf(eventId: string): Observable<RegistrationDto> {
     return this.http.post<RegistrationDto>(`${this.baseUrl}/events/${eventId}/registrations`, {});
+  }
+
+  registerByAdmin(eventId: string, userId: string): Observable<RegistrationDto> {
+    return this.http.post<RegistrationDto>(
+      `${this.baseUrl}/events/${eventId}/registrations/${userId}`,
+      {},
+    );
+  }
+
+  unregisterByAdmin(eventId: string, userId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/events/${eventId}/registrations/${userId}`);
   }
 
   deleteEvent(eventId: string): Observable<void> {

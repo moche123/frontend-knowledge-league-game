@@ -40,6 +40,16 @@ export class AuthService {
     );
   }
 
+  // Admin-only directory search — picks an EXISTING player to register for an
+  // event. Account creation for new players is a separate admin feature, not this.
+  searchPlayers(search: string): Observable<PublicUserDto[]> {
+    return this.http.get<PublicUserDto[]>(`${this.baseUrl}/users`, { params: { search } });
+  }
+
+  getUser(userId: string): Observable<PublicUserDto> {
+    return this.http.get<PublicUserDto>(`${this.baseUrl}/users/${userId}`);
+  }
+
   refresh(): Observable<AuthResponseDto> {
     const refreshToken = this.getRefreshToken();
     return this.http

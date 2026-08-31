@@ -58,6 +58,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'events/:eventId/questions',
+    canActivate: [authGuard, roleGuard('admin')],
+    loadComponent: () =>
+      import('./pages/admin/event-questions/event-questions-page').then(
+        (m) => m.EventQuestionsPage,
+      ),
+  },
+  {
     path: 'profile',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/profile/profile-page').then((m) => m.ProfilePage),

@@ -18,9 +18,10 @@ const VARIANT_CLASS: Record<TextareaVariant, string> = {
     <textarea
       [placeholder]="placeholder()"
       [rows]="rows()"
+      [disabled]="disabled()"
       [ngModel]="value()"
       (ngModelChange)="value.set($event)"
-      class="w-full font-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 transition-colors"
+      class="w-full font-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 transition-colors disabled:opacity-50"
       [class]="variantClass()"
     ></textarea>
   `,
@@ -30,6 +31,7 @@ export class Textarea {
   placeholder = input('');
   rows = input(4);
   variant = input<TextareaVariant>('paper');
+  disabled = input(false);
 
   value = model('');
 

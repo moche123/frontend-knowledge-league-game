@@ -133,6 +133,14 @@
                       }
                       <button
                         type="button"
+                        title="Manage questions"
+                        class="text-on-surface-variant hover:text-primary transition-colors p-1"
+                        (click)="goToQuestions(event)"
+                      >
+                        <app-icon name="quiz" />
+                      </button>
+                      <button
+                        type="button"
                         [disabled]="deletingEventId() === event.id"
                         title="Delete event"
                         class="text-on-surface-variant hover:text-error transition-colors p-1 disabled:opacity-30"

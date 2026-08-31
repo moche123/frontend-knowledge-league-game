@@ -33,7 +33,7 @@ const SIZE_CLASS: Record<ButtonSize, string> = {
     <button
       [type]="type()"
       [disabled]="disabled()"
-      class="inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
+      class="inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-150 cursor-pointer active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
       [class]="[variantClass(), sizeClass(), fullWidth() ? 'w-full' : '']"
     >
       <ng-content />
