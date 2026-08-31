@@ -7,7 +7,7 @@ import {
   MatchQuestionDto,
   UpdateMatchQuestionDto,
 } from '../../shared/dto/match-question.dto';
-import { StageWithMatchesDto } from '../../shared/dto/stage.dto';
+import { MatchDto, StageWithMatchesDto } from '../../shared/dto/stage.dto';
 
 @Injectable({ providedIn: 'root' })
 export class MatchApi {
@@ -16,6 +16,19 @@ export class MatchApi {
 
   listStages(eventId: string): Observable<StageWithMatchesDto[]> {
     return this.http.get<StageWithMatchesDto[]>(`${this.baseUrl}/events/${eventId}/stages`);
+  }
+
+  // Sets start time + duration AND generates (or regenerates) the match's
+  // AI question set in the same call — no separate "generate" step.
+  schedule(
+    eventId: string,
+    matchId: string,
+    dto: { scheduledStartAt: string; durationMinutes: number },
+  ): Observable<MatchDto> {
+    return this.http.patch<MatchDto>(
+      `${this.baseUrl}/events/${eventId}/matches/${matchId}/schedule`,
+      dto,
+    );
   }
 
   listQuestions(eventId: string, matchId: string): Observable<MatchQuestionDto[]> {
@@ -50,6 +63,24 @@ export class MatchApi {
   deleteQuestion(eventId: string, matchId: string, questionId: string): Observable<void> {
     return this.http.delete<void>(
       `${this.baseUrl}/events/${eventId}/matches/${matchId}/questions/${questionId}`,
+    );
+  }
+
+  editParticipants(
+    eventId: string,
+    matchId: string,
+    dto: { playerAId?: string; playerBId?: string },
+  ): Observable<MatchDto> {
+    return this.http.patch<MatchDto>(
+      `${this.baseUrl}/events/${eventId}/matches/${matchId}/participants`,
+      dto,
+    );
+  }
+
+  setReferee(eventId: string, matchId: string, refereeId: string): Observable<MatchDto> {
+    return this.http.patch<MatchDto>(
+      `${this.baseUrl}/events/${eventId}/matches/${matchId}/referee`,
+      { refereeId },
     );
   }
 }

@@ -9,6 +9,7 @@ export interface MatchDto {
   playerBId: string | null;
   status: MatchStatus;
   winnerId: string | null;
+  refereeId: string | null;
   scoreA: number | null;
   scoreB: number | null;
   createdAt: string;

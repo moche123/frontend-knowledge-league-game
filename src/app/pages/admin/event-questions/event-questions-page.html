@@ -51,9 +51,27 @@
                 <div class="font-body-sm text-body-sm text-on-surface">{{ match.matchup }}</div>
               </button>
             } @empty {
-              <p class="p-4 text-on-surface-variant font-body-sm text-body-sm">
-                No matches yet — draw the bracket first from the events table.
-              </p>
+              <div class="p-4 flex flex-col gap-3">
+                @if (canStartTournament()) {
+                  <p class="text-on-surface-variant font-body-sm text-body-sm">
+                    All {{ capacity() }} seats filled — ready to draw the bracket and start.
+                  </p>
+                  <app-button
+                    variant="accent"
+                    [fullWidth]="true"
+                    [disabled]="drawingBracket()"
+                    (click)="startTournament()"
+                  >
+                    <app-icon name="shuffle" size="sm" />
+                    {{ drawingBracket() ? 'Starting…' : 'Start tournament' }}
+                  </app-button>
+                } @else {
+                  <p class="text-on-surface-variant font-body-sm text-body-sm">
+                    No matches yet — {{ registeredCount() }}/{{ capacity() }} registered. Fill
+                    every seat to start the tournament and draw the bracket.
+                  </p>
+                }
+              </div>
             }
           </div>
         </section>
@@ -202,7 +220,141 @@
             </div>
           </div>
 
-          @if (loadingQuestions()) {
+          <div
+            class="bg-surface-container-high/40 border border-outline/20 rounded-xl p-4 flex flex-col gap-4"
+          >
+            <h3 class="font-title-sm text-title-sm text-on-surface">Participants &amp; referee</h3>
+            @if (!isEditable()) {
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Locked — only editable while the match is pending.
+              </p>
+            } @else {
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label class="flex flex-col gap-1">
+                  <span class="font-label-caps text-label-caps text-on-surface-variant"
+                    >Player A</span
+                  >
+                  <app-select
+                    variant="filled"
+                    placeholder="Select a player"
+                    [options]="playerOptions()"
+                    [value]="editPlayerAId()"
+                    (valueChange)="editPlayerAId.set($event)"
+                  />
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="font-label-caps text-label-caps text-on-surface-variant"
+                    >Player B</span
+                  >
+                  <app-select
+                    variant="filled"
+                    placeholder="Select a player"
+                    [options]="playerOptions()"
+                    [value]="editPlayerBId()"
+                    (valueChange)="editPlayerBId.set($event)"
+                  />
+                </label>
+              </div>
+              <app-button
+                variant="outline"
+                size="sm"
+                [disabled]="savingParticipants()"
+                (click)="saveParticipants()"
+              >
+                <app-icon name="save" size="sm" />
+                {{ savingParticipants() ? 'Saving…' : 'Save participants' }}
+              </app-button>
+
+              <div class="border-t border-outline-variant/30 pt-4 flex flex-col gap-3">
+                <label class="flex flex-col gap-1">
+                  <span class="font-label-caps text-label-caps text-on-surface-variant"
+                    >Referee</span
+                  >
+                  <app-select
+                    variant="filled"
+                    placeholder="Select a referee"
+                    [options]="refereeOptions()"
+                    [value]="editRefereeId()"
+                    (valueChange)="editRefereeId.set($event)"
+                  />
+                </label>
+                <app-button
+                  variant="outline"
+                  size="sm"
+                  [disabled]="savingReferee() || !editRefereeId()"
+                  (click)="saveReferee()"
+                >
+                  <app-icon name="gavel" size="sm" />
+                  {{ savingReferee() ? 'Saving…' : 'Assign referee' }}
+                </app-button>
+              </div>
+            }
+          </div>
+
+          <div
+            class="bg-surface-container-high/40 border border-outline/20 rounded-xl p-4 flex flex-col gap-4"
+          >
+            <div>
+              <h3 class="font-title-sm text-title-sm text-on-surface">Schedule</h3>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                @if (hasSchedule()) {
+                  Scheduled — rescheduling regenerates this match's questions from scratch via AI.
+                } @else {
+                  Start time + duration. Generates this match's questions via AI once set.
+                }
+              </p>
+            </div>
+            @if (!isEditable()) {
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Locked — only editable while the match is pending.
+              </p>
+            } @else {
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label class="flex flex-col gap-1">
+                  <span class="font-label-caps text-label-caps text-on-surface-variant"
+                    >Start</span
+                  >
+                  <input
+                    type="datetime-local"
+                    [value]="scheduleStartAt()"
+                    (input)="scheduleStartAt.set($any($event.target).value)"
+                    class="w-full bg-surface-container text-on-surface border-0 border-b-2 border-outline-variant focus:border-accent focus:ring-0 px-4 py-2 rounded-t transition-colors"
+                  />
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="font-label-caps text-label-caps text-on-surface-variant"
+                    >Duration (minutes)</span
+                  >
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    [value]="scheduleDurationMinutes()"
+                    (input)="scheduleDurationMinutes.set($any($event.target).valueAsNumber)"
+                    class="w-full bg-surface-container text-on-surface border-0 border-b-2 border-outline-variant focus:border-accent focus:ring-0 px-4 py-2 rounded-t transition-colors"
+                  />
+                </label>
+              </div>
+              <app-button variant="accent" [disabled]="!canSchedule()" (click)="scheduleMatch()">
+                <app-icon name="auto_awesome" size="sm" />
+                {{
+                  scheduling()
+                    ? 'Generating…'
+                    : hasSchedule()
+                      ? 'Reschedule & regenerate questions'
+                      : 'Schedule match'
+                }}
+              </app-button>
+            }
+          </div>
+
+          @if (!hasSchedule()) {
+            <div
+              class="flex-1 flex items-center justify-center text-on-surface-variant font-body-md text-body-md border border-outline/20 border-dashed rounded-xl p-12"
+            >
+              Schedule this match above to generate its questions.
+            </div>
+          } @else if (loadingQuestions()) {
             <p class="text-on-surface-variant font-body-sm text-body-sm">Loading questions…</p>
           } @else {
             <div class="flex flex-col gap-gutter">
@@ -345,12 +497,12 @@
                 </app-button>
               </div>
             }
-
-            <app-button variant="outline-neutral" (click)="done()">
-              <app-icon name="check" size="sm" />
-              Done
-            </app-button>
           }
+
+          <app-button variant="outline-neutral" (click)="done()">
+            <app-icon name="check" size="sm" />
+            Done
+          </app-button>
         }
       </section>
     </main>
