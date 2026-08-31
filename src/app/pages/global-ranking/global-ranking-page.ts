@@ -8,6 +8,7 @@ import { NavItem } from '../../shared/ui/nav-item/nav-item';
 import { PodiumRank, PodiumSlot } from '../../shared/ui/podium-slot/podium-slot';
 import { Select, SelectOption } from '../../shared/ui/select/select';
 import { SideNav } from '../../shared/ui/side-nav/side-nav';
+import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
 
 interface Podium {
   rank: PodiumRank;
@@ -31,7 +32,7 @@ interface RankingRow {
 
 @Component({
   selector: 'app-global-ranking-page',
-  imports: [Avatar, Icon, NavItem, PodiumSlot, Select, SideNav],
+  imports: [Avatar, Icon, NavItem, PodiumSlot, Select, SideNav, SideNavCommon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './global-ranking-page.html',
 })
@@ -128,10 +129,5 @@ export class GlobalRankingPage {
 
   protected goToArbiterPanel(): void {
     this.router.navigateByUrl('/judge-panel');
-  }
-
-  protected logout(): void {
-    this.authService.logout();
-    this.router.navigateByUrl('/login');
   }
 }

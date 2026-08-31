@@ -14,9 +14,6 @@
     <div side-nav-body class="flex flex-col gap-2">
       <app-nav-item icon="dashboard" label="Home" (clicked)="goHome()" />
       <app-nav-item icon="swords" label="Active Matches" />
-      <app-nav-item icon="gavel" label="Disputes" [active]="true" />
-      <app-nav-item icon="military_tech" label="Leaderboard" (clicked)="goToRanking()" />
-      <app-nav-item icon="settings" label="Settings" />
     </div>
 
     <div side-nav-footer class="flex flex-col gap-2 px-2">
@@ -27,17 +24,7 @@
         <app-icon name="add" size="sm" />
         New Tournament
       </button>
-      <div class="flex flex-col gap-1">
-        <app-nav-item icon="help" label="Help" />
-        <a
-          href="#"
-          (click)="$event.preventDefault(); logout()"
-          class="flex items-center gap-3 px-4 py-2 rounded-xl text-error hover:bg-error-container/20 transition-all"
-        >
-          <app-icon name="logout" />
-          <span class="font-body-sm text-body-sm">Logout</span>
-        </a>
-      </div>
+      <app-side-nav-common active="disputes" />
     </div>
   </app-side-nav>
 

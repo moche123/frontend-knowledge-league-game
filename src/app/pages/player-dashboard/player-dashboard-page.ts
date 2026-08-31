@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../core/auth/auth.service';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { Avatar } from '../../shared/ui/avatar/avatar';
 import { Button } from '../../shared/ui/button/button';
 import { Icon } from '../../shared/ui/icon/icon';
 import { NavItem } from '../../shared/ui/nav-item/nav-item';
 import { SideNav } from '../../shared/ui/side-nav/side-nav';
+import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
 import { Tabs, TabItem } from '../../shared/ui/tabs/tabs';
 import { TournamentCard } from '../../shared/ui/tournament-card/tournament-card';
 
@@ -27,14 +26,11 @@ interface Tournament {
 
 @Component({
   selector: 'app-player-dashboard-page',
-  imports: [Avatar, Button, Icon, NavItem, SideNav, Tabs, TournamentCard],
+  imports: [Avatar, Button, Icon, NavItem, SideNav, SideNavCommon, Tabs, TournamentCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './player-dashboard-page.html',
 })
 export class PlayerDashboardPage {
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-
   protected readonly logoUrl = LOGO_URL;
 
   protected readonly tabs: TabItem[] = [
@@ -88,14 +84,5 @@ export class PlayerDashboardPage {
 
   protected isFull(tournament: Tournament): boolean {
     return tournament.enrolled >= tournament.capacity;
-  }
-
-  protected goToRanking(): void {
-    this.router.navigateByUrl('/ranking');
-  }
-
-  protected logout(): void {
-    this.authService.logout();
-    this.router.navigateByUrl('/login');
   }
 }

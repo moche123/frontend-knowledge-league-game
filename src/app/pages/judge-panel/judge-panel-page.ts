@@ -1,12 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../core/auth/auth.service';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { AssignmentCard, AssignmentStatus } from '../../shared/ui/assignment-card/assignment-card';
 import { Avatar } from '../../shared/ui/avatar/avatar';
 import { ChatEntry, ChatPanel } from '../../shared/ui/chat-panel/chat-panel';
 import { Icon } from '../../shared/ui/icon/icon';
 import { NavItem } from '../../shared/ui/nav-item/nav-item';
 import { SideNav } from '../../shared/ui/side-nav/side-nav';
+import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
 
 interface Assignment {
   id: string;
@@ -25,14 +24,11 @@ let nextMessageId = 0;
 
 @Component({
   selector: 'app-judge-panel-page',
-  imports: [AssignmentCard, Avatar, ChatPanel, Icon, NavItem, SideNav],
+  imports: [AssignmentCard, Avatar, ChatPanel, Icon, NavItem, SideNav, SideNavCommon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './judge-panel-page.html',
 })
 export class JudgePanelPage {
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-
   protected readonly arbiterAvatar = ARBITER_AVATAR;
 
   protected readonly assignments: Assignment[] = [
@@ -116,10 +112,5 @@ export class JudgePanelPage {
         text,
       },
     ]);
-  }
-
-  protected logout(): void {
-    this.authService.logout();
-    this.router.navigateByUrl('/login');
   }
 }

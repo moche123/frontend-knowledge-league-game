@@ -10,18 +10,12 @@
 
     <div side-nav-body class="flex flex-col gap-1 font-label-caps text-label-caps">
       <app-nav-item icon="emoji_events" label="My Tournaments" [active]="true" />
-      <app-nav-item icon="leaderboard" label="Ranking" (clicked)="goToRanking()" />
       <app-nav-item icon="person" label="Profile" />
     </div>
 
     <div side-nav-footer class="px-2 flex flex-col gap-4">
       <app-button variant="outline" [fullWidth]="true">Start Quiz</app-button>
-      <div
-        class="flex flex-col gap-2 font-label-caps text-label-caps border-t border-outline-variant pt-6"
-      >
-        <app-nav-item icon="help" label="Help" />
-        <app-nav-item icon="logout" label="Logout" (clicked)="logout()" />
-      </div>
+      <app-side-nav-common />
     </div>
   </app-side-nav>
 

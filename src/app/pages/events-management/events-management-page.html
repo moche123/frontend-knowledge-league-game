@@ -34,13 +34,11 @@
     <div side-nav-body class="flex flex-col gap-2">
       <app-nav-item icon="event" label="Events" [active]="true" />
       <app-nav-item icon="database" label="Question Bank" />
-      <app-nav-item icon="gavel" label="Disputes" (clicked)="goToDisputes()" />
     </div>
 
     <div side-nav-footer class="flex flex-col gap-1 px-2">
       <app-nav-item icon="settings" label="Settings" />
-      <app-nav-item icon="help" label="Support" />
-      <app-nav-item icon="logout" label="Logout" (clicked)="logout()" />
+      <app-side-nav-common />
     </div>
   </app-side-nav>
 

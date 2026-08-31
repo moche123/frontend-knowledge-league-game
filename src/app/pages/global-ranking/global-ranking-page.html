@@ -19,7 +19,6 @@
       <app-nav-item icon="workspace_premium" label="Tournaments" />
       <app-nav-item icon="psychology" label="AI Evaluation" />
       <app-nav-item icon="gavel" label="Arbiter Panel" (clicked)="goToArbiterPanel()" />
-      <app-nav-item icon="military_tech" label="Hall of Fame" [active]="true" />
     </div>
 
     <div side-nav-footer class="flex flex-col gap-4 px-2">
@@ -30,10 +29,7 @@
         <app-icon name="emoji_events" />
         Claim Trophy
       </button>
-      <div class="flex flex-col gap-1 pt-stack-md border-t border-outline-variant/30">
-        <app-nav-item icon="help_outline" label="Support" />
-        <app-nav-item icon="logout" label="Sign Out" (clicked)="logout()" />
-      </div>
+      <app-side-nav-common active="ranking" />
     </div>
   </app-side-nav>
 
