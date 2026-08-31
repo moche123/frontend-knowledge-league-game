@@ -31,6 +31,7 @@ const TEXT_CLASS: Record<TextFieldTone, string> = {
         [placeholder]="placeholder()"
         [required]="required()"
         [id]="fieldId()"
+        [min]="min()"
         [ngModel]="value()"
         (ngModelChange)="value.set($event)"
         class="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-2 pt-3 font-body-md text-body-md placeholder:text-outline focus:border-primary focus:ring-0 transition-colors"
@@ -48,6 +49,7 @@ export class TextField {
   icon = input<string>();
   fieldId = input<string>();
   tone = input<TextFieldTone>('dark');
+  min = input<string>();
 
   value = model('');
 

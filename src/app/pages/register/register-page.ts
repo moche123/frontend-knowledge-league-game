@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { EMPTY, Subject, catchError, of, startWith, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { HOME_BY_ROLE } from '../../core/auth/home-by-role';
+import { ToastService } from '../../core/toast/toast.service';
 import { RegisterDto } from '../../shared/dto/register.dto';
 import { Button } from '../../shared/ui/button/button';
 import { Icon } from '../../shared/ui/icon/icon';
@@ -35,6 +36,7 @@ export class RegisterPage {
 
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   private readonly submit$ = new Subject<void>();
 
@@ -47,7 +49,10 @@ export class RegisterPage {
       };
 
       return this.authService.register(dto).pipe(
-        tap((user) => this.router.navigateByUrl(HOME_BY_ROLE[user.role])),
+        tap((user) => {
+          this.toastService.success(`Account created — welcome, ${user.name}!`);
+          this.router.navigateByUrl(HOME_BY_ROLE[user.role]);
+        }),
         // map(() => IDLE_STATE), — igual que en login-page: en éxito no reabrimos el
         // botón, evita la rendija de doble submit mientras el redirect todavía no terminó.
         switchMap(() => EMPTY),

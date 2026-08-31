@@ -215,6 +215,7 @@
             fieldId="event-start"
             tone="light"
             type="datetime-local"
+            [min]="minStartDate()"
             [value]="startDate()"
             (valueChange)="startDate.set($event)"
           />
@@ -230,11 +231,16 @@
             fieldId="event-end"
             tone="light"
             type="datetime-local"
+            [min]="minEndDate()"
             [value]="endDate()"
             (valueChange)="endDate.set($event)"
           />
         </div>
       </div>
+
+      @if (dateError()) {
+        <p class="font-body-sm text-body-sm text-error -mt-2">{{ dateError() }}</p>
+      }
 
       <div class="flex flex-col gap-3">
         <div

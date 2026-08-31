@@ -1,6 +1,7 @@
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { BehaviorSubject, forkJoin, map, of, switchMap } from 'rxjs';
+import { ToastService } from '../../../core/toast/toast.service';
 import { TournamentApi } from '../../../core/tournament/tournament-api.service';
 import { EventDto, EventStatus } from '../../../shared/dto/tournament.dto';
 import { Badge, BadgeVariant } from '../../../shared/ui/badge/badge';
@@ -45,6 +46,23 @@ const DATE_TIME_FORMAT = new Intl.DateTimeFormat('en-US', {
   minute: '2-digit',
 });
 
+function pad(value: number): string {
+  return value.toString().padStart(2, '0');
+}
+
+// datetime-local wants "YYYY-MM-DDTHH:mm" in LOCAL time — Date#toISOString() is
+// UTC and would shift the value, so this formats by local field, not by string.
+function toDateTimeLocal(date: Date): string {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function startOfTomorrow(): Date {
+  const date = new Date();
+  date.setDate(date.getDate() + 1);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
 interface EventRow {
   id: string;
   name: string;
@@ -82,6 +100,7 @@ interface EventWithRegistrationCount {
 })
 export class EventsManagementPage {
   private readonly tournamentApi = inject(TournamentApi);
+  private readonly toastService = inject(ToastService);
 
   protected readonly statusBadge = STATUS_BADGE;
   protected readonly statusLabel = STATUS_LABEL;
@@ -143,12 +162,35 @@ export class EventsManagementPage {
   protected creating = signal(false);
   protected createError = signal('');
 
+  // Recomputed each time the drawer opens (see openPanel) rather than once at
+  // module load, so a drawer left open across midnight still enforces "tomorrow"
+  // against the current day.
+  protected readonly minStartDate = signal(toDateTimeLocal(startOfTomorrow()));
+
+  protected readonly minEndDate = computed(() => this.startDate() || this.minStartDate());
+
+  // datetime-local values are "YYYY-MM-DDTHH:mm" — same-length zero-padded fields,
+  // so plain string comparison is a valid (and timezone-safe) ordering check.
+  protected readonly dateError = computed(() => {
+    const start = this.startDate();
+    const end = this.endDate();
+
+    if (start && start < this.minStartDate()) {
+      return 'Start date must be tomorrow or later.';
+    }
+    if (start && end && end <= start) {
+      return 'End date must be after the start date.';
+    }
+    return '';
+  });
+
   protected readonly canCreate = computed(
     () =>
       this.eventName().trim().length > 0 &&
       this.theme().trim().length > 0 &&
       this.startDate().length > 0 &&
       this.endDate().length > 0 &&
+      !this.dateError() &&
       !this.creating(),
   );
 
@@ -179,6 +221,7 @@ export class EventsManagementPage {
 
   private openPanel(): void {
     this.createError.set('');
+    this.minStartDate.set(toDateTimeLocal(startOfTomorrow()));
     this.panelVisible.set(true);
     // Mount closed first, then flip to open on the next frame so the browser
     // has an actual painted "closed" frame to transition from.
@@ -197,10 +240,11 @@ export class EventsManagementPage {
 
     this.creating.set(true);
     this.createError.set('');
+    const name = this.eventName().trim();
 
     this.tournamentApi
       .createEvent({
-        name: this.eventName().trim(),
+        name,
         theme: this.theme().trim(),
         startDate: new Date(this.startDate()).toISOString(),
         endDate: new Date(this.endDate()).toISOString(),
@@ -214,14 +258,16 @@ export class EventsManagementPage {
           this.resetForm();
           this.closePanel();
           this.refresh$.next();
+          this.toastService.success(`Event "${name}" created.`);
         },
         error: (error: { status?: number }) => {
           this.creating.set(false);
-          this.createError.set(
+          const message =
             error.status === 409
               ? 'An event with this name already exists.'
-              : 'Could not create the event. Check the data and try again.',
-          );
+              : 'Could not create the event. Check the data and try again.';
+          this.createError.set(message);
+          this.toastService.error(message);
         },
       });
   }

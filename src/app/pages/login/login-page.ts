@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { EMPTY, Subject, catchError, of, startWith, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { HOME_BY_ROLE } from '../../core/auth/home-by-role';
+import { ToastService } from '../../core/toast/toast.service';
 import { LoginDto } from '../../shared/dto/login.dto';
 import { Button } from '../../shared/ui/button/button';
 import { Icon } from '../../shared/ui/icon/icon';
@@ -34,6 +35,7 @@ export class LoginPage {
 
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   private readonly submit$ = new Subject<void>();
 
@@ -50,7 +52,10 @@ export class LoginPage {
       const dto: LoginDto = { email: this.email(), password: this.password() };
 
       return this.authService.login(dto).pipe(
-        tap((user) => this.router.navigateByUrl(HOME_BY_ROLE[user.role])),
+        tap((user) => {
+          this.toastService.success(`Welcome back, ${user.name}!`);
+          this.router.navigateByUrl(HOME_BY_ROLE[user.role]);
+        }),
         // map(() => IDLE_STATE), — volvía loading:false apenas resolvía, antes de que
         // terminara la navegación: dejaba una rendija para un click2 legítimo que
         // disparaba un segundo login real. En éxito no hace falta "liberar" el botón,
