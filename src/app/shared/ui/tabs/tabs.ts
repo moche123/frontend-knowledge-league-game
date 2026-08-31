@@ -21,7 +21,7 @@ export type TabsVariant = 'segmented' | 'underline';
         <button
           type="button"
           (click)="active.set(tab.id)"
-          class="pb-3 font-title-sm text-title-sm transition-colors duration-300 border-b-2"
+          class="pb-3 font-title-sm text-title-sm transition-colors duration-300 border-b-2 cursor-pointer"
           [class]="
             variant() === 'segmented' ? 'flex-1 text-center font-label-caps text-label-caps' : ''
           "

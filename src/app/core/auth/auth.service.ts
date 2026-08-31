@@ -48,7 +48,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.http.post(`${this.baseUrl}/logout`, {}).subscribe({ error: () => {} });
+    this.http.post(`${this.baseUrl}/logout`, {}).subscribe({ error: () => void 0 });
     this.clearSession();
   }
 
@@ -65,6 +65,10 @@ export class AuthService {
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     this.user.set(null);
+  }
+
+  getLoggedInUser(): PublicUserDto | null {
+    return this.user();
   }
 
   private persistSession(response: AuthResponseDto): void {

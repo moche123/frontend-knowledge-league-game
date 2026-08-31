@@ -46,7 +46,7 @@
           </button>
         </div>
         <div class="flex items-center gap-3 border-l border-outline-variant pl-6">
-          <span class="font-title-sm text-title-sm hidden lg:block">Alejandro Silva</span>
+          <span class="font-title-sm text-title-sm hidden lg:block">{{ authService.getLoggedInUser()?.name }}</span>
           <app-avatar
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMzJ-_BefSihRwqWaEtLWww3HRFO_0oqAtqX4L-pDneg8MVfeCIERZpr1OPJQLsgzuGR18BFNcIGsUKM6-xdo-H_WoOWrgKXOt4BcCzrYgGccp7MmHmqkRYG5Cuef7FOxCnXLuh4A2spYQbCaiol5YuVgobBsUNiopc-9j8PciWW3JAyO2RTuFBfW99AMsZe2zVyqmbrm6A_xqqO21_TB5yl1PUWVlhEj9tHUD_jbeSGBhZ0yiTxgt"
             ring="outline"
@@ -76,20 +76,25 @@
           Active Events
         </h4>
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-gutter">
-          @for (tournament of tournaments; track tournament.id) {
+          @for (tournament of activeEvents(); track tournament.id) {
             <app-tournament-card
               [category]="tournament.category"
               [categoryTone]="tournament.categoryTone"
               [glowClass]="tournament.glowClass"
-              [progressTone]="tournament.progressTone"
               [title]="tournament.title"
               [points]="tournament.points"
               [date]="tournament.date"
               [enrolled]="tournament.enrolled"
               [capacity]="tournament.capacity"
-              [progress]="progressOf(tournament)"
-              [full]="isFull(tournament)"
+              [progress]="tournament.progress"
+              [state]="tournament.state"
+              [registering]="registeringEventId() === tournament.id"
+              (register)="register(tournament.id)"
             />
+          } @empty {
+            <p class="text-on-surface-variant font-body-md text-body-md col-span-full">
+              No events here yet.
+            </p>
           }
         </div>
       </div>

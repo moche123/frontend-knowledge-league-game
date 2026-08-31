@@ -18,7 +18,7 @@
         </div>
         <div class="flex items-center gap-3">
           <span class="font-title-sm text-title-sm text-on-surface hidden md:block"
-            >Alejandro Silva</span
+            >{{ authService.getLoggedInUser()?.name }}</span
           >
           <app-avatar initials="AS" ring="primary" />
         </div>
