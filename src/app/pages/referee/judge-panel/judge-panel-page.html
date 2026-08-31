@@ -6,21 +6,10 @@
 
     <div side-nav-body class="flex flex-col gap-1">
       <app-nav-item icon="assignment" label="Assignments" [active]="true" />
-      <app-nav-item icon="history" label="History" />
-      <app-nav-item icon="bar_chart" label="Reports" />
     </div>
 
-    <div side-nav-footer class="flex flex-col gap-1 px-2">
-      <div class="flex flex-col gap-1 pt-4 border-t border-outline-variant mb-4">
-        <app-nav-item icon="settings" label="Settings" />
-      </div>
+    <div side-nav-footer class="px-2">
       <app-side-nav-common />
-      <button
-        type="button"
-        class="w-full bg-secondary-container text-on-secondary-container font-title-sm text-title-sm py-2 px-4 rounded hover:bg-secondary-fixed hover:text-on-secondary-fixed transition-colors"
-      >
-        New Tournament
-      </button>
     </div>
   </app-side-nav>
 

@@ -129,6 +129,13 @@
   --spacing-container-max: 1280px;
 }
 
+html {
+  /* App is dark-mode-only — without this, native form controls (the
+     datetime-local calendar/clock picker icon, scrollbars, etc.) render with
+     browser's light-scheme defaults: a dark icon on a dark input, invisible. */
+  color-scheme: dark;
+}
+
 body {
   font-family: var(--font-body);
 }

@@ -17,63 +17,15 @@
         New Tournament
       </app-button>
       <app-nav-item icon="event" label="Events" [active]="true" />
-      <app-nav-item icon="database" label="Question Bank" />
     </div>
 
-    <div side-nav-footer class="flex flex-col gap-1 px-2">
-      <app-nav-item icon="settings" label="Settings" />
+    <div side-nav-footer class="px-2">
       <app-side-nav-common />
     </div>
   </app-side-nav>
 
   <div class="md:ml-64 flex flex-col flex-1 w-full relative">
-    <header
-      class="bg-background/80 backdrop-blur-md sticky top-0 z-30 border-b border-outline-variant shadow-sm flex justify-between items-center h-16 px-gutter"
-    >
-      <div class="font-headline-md text-headline-md font-bold text-tertiary">
-        Knowledge Coliseum Admin
-      </div>
-      <nav class="hidden lg:flex gap-6">
-        <a
-          class="text-tertiary border-b-2 border-tertiary pb-1 font-label-caps text-label-caps"
-          href="#"
-          (click)="$event.preventDefault()"
-          >Dashboard</a
-        >
-        <a
-          class="text-on-surface-variant hover:text-tertiary-fixed transition-all font-label-caps text-label-caps"
-          href="#"
-          (click)="$event.preventDefault()"
-          >Analytics</a
-        >
-        <a
-          class="text-on-surface-variant hover:text-tertiary-fixed transition-all font-label-caps text-label-caps"
-          href="#"
-          (click)="$event.preventDefault()"
-          >Logs</a
-        >
-      </nav>
-      <div class="flex items-center gap-4">
-        <button
-          type="button"
-          class="text-tertiary font-label-caps text-label-caps border border-tertiary/30 px-3 py-1.5 rounded hover:bg-tertiary/10 transition-colors"
-        >
-          System Status
-        </button>
-        <div class="flex gap-2 text-on-surface-variant">
-          <button type="button" class="hover:text-tertiary-fixed transition-all rounded-full p-1">
-            <app-icon name="notifications" />
-          </button>
-          <button
-            type="button"
-            aria-label="Admin Profile"
-            class="hover:text-tertiary-fixed transition-all rounded-full p-1"
-          >
-            <app-icon name="account_circle" />
-          </button>
-        </div>
-      </div>
-    </header>
+    <app-top-bar title="Events" />
 
     <main class="flex-1 p-gutter overflow-y-auto bg-transparent pb-32">
       <div
@@ -99,28 +51,27 @@
               >
                 <th class="p-4 font-semibold">Name</th>
                 <th class="p-4 font-semibold">Theme</th>
-                <th class="p-4 font-semibold">Date</th>
+                <th class="p-4 font-semibold">Start / End</th>
                 <th class="p-4 font-semibold">Status</th>
                 <th class="p-4 font-semibold text-center">Enrolled</th>
                 <th class="p-4 font-semibold">Referee</th>
-                <th class="p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody
               class="font-body-sm text-body-sm text-on-surface divide-y divide-outline-variant/30"
             >
-              @for (event of events; track event.id) {
+              @for (event of events(); track event.id) {
                 <tr
                   class="hover:bg-surface-container-highest/50 transition-colors"
-                  [class]="event.status === 'live' ? 'bg-primary-container/20' : ''"
+                  [class]="event.status === 'in_progress' ? 'bg-primary-container/20' : ''"
                 >
                   <td class="p-4">
                     <div
                       class="font-title-sm text-title-sm font-semibold flex items-center gap-2"
-                      [class]="event.status === 'live' ? 'text-accent' : 'text-on-surface'"
+                      [class]="event.status === 'in_progress' ? 'text-accent' : 'text-on-surface'"
                     >
                       {{ event.name }}
-                      @if (event.status === 'live') {
+                      @if (event.status === 'in_progress') {
                         <span class="relative flex h-2 w-2">
                           <span
                             class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"
@@ -129,21 +80,19 @@
                         </span>
                       }
                     </div>
-                    <div class="text-on-surface-variant text-xs mt-1">ID: {{ event.code }}</div>
                   </td>
                   <td class="p-4">
-                    <app-badge variant="secondary" [icon]="event.themeIcon">{{
-                      event.themeLabel
-                    }}</app-badge>
+                    <app-badge variant="secondary">{{ event.theme }}</app-badge>
                   </td>
-                  <td class="p-4 text-on-surface-variant">
-                    {{ event.date }}<br /><span class="text-xs">{{ event.time }}</span>
+                  <td class="p-4 text-on-surface-variant text-xs">
+                    {{ event.startLabel }}<br />
+                    <span class="text-on-surface-variant/70">→ {{ event.endLabel }}</span>
                   </td>
                   <td class="p-4">
                     <app-badge
                       [variant]="statusBadge[event.status]"
                       [dot]="event.status !== 'finished'"
-                      [pulse]="event.status === 'live'"
+                      [pulse]="event.status === 'in_progress'"
                     >
                       {{ statusLabel[event.status] }}
                     </app-badge>
@@ -152,7 +101,7 @@
                     <div class="flex items-center justify-center gap-2">
                       <div class="w-16">
                         <app-progress-bar
-                          [value]="progressOf(event)"
+                          [value]="event.progress"
                           [tone]="statusProgressTone[event.status]"
                         />
                       </div>
@@ -160,25 +109,15 @@
                     </div>
                   </td>
                   <td class="p-4">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="w-6 h-6 rounded-full bg-tertiary-container text-tertiary flex items-center justify-center text-xs font-bold"
-                      >
-                        {{ event.refereeInitials }}
-                      </div>
-                      <span>{{ event.refereeName }}</span>
-                    </div>
+                    <app-badge [variant]="event.refereeAssigned ? 'accent' : 'neutral'">
+                      {{ event.refereeAssigned ? 'Assigned' : 'Unassigned' }}
+                    </app-badge>
                   </td>
-                  <td class="p-4 text-right">
-                    <button
-                      type="button"
-                      class="text-on-surface-variant hover:text-tertiary transition-colors p-1"
-                    >
-                      <app-icon
-                        [name]="actionIcon[event.action]"
-                        [fill]="event.status === 'live'"
-                      />
-                    </button>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="p-6 text-center text-on-surface-variant">
+                    No events created yet.
                   </td>
                 </tr>
               }
@@ -198,11 +137,12 @@
       (click)="togglePanel()"
     ></button>
   }
-  <div
-    class="fixed inset-y-0 right-0 w-[450px] max-w-full bg-surface-container-lowest border-l border-outline-variant shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col"
-    [class.translate-x-full]="!panelOpen()"
-    [class.translate-x-0]="panelOpen()"
-  >
+  @if (panelVisible()) {
+    <div
+      class="fixed inset-y-0 right-0 w-[450px] max-w-full bg-surface-container-lowest border-l border-outline-variant shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col"
+      [class.translate-x-full]="!panelOpen()"
+      [class.translate-x-0]="panelOpen()"
+    >
     <div
       class="flex items-center justify-between p-6 border-b border-outline-variant/30 bg-surface-container-high/50"
     >
@@ -224,6 +164,10 @@
     </div>
 
     <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-stack-lg scrollbar-elite">
+      @if (createError()) {
+        <p class="font-body-sm text-body-sm text-error text-center">{{ createError() }}</p>
+      }
+
       <div class="flex flex-col gap-2">
         <label
           for="event-name"
@@ -233,7 +177,8 @@
         </label>
         <app-text-field
           fieldId="event-name"
-          placeholder="E.g. Math Cup 2024"
+          tone="light"
+          placeholder="E.g. Math Cup 2026"
           [value]="eventName()"
           (valueChange)="eventName.set($event)"
         />
@@ -244,15 +189,18 @@
           for="event-theme"
           class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1"
         >
-          <app-icon name="category" size="sm" /> Theme
+          <app-icon name="category" size="sm" /> Quiz topic
         </label>
-        <app-select
+        <app-text-field
           fieldId="event-theme"
-          placeholder="Select a theme..."
-          [options]="themeOptions"
+          tone="light"
+          placeholder="E.g. World History"
           [value]="theme()"
           (valueChange)="theme.set($event)"
         />
+        <p class="font-body-sm text-body-sm text-on-surface-variant">
+          Used by the AI to generate this event's questions.
+        </p>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
@@ -261,18 +209,30 @@
             for="event-start"
             class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1"
           >
-            <app-icon name="calendar_today" size="sm" /> Start
+            <app-icon name="calendar_today" size="sm" /> Start date &amp; time
           </label>
-          <app-text-field fieldId="event-start" type="datetime-local" />
+          <app-text-field
+            fieldId="event-start"
+            tone="light"
+            type="datetime-local"
+            [value]="startDate()"
+            (valueChange)="startDate.set($event)"
+          />
         </div>
         <div class="flex flex-col gap-2">
           <label
             for="event-end"
             class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1"
           >
-            <app-icon name="event_busy" size="sm" /> End
+            <app-icon name="event_busy" size="sm" /> End date &amp; time
           </label>
-          <app-text-field fieldId="event-end" type="datetime-local" />
+          <app-text-field
+            fieldId="event-end"
+            tone="light"
+            type="datetime-local"
+            [value]="endDate()"
+            (valueChange)="endDate.set($event)"
+          />
         </div>
       </div>
 
@@ -280,7 +240,7 @@
         <div
           class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1"
         >
-          <app-icon name="groups" size="sm" /> Max players (Powers of 2)
+          <app-icon name="groups" size="sm" /> Max players (choose a power of 2)
         </div>
         <div class="grid grid-cols-4 gap-2">
           @for (count of playerCounts; track count) {
@@ -305,82 +265,54 @@
           <label
             for="questions-per-match"
             class="font-label-caps text-label-caps text-on-surface-variant"
-            >Questions per match</label
+            >Questions per match (1-50)</label
           >
           <input
             id="questions-per-match"
             type="number"
             min="1"
             max="50"
+            step="1"
             [value]="questionsPerMatch()"
-            (input)="questionsPerMatch.set($any($event.target).valueAsNumber)"
+            (input)="setQuestionsPerMatch($any($event.target).valueAsNumber)"
             class="w-full bg-surface-container text-center font-mono font-bold text-lg text-on-surface border-0 border-b-2 border-outline-variant focus:border-accent focus:ring-0 px-4 py-2 rounded-t transition-colors"
           />
         </div>
         <div class="flex flex-col gap-2">
           <label for="max-score" class="font-label-caps text-label-caps text-on-surface-variant"
-            >Max Score</label
+            >Max score per match (1-100)</label
           >
           <input
             id="max-score"
             type="number"
-            min="100"
-            step="100"
+            min="1"
+            max="100"
             [value]="maxScore()"
-            (input)="maxScore.set($any($event.target).valueAsNumber)"
+            (input)="setMaxScore($any($event.target).valueAsNumber)"
             class="w-full bg-surface-container text-center font-mono font-bold text-lg text-gold border-0 border-b-2 border-outline-variant focus:border-gold focus:ring-0 px-4 py-2 rounded-t transition-colors"
           />
         </div>
       </div>
 
-      <div class="flex flex-col gap-2 border-t border-outline-variant/30 pt-6 mt-2">
-        <div
-          class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1"
-        >
-          <app-icon name="sports" size="sm" /> Referee Selector
-        </div>
-        <div
-          class="bg-error-container/20 border border-error/50 rounded-lg p-3 flex flex-col gap-2"
-        >
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div
-                class="w-8 h-8 rounded-full bg-error-container text-on-error-container flex items-center justify-center font-bold text-sm"
-              >
-                DR
-              </div>
-              <div>
-                <div class="font-title-sm text-title-sm text-on-surface font-semibold">
-                  Dra. D. Reyes
-                </div>
-                <div class="text-xs text-on-surface-variant">Science Specialist</div>
-              </div>
-            </div>
-            <button type="button" class="text-error hover:text-error/80">
-              <app-icon name="swap_horiz" />
-            </button>
-          </div>
-          <div
-            class="flex items-start gap-2 text-error text-xs bg-error-container/10 p-2 rounded mt-1"
-          >
-            <app-icon name="warning" size="sm" />
-            <p class="font-medium">
-              Date overlap: This referee already has an active event ("Science Challenge") in the
-              selected range.
-            </p>
-          </div>
-        </div>
-      </div>
+      <p class="font-body-sm text-body-sm text-on-surface-variant border-t border-outline-variant/30 pt-4 mt-2">
+        The referee can be assigned later from the event's edit screen.
+      </p>
     </div>
 
     <div class="p-6 border-t border-outline-variant/30 bg-surface-container-high/50 flex gap-4">
       <app-button variant="outline-neutral" [fullWidth]="true" (click)="togglePanel()"
         >Cancel</app-button
       >
-      <app-button variant="accent" [fullWidth]="true" [disabled]="true">
+      <app-button
+        variant="accent"
+        [fullWidth]="true"
+        [disabled]="!canCreate()"
+        (click)="createEvent()"
+      >
         <app-icon name="save" size="sm" />
-        Save Event
+        {{ creating() ? 'Saving…' : 'Save Event' }}
       </app-button>
     </div>
   </div>
+  }
 </div>

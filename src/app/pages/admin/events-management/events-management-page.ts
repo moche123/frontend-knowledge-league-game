@@ -1,58 +1,67 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { BehaviorSubject, forkJoin, map, of, switchMap } from 'rxjs';
+import { TournamentApi } from '../../../core/tournament/tournament-api.service';
+import { EventDto, EventStatus } from '../../../shared/dto/tournament.dto';
 import { Badge, BadgeVariant } from '../../../shared/ui/badge/badge';
 import { Button } from '../../../shared/ui/button/button';
 import { Icon } from '../../../shared/ui/icon/icon';
 import { NavItem } from '../../../shared/ui/nav-item/nav-item';
-import { ProgressBar } from '../../../shared/ui/progress-bar/progress-bar';
-import { Select, SelectOption } from '../../../shared/ui/select/select';
+import { ProgressBar, ProgressTone } from '../../../shared/ui/progress-bar/progress-bar';
 import { SideNav } from '../../../shared/ui/side-nav/side-nav';
 import { SideNavCommon } from '../../../shared/ui/side-nav-common/side-nav-common';
 import { SideNavHeader } from '../../../shared/ui/side-nav-header/side-nav-header';
 import { TextField } from '../../../shared/ui/text-field/text-field';
+import { TopBar } from '../../../shared/ui/top-bar/top-bar';
 
-type EventStatus = 'finished' | 'live' | 'open';
+const STATUS_BADGE: Record<EventStatus, BadgeVariant> = {
+  registration_open: 'gold',
+  in_progress: 'accent',
+  finished: 'neutral',
+};
+
+const STATUS_LABEL: Record<EventStatus, string> = {
+  registration_open: 'Open Registration',
+  in_progress: 'Live',
+  finished: 'Finished',
+};
+
+const STATUS_PROGRESS_TONE: Record<EventStatus, ProgressTone> = {
+  registration_open: 'gold',
+  in_progress: 'accent',
+  finished: 'neutral',
+};
+
+const PLAYER_COUNTS = [4, 8, 16, 32] as const;
+
+// Must match the drawer's `duration-300` class in the template.
+const DRAWER_TRANSITION_MS = 300;
+
+const DATE_TIME_FORMAT = new Intl.DateTimeFormat('en-US', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+});
 
 interface EventRow {
   id: string;
   name: string;
-  code: string;
-  themeIcon: string;
-  themeLabel: string;
-  date: string;
-  time: string;
+  theme: string;
   status: EventStatus;
+  startLabel: string;
+  endLabel: string;
   enrolled: number;
   capacity: number;
-  refereeInitials: string;
-  refereeName: string;
-  action: 'report' | 'monitor' | 'edit';
+  progress: number;
+  refereeAssigned: boolean;
 }
 
-const STATUS_BADGE: Record<EventStatus, BadgeVariant> = {
-  finished: 'neutral',
-  live: 'accent',
-  open: 'gold',
-};
-
-const STATUS_LABEL: Record<EventStatus, string> = {
-  finished: 'Finished',
-  live: 'Live',
-  open: 'Open Registration',
-};
-
-const STATUS_PROGRESS_TONE: Record<EventStatus, 'neutral' | 'accent' | 'gold'> = {
-  finished: 'neutral',
-  live: 'accent',
-  open: 'gold',
-};
-
-const ACTION_ICON: Record<EventRow['action'], string> = {
-  report: 'analytics',
-  monitor: 'desktop_windows',
-  edit: 'edit',
-};
-
-const PLAYER_COUNTS = [4, 8, 16, 32] as const;
+interface EventWithRegistrationCount {
+  event: EventDto;
+  enrolled: number;
+}
 
 @Component({
   selector: 'app-events-management-page',
@@ -62,89 +71,168 @@ const PLAYER_COUNTS = [4, 8, 16, 32] as const;
     Icon,
     NavItem,
     ProgressBar,
-    Select,
     SideNav,
     SideNavCommon,
     SideNavHeader,
     TextField,
+    TopBar,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './events-management-page.html',
 })
 export class EventsManagementPage {
+  private readonly tournamentApi = inject(TournamentApi);
+
   protected readonly statusBadge = STATUS_BADGE;
   protected readonly statusLabel = STATUS_LABEL;
   protected readonly statusProgressTone = STATUS_PROGRESS_TONE;
-  protected readonly actionIcon = ACTION_ICON;
   protected readonly playerCounts = PLAYER_COUNTS;
 
-  protected readonly events: EventRow[] = [
-    {
-      id: 'e1',
-      name: 'History Olympiad',
-      code: 'TRN-2023-089',
-      themeIcon: 'history_edu',
-      themeLabel: 'History',
-      date: '15 Oct 2023',
-      time: '10:00 - 14:00',
-      status: 'finished',
-      enrolled: 32,
-      capacity: 32,
-      refereeInitials: 'ML',
-      refereeName: 'Prof. M. López',
-      action: 'report',
-    },
-    {
-      id: 'e2',
-      name: 'Science Challenge',
-      code: 'TRN-2023-102',
-      themeIcon: 'science',
-      themeLabel: 'Science',
-      date: 'Today',
-      time: '09:00 - 18:00',
-      status: 'live',
-      enrolled: 16,
-      capacity: 16,
-      refereeInitials: 'DR',
-      refereeName: 'Dra. D. Reyes',
-      action: 'monitor',
-    },
-    {
-      id: 'e3',
-      name: 'Literary Mastery',
-      code: 'TRN-2023-115',
-      themeIcon: 'menu_book',
-      themeLabel: 'Literature',
-      date: '25 Nov 2023',
-      time: '15:00 - 19:00',
-      status: 'open',
-      enrolled: 12,
-      capacity: 16,
-      refereeInitials: 'AJ',
-      refereeName: 'A. Jiménez',
-      action: 'edit',
-    },
-  ];
+  private readonly refresh$ = new BehaviorSubject<void>(undefined);
 
-  protected readonly themeOptions: SelectOption[] = [
-    { value: 'historia', label: 'World History' },
-    { value: 'ciencias', label: 'Natural Sciences' },
-    { value: 'literatura', label: 'Classic Literature' },
-    { value: 'matematicas', label: 'Advanced Mathematics' },
-  ];
+  private readonly eventsWithCounts = toSignal(
+    this.refresh$.pipe(
+      switchMap(() => this.tournamentApi.listEvents()),
+      switchMap((events) =>
+        events.length === 0
+          ? of<EventWithRegistrationCount[]>([])
+          : forkJoin(
+              events.map((event) =>
+                this.tournamentApi
+                  .listRegistrations(event.id)
+                  .pipe(map((registrations) => ({ event, enrolled: registrations.length }))),
+              ),
+            ),
+      ),
+    ),
+    { initialValue: [] as EventWithRegistrationCount[] },
+  );
 
+  protected readonly events = computed<EventRow[]>(() =>
+    this.eventsWithCounts()
+      .map(({ event, enrolled }) => ({
+        id: event.id,
+        name: event.name,
+        theme: event.theme,
+        status: event.status,
+        startLabel: DATE_TIME_FORMAT.format(new Date(event.startDate)),
+        endLabel: DATE_TIME_FORMAT.format(new Date(event.endDate)),
+        enrolled,
+        capacity: event.maxPlayers,
+        progress: Math.round((enrolled / event.maxPlayers) * 100),
+        refereeAssigned: event.refereeId !== null,
+      }))
+      .sort((a, b) => a.startLabel.localeCompare(b.startLabel)),
+  );
+
+  // The drawer is not mounted in the DOM at all until first opened (panelVisible),
+  // so there is nothing on screen to flash on initial page load. panelOpen only
+  // toggles the transform once the element already exists, so the slide-in/out
+  // transition always animates between two real, painted frames instead of racing
+  // the element's very first style commit.
+  protected panelVisible = signal(false);
   protected panelOpen = signal(false);
   protected eventName = signal('');
   protected theme = signal('');
+  protected startDate = signal('');
+  protected endDate = signal('');
   protected maxPlayers = signal(8);
-  protected questionsPerMatch = signal(10);
-  protected maxScore = signal(1000);
+  protected questionsPerMatch = signal(5);
+  protected maxScore = signal(100);
 
-  protected togglePanel(): void {
-    this.panelOpen.update((open) => !open);
+  protected creating = signal(false);
+  protected createError = signal('');
+
+  protected readonly canCreate = computed(
+    () =>
+      this.eventName().trim().length > 0 &&
+      this.theme().trim().length > 0 &&
+      this.startDate().length > 0 &&
+      this.endDate().length > 0 &&
+      !this.creating(),
+  );
+
+  // questionsPerMatch is @IsInt() on the backend — a bare valueAsNumber from the
+  // input lets someone type "5.5" and get rejected with an opaque 400. Round and
+  // guard NaN (empty field) here instead of trusting native number input parsing.
+  protected setQuestionsPerMatch(value: number): void {
+    if (!Number.isFinite(value)) {
+      return;
+    }
+    this.questionsPerMatch.set(Math.max(1, Math.round(value)));
   }
 
-  protected progressOf(event: EventRow): number {
-    return Math.round((event.enrolled / event.capacity) * 100);
+  protected setMaxScore(value: number): void {
+    if (!Number.isFinite(value)) {
+      return;
+    }
+    this.maxScore.set(Math.min(100, Math.max(1, value)));
+  }
+
+  protected togglePanel(): void {
+    if (this.panelOpen()) {
+      this.closePanel();
+    } else {
+      this.openPanel();
+    }
+  }
+
+  private openPanel(): void {
+    this.createError.set('');
+    this.panelVisible.set(true);
+    // Mount closed first, then flip to open on the next frame so the browser
+    // has an actual painted "closed" frame to transition from.
+    requestAnimationFrame(() => this.panelOpen.set(true));
+  }
+
+  private closePanel(): void {
+    this.panelOpen.set(false);
+    setTimeout(() => this.panelVisible.set(false), DRAWER_TRANSITION_MS);
+  }
+
+  protected createEvent(): void {
+    if (!this.canCreate()) {
+      return;
+    }
+
+    this.creating.set(true);
+    this.createError.set('');
+
+    this.tournamentApi
+      .createEvent({
+        name: this.eventName().trim(),
+        theme: this.theme().trim(),
+        startDate: new Date(this.startDate()).toISOString(),
+        endDate: new Date(this.endDate()).toISOString(),
+        maxPlayers: this.maxPlayers(),
+        questionsPerMatch: this.questionsPerMatch(),
+        maxScorePerMatch: this.maxScore(),
+      })
+      .subscribe({
+        next: () => {
+          this.creating.set(false);
+          this.resetForm();
+          this.closePanel();
+          this.refresh$.next();
+        },
+        error: (error: { status?: number }) => {
+          this.creating.set(false);
+          this.createError.set(
+            error.status === 409
+              ? 'An event with this name already exists.'
+              : 'Could not create the event. Check the data and try again.',
+          );
+        },
+      });
+  }
+
+  private resetForm(): void {
+    this.eventName.set('');
+    this.theme.set('');
+    this.startDate.set('');
+    this.endDate.set('');
+    this.maxPlayers.set(8);
+    this.questionsPerMatch.set(5);
+    this.maxScore.set(100);
   }
 }

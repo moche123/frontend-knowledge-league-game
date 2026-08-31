@@ -6,9 +6,6 @@
 
     <div side-nav-body class="flex flex-col gap-1">
       <app-nav-item icon="dashboard" label="Dashboard" (clicked)="goHome()" />
-      <app-nav-item icon="workspace_premium" label="Tournaments" />
-      <app-nav-item icon="psychology" label="AI Evaluation" />
-      <app-nav-item icon="gavel" label="Arbiter Panel" (clicked)="goToArbiterPanel()" />
     </div>
 
     <div side-nav-footer class="flex flex-col gap-4 px-2">
@@ -23,59 +20,13 @@
     </div>
   </app-side-nav>
 
-  <div
-    class="flex-grow flex flex-col h-screen overflow-hidden bg-primary-container relative md:ml-64"
-  >
-    <div
-      class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-tertiary/5 rounded-full blur-[120px] pointer-events-none"
-    ></div>
-
-    <header class="bg-background border-b border-primary-container z-10 shrink-0">
-      <div
-        class="flex justify-between items-center px-margin-desktop py-base w-full max-w-container-max mx-auto h-20"
-      >
-        <div class="flex items-center gap-4">
-          <span
-            class="font-display-lg-mobile text-display-lg-mobile text-tertiary tracking-tighter uppercase xl:font-display-lg xl:text-display-lg hidden sm:block"
-          >
-            Knowledge League
-          </span>
-        </div>
-        <div class="flex items-center gap-6">
-          <button
-            type="button"
-            class="text-on-surface-variant hover:text-tertiary transition-colors duration-200"
-          >
-            <app-icon name="military_tech" size="lg" />
-          </button>
-          <button
-            type="button"
-            class="text-on-surface-variant hover:text-tertiary transition-colors duration-200 relative"
-          >
-            <app-icon name="notifications" size="lg" />
-            <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
-          </button>
-          <button
-            type="button"
-            class="text-on-surface-variant hover:text-tertiary transition-colors duration-200"
-          >
-            <app-icon name="settings" size="lg" />
-          </button>
-          <div class="flex items-center gap-3 pl-4 border-l border-outline-variant/30">
-            <div class="text-right hidden md:block">
-              <p class="font-title-sm text-title-sm text-primary">Alejandro Silva</p>
-              <p class="font-label-caps text-label-caps text-tertiary">Grandmaster | 12,450 pts</p>
-            </div>
-            <app-avatar [src]="selfRow.avatarUrl" ring="gold" />
-          </div>
-        </div>
-      </div>
-    </header>
+  <div class="flex-1 flex flex-col min-w-0 md:ml-64">
+    <app-top-bar title="Global Ranking" />
 
     <main
-      class="flex-grow overflow-y-auto px-margin-mobile md:px-margin-desktop py-stack-lg z-10 scrollbar-elite"
+      class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full overflow-y-auto"
     >
-      <div class="max-w-container-max mx-auto space-y-stack-lg pb-24">
+      <div class="space-y-stack-lg pb-24">
         <div
           class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container/40 p-6 rounded-xl border border-outline-variant/20 backdrop-blur-md"
         >

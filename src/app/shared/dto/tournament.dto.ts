@@ -13,3 +13,13 @@ export interface EventDto {
   status: EventStatus;
   createdAt: string;
 }
+
+export interface CreateEventDto {
+  name: string;
+  theme: string;
+  startDate: string;
+  endDate: string;
+  maxPlayers: number;
+  questionsPerMatch: number;
+  maxScorePerMatch?: number;
+}

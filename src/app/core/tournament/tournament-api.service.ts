@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EventDto } from '../../shared/dto/tournament.dto';
+import { CreateEventDto, EventDto } from '../../shared/dto/tournament.dto';
 import { RegistrationDto } from '../../shared/dto/registration.dto';
 
 @Injectable({ providedIn: 'root' })
@@ -12,6 +12,10 @@ export class TournamentApi {
 
   listEvents(): Observable<EventDto[]> {
     return this.http.get<EventDto[]>(`${this.baseUrl}/events`);
+  }
+
+  createEvent(dto: CreateEventDto): Observable<EventDto> {
+    return this.http.post<EventDto>(`${this.baseUrl}/events`, dto);
   }
 
   listRegistrations(eventId: string): Observable<RegistrationDto[]> {
