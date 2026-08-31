@@ -359,4 +359,16 @@
     </div>
   </div>
   }
+
+  <app-confirm-dialog
+    [open]="eventPendingDelete() !== null"
+    title="Delete event"
+    [message]="deleteDialogMessage()"
+    confirmLabel="Delete"
+    loadingLabel="Deleting…"
+    variant="danger"
+    [loading]="deletingEventId() !== null"
+    (confirmed)="confirmDeleteEvent()"
+    (cancelled)="cancelDeleteEvent()"
+  />
 </div>

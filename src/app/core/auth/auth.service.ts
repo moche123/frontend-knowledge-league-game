@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponseDto, PublicUserDto } from '../../shared/dto/auth-response.dto';
+import { AuthResponseDto, PublicUserDto, UserRole } from '../../shared/dto/auth-response.dto';
 import { CreateUserByAdminDto } from '../../shared/dto/create-user.dto';
 import { LoginDto } from '../../shared/dto/login.dto';
 import { RegisterDto } from '../../shared/dto/register.dto';
@@ -49,6 +49,16 @@ export class AuthService {
 
   getUser(userId: string): Observable<PublicUserDto> {
     return this.http.get<PublicUserDto>(`${this.baseUrl}/users/${userId}`);
+  }
+
+  // Admin users management page — lists players and/or referees (never admins),
+  // optionally filtered by type.
+  listUsers(role: UserRole | 'all' = 'all'): Observable<PublicUserDto[]> {
+    return this.http.get<PublicUserDto[]>(`${this.baseUrl}/users`, { params: { role } });
+  }
+
+  deleteUser(userId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/users/${userId}`);
   }
 
   // Admin creates a player or referee account directly — never admin (that

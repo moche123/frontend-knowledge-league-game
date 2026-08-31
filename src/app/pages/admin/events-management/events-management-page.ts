@@ -7,6 +7,7 @@ import { TournamentApi } from '../../../core/tournament/tournament-api.service';
 import { EventDto, EventStatus } from '../../../shared/dto/tournament.dto';
 import { Badge, BadgeVariant } from '../../../shared/ui/badge/badge';
 import { Button } from '../../../shared/ui/button/button';
+import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
 import { Icon } from '../../../shared/ui/icon/icon';
 import { NavItem } from '../../../shared/ui/nav-item/nav-item';
 import { ProgressBar, ProgressTone } from '../../../shared/ui/progress-bar/progress-bar';
@@ -88,6 +89,7 @@ interface EventWithRegistrationCount {
   imports: [
     Badge,
     Button,
+    ConfirmDialog,
     Icon,
     NavItem,
     ProgressBar,
@@ -278,6 +280,17 @@ export class EventsManagementPage {
 
   protected deletingEventId = signal<string | null>(null);
   protected drawingEventId = signal<string | null>(null);
+  protected eventPendingDelete = signal<EventRow | null>(null);
+
+  protected readonly deleteDialogMessage = computed(() => {
+    const event = this.eventPendingDelete();
+    if (!event) {
+      return '';
+    }
+    return event.status === 'registration_open'
+      ? `Delete "${event.name}"? This cannot be undone.`
+      : `Delete "${event.name}"? This permanently erases its bracket, match history and any ranking points earned in it. This cannot be undone.`;
+  });
 
   protected goToQuestions(event: EventRow): void {
     this.router.navigateByUrl(`/events/${event.id}/questions`);
@@ -288,12 +301,19 @@ export class EventsManagementPage {
   }
 
   protected deleteEvent(event: EventRow): void {
-    const warning =
-      event.status === 'registration_open'
-        ? `Delete "${event.name}"? This cannot be undone.`
-        : `Delete "${event.name}"? This permanently erases its bracket, match history and any ranking points earned in it. This cannot be undone.`;
+    this.eventPendingDelete.set(event);
+  }
 
-    if (!confirm(warning)) {
+  protected cancelDeleteEvent(): void {
+    if (this.deletingEventId()) {
+      return;
+    }
+    this.eventPendingDelete.set(null);
+  }
+
+  protected confirmDeleteEvent(): void {
+    const event = this.eventPendingDelete();
+    if (!event || this.deletingEventId()) {
       return;
     }
 
@@ -301,11 +321,13 @@ export class EventsManagementPage {
     this.tournamentApi.deleteEvent(event.id).subscribe({
       next: () => {
         this.deletingEventId.set(null);
+        this.eventPendingDelete.set(null);
         this.refresh$.next();
         this.toastService.success(`Event "${event.name}" deleted.`);
       },
       error: () => {
         this.deletingEventId.set(null);
+        this.eventPendingDelete.set(null);
         this.toastService.error('Could not delete the event. Try again.');
       },
     });
