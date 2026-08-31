@@ -283,6 +283,10 @@ export class EventsManagementPage {
     this.router.navigateByUrl(`/events/${event.id}/questions`);
   }
 
+  protected goToUsers(): void {
+    this.router.navigateByUrl('/admin/users');
+  }
+
   protected deleteEvent(event: EventRow): void {
     const warning =
       event.status === 'registration_open'

@@ -431,4 +431,8 @@ export class EventQuestionsPage {
   protected done(): void {
     this.router.navigateByUrl('/events');
   }
+
+  protected goToUsers(): void {
+    this.router.navigateByUrl('/admin/users');
+  }
 }

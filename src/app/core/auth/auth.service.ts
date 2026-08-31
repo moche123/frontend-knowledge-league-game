@@ -3,6 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthResponseDto, PublicUserDto } from '../../shared/dto/auth-response.dto';
+import { CreateUserByAdminDto } from '../../shared/dto/create-user.dto';
 import { LoginDto } from '../../shared/dto/login.dto';
 import { RegisterDto } from '../../shared/dto/register.dto';
 
@@ -48,6 +49,13 @@ export class AuthService {
 
   getUser(userId: string): Observable<PublicUserDto> {
     return this.http.get<PublicUserDto>(`${this.baseUrl}/users/${userId}`);
+  }
+
+  // Admin creates a player or referee account directly — never admin (that
+  // stays a manual DB bootstrap). Does not persist tokens: the admin isn't
+  // logging in as this new account.
+  createUser(dto: CreateUserByAdminDto): Observable<PublicUserDto> {
+    return this.http.post<PublicUserDto>(`${this.baseUrl}/users`, dto);
   }
 
   refresh(): Observable<AuthResponseDto> {

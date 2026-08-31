@@ -66,6 +66,12 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'admin/users',
+    canActivate: [authGuard, roleGuard('admin')],
+    loadComponent: () =>
+      import('./pages/admin/create-user/create-user-page').then((m) => m.CreateUserPage),
+  },
+  {
     path: 'profile',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/profile/profile-page').then((m) => m.ProfilePage),
