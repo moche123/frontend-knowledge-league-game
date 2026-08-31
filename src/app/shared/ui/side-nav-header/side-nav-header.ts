@@ -1,8 +1,7 @@
-import { toSignal } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { AuthService } from '../../../core/auth/auth.service';
+import { computeRankStats } from '../../../core/ranking/rank-stats';
 import { RankingApi } from '../../../core/ranking/ranking-api.service';
-import { LeaderboardRowDto } from '../../dto/ranking.dto';
 import { Avatar } from '../avatar/avatar';
 
 /** Top block shared by every side-nav across roles — same identity layout everywhere:
@@ -31,7 +30,9 @@ export class SideNavHeader {
 
   protected readonly user = this.authService.currentUser;
 
-  protected readonly initials = computed(() => (this.user()?.name ?? '?').slice(0, 2).toUpperCase());
+  protected readonly initials = computed(() =>
+    (this.user()?.name ?? '?').slice(0, 2).toUpperCase(),
+  );
 
   protected readonly roleLabel = computed(() => {
     const role = this.user()?.role ?? '';
@@ -40,17 +41,7 @@ export class SideNavHeader {
 
   protected readonly isPlayer = computed(() => this.user()?.role === 'player');
 
-  private readonly leaderboard = toSignal(this.rankingApi.getGlobalLeaderboard(), {
-    initialValue: [] as LeaderboardRowDto[],
-  });
-
-  protected readonly rankPosition = computed(() => {
-    const userId = this.user()?.id;
-    const index = this.leaderboard().findIndex((row) => row.userId === userId);
-    return index === -1 ? null : index + 1;
-  });
-
-  protected readonly totalPoints = computed(
-    () => this.leaderboard().find((row) => row.userId === this.user()?.id)?.totalPoints ?? 0,
-  );
+  private readonly rankStats = computeRankStats(this.rankingApi.leaderboard, () => this.user()?.id);
+  protected readonly rankPosition = this.rankStats.rankPosition;
+  protected readonly totalPoints = this.rankStats.totalPoints;
 }

@@ -53,7 +53,10 @@ export type TournamentCardState = 'register' | 'registered' | 'full' | 'ongoing'
         </div>
 
         <div class="mt-2 mb-4">
-          <app-progress-bar [value]="progress()" [tone]="state() === 'full' ? 'error' : progressTone()" />
+          <app-progress-bar
+            [value]="progress()"
+            [tone]="state() === 'full' ? 'error' : progressTone()"
+          />
         </div>
 
         @switch (state()) {

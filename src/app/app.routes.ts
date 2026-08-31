@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 import { guestGuard } from './core/auth/guest.guard';
+import { roleGuard } from './core/auth/role.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -16,15 +17,19 @@ export const routes: Routes = [
   },
   {
     path: 'answer-question',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard('player')],
     loadComponent: () =>
-      import('./pages/answer-question/answer-question-page').then((m) => m.AnswerQuestionPage),
+      import('./pages/player/answer-question/answer-question-page').then(
+        (m) => m.AnswerQuestionPage,
+      ),
   },
   {
     path: 'dashboard',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard('player')],
     loadComponent: () =>
-      import('./pages/player-dashboard/player-dashboard-page').then((m) => m.PlayerDashboardPage),
+      import('./pages/player/player-dashboard/player-dashboard-page').then(
+        (m) => m.PlayerDashboardPage,
+      ),
   },
   {
     path: 'disputes',
@@ -34,9 +39,9 @@ export const routes: Routes = [
   },
   {
     path: 'judge-panel',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard('referee')],
     loadComponent: () =>
-      import('./pages/judge-panel/judge-panel-page').then((m) => m.JudgePanelPage),
+      import('./pages/referee/judge-panel/judge-panel-page').then((m) => m.JudgePanelPage),
   },
   {
     path: 'ranking',
@@ -46,9 +51,9 @@ export const routes: Routes = [
   },
   {
     path: 'events',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard('admin')],
     loadComponent: () =>
-      import('./pages/events-management/events-management-page').then(
+      import('./pages/admin/events-management/events-management-page').then(
         (m) => m.EventsManagementPage,
       ),
   },

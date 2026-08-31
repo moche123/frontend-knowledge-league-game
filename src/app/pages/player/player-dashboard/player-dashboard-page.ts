@@ -1,25 +1,22 @@
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { BehaviorSubject, forkJoin, map, of, switchMap } from 'rxjs';
-import { AuthService } from '../../core/auth/auth.service';
-import { RankingApi } from '../../core/ranking/ranking-api.service';
-import { TournamentApi } from '../../core/tournament/tournament-api.service';
-import { LeaderboardRowDto } from '../../shared/dto/ranking.dto';
-import { RegistrationDto } from '../../shared/dto/registration.dto';
-import { EventDto } from '../../shared/dto/tournament.dto';
-import { Avatar } from '../../shared/ui/avatar/avatar';
-import { Button } from '../../shared/ui/button/button';
-import { Icon } from '../../shared/ui/icon/icon';
-import { NavItem } from '../../shared/ui/nav-item/nav-item';
-import { SideNav } from '../../shared/ui/side-nav/side-nav';
-import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
-import { SideNavHeader } from '../../shared/ui/side-nav-header/side-nav-header';
-import { Tabs, TabItem } from '../../shared/ui/tabs/tabs';
+import { AuthService } from '../../../core/auth/auth.service';
+import { TournamentApi } from '../../../core/tournament/tournament-api.service';
+import { RegistrationDto } from '../../../shared/dto/registration.dto';
+import { EventDto } from '../../../shared/dto/tournament.dto';
+import { Button } from '../../../shared/ui/button/button';
+import { Icon } from '../../../shared/ui/icon/icon';
+import { NavItem } from '../../../shared/ui/nav-item/nav-item';
+import { SideNav } from '../../../shared/ui/side-nav/side-nav';
+import { SideNavCommon } from '../../../shared/ui/side-nav-common/side-nav-common';
+import { SideNavHeader } from '../../../shared/ui/side-nav-header/side-nav-header';
+import { Tabs, TabItem } from '../../../shared/ui/tabs/tabs';
+import { TopBar } from '../../../shared/ui/top-bar/top-bar';
 import {
   TournamentCard,
   TournamentCardState,
-} from '../../shared/ui/tournament-card/tournament-card';
+} from '../../../shared/ui/tournament-card/tournament-card';
 
 const CARD_TONES: { categoryTone: 'primary' | 'secondary' | 'neutral'; glowClass: string }[] = [
   { categoryTone: 'primary', glowClass: 'bg-primary' },
@@ -55,7 +52,6 @@ interface TournamentCardModel {
 @Component({
   selector: 'app-player-dashboard-page',
   imports: [
-    Avatar,
     Button,
     Icon,
     NavItem,
@@ -63,6 +59,7 @@ interface TournamentCardModel {
     SideNavCommon,
     SideNavHeader,
     Tabs,
+    TopBar,
     TournamentCard,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -71,8 +68,6 @@ interface TournamentCardModel {
 export class PlayerDashboardPage {
   public authService = inject(AuthService);
   private readonly tournamentApi = inject(TournamentApi);
-  private readonly rankingApi = inject(RankingApi);
-  private readonly router = inject(Router);
 
   protected readonly tabs: TabItem[] = [
     { id: 'registered', label: 'My Registrations' },
@@ -104,19 +99,6 @@ export class PlayerDashboardPage {
   );
 
   private readonly currentUserId = computed(() => this.authService.currentUser()?.id ?? null);
-
-  private readonly leaderboard = toSignal(this.rankingApi.getGlobalLeaderboard(), {
-    initialValue: [] as LeaderboardRowDto[],
-  });
-
-  protected readonly rankPosition = computed(() => {
-    const index = this.leaderboard().findIndex((row) => row.userId === this.currentUserId());
-    return index === -1 ? null : index + 1;
-  });
-
-  protected readonly totalPoints = computed(
-    () => this.leaderboard().find((row) => row.userId === this.currentUserId())?.totalPoints ?? 0,
-  );
 
   protected readonly openEvents = computed(() =>
     this.eventsWithRegistrations()
@@ -151,10 +133,6 @@ export class PlayerDashboardPage {
         return this.openEvents();
     }
   });
-
-  protected goToProfile(): void {
-    this.router.navigateByUrl('/profile');
-  }
 
   protected register(eventId: string): void {
     this.registeringEventId.set(eventId);

@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { AssignmentCard, AssignmentStatus } from '../../shared/ui/assignment-card/assignment-card';
-import { ChatEntry, ChatPanel } from '../../shared/ui/chat-panel/chat-panel';
-import { Icon } from '../../shared/ui/icon/icon';
-import { NavItem } from '../../shared/ui/nav-item/nav-item';
-import { SideNav } from '../../shared/ui/side-nav/side-nav';
-import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
-import { SideNavHeader } from '../../shared/ui/side-nav-header/side-nav-header';
+import {
+  AssignmentCard,
+  AssignmentStatus,
+} from '../../../shared/ui/assignment-card/assignment-card';
+import { ChatEntry, ChatPanel } from '../../../shared/ui/chat-panel/chat-panel';
+import { Icon } from '../../../shared/ui/icon/icon';
+import { NavItem } from '../../../shared/ui/nav-item/nav-item';
+import { SideNav } from '../../../shared/ui/side-nav/side-nav';
+import { SideNavCommon } from '../../../shared/ui/side-nav-common/side-nav-common';
+import { SideNavHeader } from '../../../shared/ui/side-nav-header/side-nav-header';
 
 interface Assignment {
   id: string;

@@ -4,9 +4,9 @@ import { Router } from '@angular/router';
 import { forkJoin, map, of, switchMap } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { HOME_BY_ROLE } from '../../core/auth/home-by-role';
+import { computeRankStats } from '../../core/ranking/rank-stats';
 import { RankingApi } from '../../core/ranking/ranking-api.service';
 import { TournamentApi } from '../../core/tournament/tournament-api.service';
-import { LeaderboardRowDto } from '../../shared/dto/ranking.dto';
 import { EventDto, EventStatus } from '../../shared/dto/tournament.dto';
 import { Badge, BadgeVariant } from '../../shared/ui/badge/badge';
 import { Icon } from '../../shared/ui/icon/icon';
@@ -14,6 +14,7 @@ import { NavItem } from '../../shared/ui/nav-item/nav-item';
 import { SideNav } from '../../shared/ui/side-nav/side-nav';
 import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
 import { SideNavHeader } from '../../shared/ui/side-nav-header/side-nav-header';
+import { TopBar } from '../../shared/ui/top-bar/top-bar';
 
 const STATUS_BADGE: Record<EventStatus, BadgeVariant> = {
   registration_open: 'gold',
@@ -48,7 +49,7 @@ interface MyEventRow {
 
 @Component({
   selector: 'app-profile-page',
-  imports: [Badge, Icon, NavItem, SideNav, SideNavCommon, SideNavHeader],
+  imports: [Badge, Icon, NavItem, SideNav, SideNavCommon, SideNavHeader, TopBar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile-page.html',
 })
@@ -73,19 +74,9 @@ export class ProfilePage {
     return user ? DATE_FORMAT.format(new Date(user.createdAt)) : '';
   });
 
-  private readonly leaderboard = toSignal(this.rankingApi.getGlobalLeaderboard(), {
-    initialValue: [] as LeaderboardRowDto[],
-  });
-
-  protected readonly rankPosition = computed(() => {
-    const userId = this.user()?.id;
-    const index = this.leaderboard().findIndex((row) => row.userId === userId);
-    return index === -1 ? null : index + 1;
-  });
-
-  protected readonly totalPoints = computed(
-    () => this.leaderboard().find((row) => row.userId === this.user()?.id)?.totalPoints ?? 0,
-  );
+  private readonly rankStats = computeRankStats(this.rankingApi.leaderboard, () => this.user()?.id);
+  protected readonly rankPosition = this.rankStats.rankPosition;
+  protected readonly totalPoints = this.rankStats.totalPoints;
 
   private readonly eventsWithRegistrants = toSignal(
     this.tournamentApi.listEvents().pipe(

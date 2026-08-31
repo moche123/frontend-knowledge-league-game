@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { Badge, BadgeVariant } from '../../shared/ui/badge/badge';
-import { Button } from '../../shared/ui/button/button';
-import { Icon } from '../../shared/ui/icon/icon';
-import { NavItem } from '../../shared/ui/nav-item/nav-item';
-import { ProgressBar } from '../../shared/ui/progress-bar/progress-bar';
-import { Select, SelectOption } from '../../shared/ui/select/select';
-import { SideNav } from '../../shared/ui/side-nav/side-nav';
-import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
-import { SideNavHeader } from '../../shared/ui/side-nav-header/side-nav-header';
-import { TextField } from '../../shared/ui/text-field/text-field';
+import { Badge, BadgeVariant } from '../../../shared/ui/badge/badge';
+import { Button } from '../../../shared/ui/button/button';
+import { Icon } from '../../../shared/ui/icon/icon';
+import { NavItem } from '../../../shared/ui/nav-item/nav-item';
+import { ProgressBar } from '../../../shared/ui/progress-bar/progress-bar';
+import { Select, SelectOption } from '../../../shared/ui/select/select';
+import { SideNav } from '../../../shared/ui/side-nav/side-nav';
+import { SideNavCommon } from '../../../shared/ui/side-nav-common/side-nav-common';
+import { SideNavHeader } from '../../../shared/ui/side-nav-header/side-nav-header';
+import { TextField } from '../../../shared/ui/text-field/text-field';
 
 type EventStatus = 'finished' | 'live' | 'open';
 
