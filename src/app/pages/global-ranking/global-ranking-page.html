@@ -1,4 +1,6 @@
-<div class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body-md overflow-hidden">
+<div
+  class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body-md overflow-hidden"
+>
   <app-side-nav brand="Knowledge League" tone="surface">
     <div side-nav-header class="mb-stack-lg flex flex-col items-center px-2">
       <app-avatar
@@ -35,25 +37,42 @@
     </div>
   </app-side-nav>
 
-  <div class="flex-grow flex flex-col h-screen overflow-hidden bg-primary-container relative md:ml-64">
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-tertiary/5 rounded-full blur-[120px] pointer-events-none"></div>
+  <div
+    class="flex-grow flex flex-col h-screen overflow-hidden bg-primary-container relative md:ml-64"
+  >
+    <div
+      class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-tertiary/5 rounded-full blur-[120px] pointer-events-none"
+    ></div>
 
     <header class="bg-background border-b border-primary-container z-10 shrink-0">
-      <div class="flex justify-between items-center px-margin-desktop py-base w-full max-w-container-max mx-auto h-20">
+      <div
+        class="flex justify-between items-center px-margin-desktop py-base w-full max-w-container-max mx-auto h-20"
+      >
         <div class="flex items-center gap-4">
-          <span class="font-display-lg-mobile text-display-lg-mobile text-tertiary tracking-tighter uppercase xl:font-display-lg xl:text-display-lg hidden sm:block">
+          <span
+            class="font-display-lg-mobile text-display-lg-mobile text-tertiary tracking-tighter uppercase xl:font-display-lg xl:text-display-lg hidden sm:block"
+          >
             Knowledge League
           </span>
         </div>
         <div class="flex items-center gap-6">
-          <button type="button" class="text-on-surface-variant hover:text-tertiary transition-colors duration-200">
+          <button
+            type="button"
+            class="text-on-surface-variant hover:text-tertiary transition-colors duration-200"
+          >
             <app-icon name="military_tech" size="lg" />
           </button>
-          <button type="button" class="text-on-surface-variant hover:text-tertiary transition-colors duration-200 relative">
+          <button
+            type="button"
+            class="text-on-surface-variant hover:text-tertiary transition-colors duration-200 relative"
+          >
             <app-icon name="notifications" size="lg" />
             <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
           </button>
-          <button type="button" class="text-on-surface-variant hover:text-tertiary transition-colors duration-200">
+          <button
+            type="button"
+            class="text-on-surface-variant hover:text-tertiary transition-colors duration-200"
+          >
             <app-icon name="settings" size="lg" />
           </button>
           <div class="flex items-center gap-3 pl-4 border-l border-outline-variant/30">
@@ -67,18 +86,29 @@
       </div>
     </header>
 
-    <main class="flex-grow overflow-y-auto px-margin-mobile md:px-margin-desktop py-stack-lg z-10 scrollbar-elite">
+    <main
+      class="flex-grow overflow-y-auto px-margin-mobile md:px-margin-desktop py-stack-lg z-10 scrollbar-elite"
+    >
       <div class="max-w-container-max mx-auto space-y-stack-lg pb-24">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container/40 p-6 rounded-xl border border-outline-variant/20 backdrop-blur-md">
+        <div
+          class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container/40 p-6 rounded-xl border border-outline-variant/20 backdrop-blur-md"
+        >
           <div>
-            <h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-primary tracking-tight">
+            <h1
+              class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-primary tracking-tight"
+            >
               Global Ranking
             </h1>
             <p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-xl">
               The hall of fame of Knowledge League. Only the most learned reach the top.
             </p>
           </div>
-          <app-select variant="filled" [options]="filterOptions" [value]="filter()" (valueChange)="filter.set($event)" />
+          <app-select
+            variant="filled"
+            [options]="filterOptions"
+            [value]="filter()"
+            (valueChange)="filter.set($event)"
+          />
         </div>
 
         <div class="flex justify-center items-end gap-2 md:gap-6 pt-12 pb-8">
@@ -95,38 +125,72 @@
           }
         </div>
 
-        <div class="bg-surface-container border border-outline-variant/30 rounded-xl overflow-hidden shadow-lg">
+        <div
+          class="bg-surface-container border border-outline-variant/30 rounded-xl overflow-hidden shadow-lg"
+        >
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="border-b border-outline-variant/30 bg-surface-container-high/50">
-                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider w-20 text-center">Position</th>
-                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Player</th>
-                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-center hidden sm:table-cell">Tier</th>
-                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-center hidden md:table-cell">Tournaments Played</th>
-                  <th class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-right">Global Score</th>
+                  <th
+                    class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider w-20 text-center"
+                  >
+                    Position
+                  </th>
+                  <th
+                    class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider"
+                  >
+                    Player
+                  </th>
+                  <th
+                    class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-center hidden sm:table-cell"
+                  >
+                    Tier
+                  </th>
+                  <th
+                    class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-center hidden md:table-cell"
+                  >
+                    Tournaments Played
+                  </th>
+                  <th
+                    class="py-4 px-6 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-right"
+                  >
+                    Global Score
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-outline-variant/10">
                 @for (row of rows; track row.position) {
                   <tr class="hover:bg-surface-bright/20 transition-colors group">
                     <td class="py-4 px-6 text-center">
-                      <span class="font-headline-md text-headline-md text-on-surface-variant/70 group-hover:text-primary transition-colors">{{ row.position }}</span>
+                      <span
+                        class="font-headline-md text-headline-md text-on-surface-variant/70 group-hover:text-primary transition-colors"
+                        >{{ row.position }}</span
+                      >
                     </td>
                     <td class="py-4 px-6">
                       <div class="flex items-center gap-4">
                         <app-avatar [src]="row.avatarUrl" />
                         <div>
                           <p class="font-title-sm text-title-sm text-primary">{{ row.name }}</p>
-                          <p class="font-body-sm text-body-sm text-on-surface-variant md:hidden">{{ row.tier }}</p>
+                          <p class="font-body-sm text-body-sm text-on-surface-variant md:hidden">
+                            {{ row.tier }}
+                          </p>
                         </div>
                       </div>
                     </td>
                     <td class="py-4 px-6 text-center hidden sm:table-cell">
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-container text-primary border border-primary/20">{{ row.tier }}</span>
+                      <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-container text-primary border border-primary/20"
+                        >{{ row.tier }}</span
+                      >
                     </td>
-                    <td class="py-4 px-6 text-center text-on-surface-variant hidden md:table-cell">{{ row.tournaments }}</td>
-                    <td class="py-4 px-6 text-right font-headline-md text-headline-md text-primary">{{ row.points }}</td>
+                    <td class="py-4 px-6 text-center text-on-surface-variant hidden md:table-cell">
+                      {{ row.tournaments }}
+                    </td>
+                    <td class="py-4 px-6 text-right font-headline-md text-headline-md text-primary">
+                      {{ row.points }}
+                    </td>
                   </tr>
                 }
                 <tr>
@@ -136,7 +200,9 @@
                 </tr>
                 <tr class="bg-tertiary-container/10 border-l-4 border-tertiary">
                   <td class="py-4 px-6 text-center">
-                    <span class="font-headline-md text-headline-md text-tertiary font-bold">{{ selfRow.position }}</span>
+                    <span class="font-headline-md text-headline-md text-tertiary font-bold">{{
+                      selfRow.position
+                    }}</span>
                   </td>
                   <td class="py-4 px-6">
                     <div class="flex items-center gap-4">
@@ -144,23 +210,41 @@
                       <div>
                         <p class="font-title-sm text-title-sm text-tertiary font-bold">
                           {{ selfRow.name }}
-                          <span class="text-xs font-normal text-on-surface-variant ml-2">(You)</span>
+                          <span class="text-xs font-normal text-on-surface-variant ml-2"
+                            >(You)</span
+                          >
                         </p>
-                        <p class="font-body-sm text-body-sm text-tertiary/70 md:hidden">{{ selfRow.tier }}</p>
+                        <p class="font-body-sm text-body-sm text-tertiary/70 md:hidden">
+                          {{ selfRow.tier }}
+                        </p>
                       </div>
                     </div>
                   </td>
                   <td class="py-4 px-6 text-center hidden sm:table-cell">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-tertiary-container text-tertiary border border-tertiary/30 shadow-[0_0_10px_rgba(231,191,153,0.2)]">{{ selfRow.tier }}</span>
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-tertiary-container text-tertiary border border-tertiary/30 shadow-[0_0_10px_rgba(231,191,153,0.2)]"
+                      >{{ selfRow.tier }}</span
+                    >
                   </td>
-                  <td class="py-4 px-6 text-center text-on-surface-variant hidden md:table-cell">{{ selfRow.tournaments }}</td>
-                  <td class="py-4 px-6 text-right font-headline-md text-headline-md text-tertiary font-bold">{{ selfRow.points }}</td>
+                  <td class="py-4 px-6 text-center text-on-surface-variant hidden md:table-cell">
+                    {{ selfRow.tournaments }}
+                  </td>
+                  <td
+                    class="py-4 px-6 text-right font-headline-md text-headline-md text-tertiary font-bold"
+                  >
+                    {{ selfRow.points }}
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="p-4 border-t border-outline-variant/30 flex justify-center bg-surface-container-low/50">
-            <button type="button" class="px-6 py-2 border border-outline-variant rounded-lg font-title-sm text-title-sm text-primary hover:bg-secondary-container/20 hover:border-secondary transition-all flex items-center gap-2">
+          <div
+            class="p-4 border-t border-outline-variant/30 flex justify-center bg-surface-container-low/50"
+          >
+            <button
+              type="button"
+              class="px-6 py-2 border border-outline-variant rounded-lg font-title-sm text-title-sm text-primary hover:bg-secondary-container/20 hover:border-secondary transition-all flex items-center gap-2"
+            >
               Load more
               <app-icon name="expand_more" size="sm" />
             </button>

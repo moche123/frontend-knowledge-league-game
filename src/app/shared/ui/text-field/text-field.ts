@@ -23,7 +23,7 @@ import { Icon } from '../icon/icon';
         [id]="fieldId()"
         [ngModel]="value()"
         (ngModelChange)="value.set($event)"
-        class="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-2 pt-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 transition-colors"
+        class="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-2 pt-3 font-body-md text-body-md text-inverse-on-surface placeholder:text-outline focus:border-primary focus:ring-0 transition-colors"
         [class.pl-8]="!!icon()"
       />
     </div>

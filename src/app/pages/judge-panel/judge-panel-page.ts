@@ -31,10 +31,40 @@ export class JudgePanelPage {
   protected readonly arbiterAvatar = ARBITER_AVATAR;
 
   protected readonly assignments: Assignment[] = [
-    { id: 'a1', status: 'live', tournament: 'History Olympiad', matchup: 'Alejandro Silva vs Sofia Mendez', stage: 'Quarterfinal', metaLabel: 'Today', time: '14:30' },
-    { id: 'a2', status: 'pending', tournament: 'Science Cup', matchup: 'Mateo Ruiz vs Clara Ortiz', stage: 'Semifinal', metaLabel: 'Tomorrow', time: '10:00' },
-    { id: 'a3', status: 'closed', tournament: 'Literary Debate', matchup: 'Diego Torres vs Laura Gomez', stage: 'Group stage', metaLabel: 'Yesterday' },
-    { id: 'a4', status: 'walkover', tournament: 'Mathematics Tournament', matchup: 'Andres Vega vs Carlos Pico', stage: 'Round 1', metaLabel: 'Review required' },
+    {
+      id: 'a1',
+      status: 'live',
+      tournament: 'History Olympiad',
+      matchup: 'Alejandro Silva vs Sofia Mendez',
+      stage: 'Quarterfinal',
+      metaLabel: 'Today',
+      time: '14:30',
+    },
+    {
+      id: 'a2',
+      status: 'pending',
+      tournament: 'Science Cup',
+      matchup: 'Mateo Ruiz vs Clara Ortiz',
+      stage: 'Semifinal',
+      metaLabel: 'Tomorrow',
+      time: '10:00',
+    },
+    {
+      id: 'a3',
+      status: 'closed',
+      tournament: 'Literary Debate',
+      matchup: 'Diego Torres vs Laura Gomez',
+      stage: 'Group stage',
+      metaLabel: 'Yesterday',
+    },
+    {
+      id: 'a4',
+      status: 'walkover',
+      tournament: 'Mathematics Tournament',
+      matchup: 'Andres Vega vs Carlos Pico',
+      stage: 'Round 1',
+      metaLabel: 'Review required',
+    },
   ];
 
   protected messages = signal<ChatEntry[]>([
@@ -71,7 +101,15 @@ export class JudgePanelPage {
   protected onSend(text: string): void {
     this.messages.update((current) => [
       ...current,
-      { id: `msg-${nextMessageId++}`, tone: 'arbiter', align: 'right', author: 'Dr. Julian Arango', time: 'Now', verified: true, text },
+      {
+        id: `msg-${nextMessageId++}`,
+        tone: 'arbiter',
+        align: 'right',
+        author: 'Dr. Julian Arango',
+        time: 'Now',
+        verified: true,
+        text,
+      },
     ]);
   }
 }

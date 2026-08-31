@@ -21,7 +21,8 @@ const SIZE_CLASS: Record<IconSize, string> = {
       class="material-symbols-outlined leading-none select-none"
       [class]="sizeClass()"
       [style.font-variation-settings]="fontVariation()"
-    >{{ name() }}</span>
+      >{{ name() }}</span
+    >
   `,
   host: { class: 'inline-flex' },
 })

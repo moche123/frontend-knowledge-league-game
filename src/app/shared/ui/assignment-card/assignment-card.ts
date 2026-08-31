@@ -59,16 +59,30 @@ const THEME: Record<AssignmentStatus, StatusTheme> = {
       [class]="theme().cardBorder + ' ' + theme().glow + ' ' + theme().interactive"
     >
       <div class="flex justify-between items-start mb-2" [class]="theme().fadeText">
-        <span class="font-label-caps text-label-caps text-primary uppercase">{{ tournament() }}</span>
-        <app-badge [variant]="theme().badgeVariant" [dot]="status() === 'live' || status() === 'pending'" [pulse]="status() === 'live'">
+        <span class="font-label-caps text-label-caps text-primary uppercase">{{
+          tournament()
+        }}</span>
+        <app-badge
+          [variant]="theme().badgeVariant"
+          [dot]="status() === 'live' || status() === 'pending'"
+          [pulse]="status() === 'live'"
+        >
           {{ theme().badgeLabel }}
         </app-badge>
       </div>
-      <h3 class="font-title-sm text-title-sm text-on-surface mb-1" [class]="theme().fadeText">{{ matchup() }}</h3>
-      <p class="font-body-sm text-body-sm text-on-surface-variant mb-3" [class]="theme().fadeText">{{ stage() }}</p>
+      <h3 class="font-title-sm text-title-sm text-on-surface mb-1" [class]="theme().fadeText">
+        {{ matchup() }}
+      </h3>
+      <p class="font-body-sm text-body-sm text-on-surface-variant mb-3" [class]="theme().fadeText">
+        {{ stage() }}
+      </p>
       <div
         class="flex justify-between items-center font-body-sm text-body-sm border-t pt-3"
-        [class]="status() === 'walkover' ? 'text-error border-outline-variant' : 'text-on-surface-variant border-outline-variant'"
+        [class]="
+          status() === 'walkover'
+            ? 'text-error border-outline-variant'
+            : 'text-on-surface-variant border-outline-variant'
+        "
         [class.opacity-60]="status() === 'closed'"
       >
         <div class="flex items-center gap-1">

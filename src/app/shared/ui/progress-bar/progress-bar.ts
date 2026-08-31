@@ -17,7 +17,11 @@ const TONE_CLASS: Record<ProgressTone, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="w-full bg-surface-container-high rounded-full h-1.5 overflow-hidden">
-      <div class="h-full rounded-full transition-all" [class]="toneClass()" [style.width.%]="clamped()"></div>
+      <div
+        class="h-full rounded-full transition-all"
+        [class]="toneClass()"
+        [style.width.%]="clamped()"
+      ></div>
     </div>
   `,
   host: { class: 'contents' },

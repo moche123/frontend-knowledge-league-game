@@ -32,7 +32,11 @@ const DOT_CLASS: Record<BadgeVariant, string> = {
       [class]="variantClass()"
     >
       @if (dot()) {
-        <span class="w-1.5 h-1.5 rounded-full" [class]="dotClass()" [class.animate-pulse]="pulse()"></span>
+        <span
+          class="w-1.5 h-1.5 rounded-full"
+          [class]="dotClass()"
+          [class.animate-pulse]="pulse()"
+        ></span>
       }
       @if (icon(); as name) {
         <app-icon [name]="name" size="sm" />

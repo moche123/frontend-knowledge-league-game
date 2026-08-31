@@ -18,7 +18,7 @@
         class="font-display-lg-mobile text-display-lg-mobile text-on-primary-fixed text-center tracking-tighter"
       >
         KNOWLEDGE LEAGUE <br />
-        LOGIN
+        REGISTER
       </h1>
       <p
         class="font-label-caps text-label-caps text-on-primary-fixed-variant mt-2 tracking-widest uppercase"
@@ -28,6 +28,13 @@
     </div>
 
     <form class="w-full flex flex-col gap-stack-md" (ngSubmit)="submit()">
+      <app-text-field
+        icon="person"
+        placeholder="Full name"
+        [required]="true"
+        [value]="fullName()"
+        (valueChange)="fullName.set($event)"
+      />
       <app-text-field
         icon="mail"
         type="email"
@@ -44,31 +51,27 @@
         [value]="password()"
         (valueChange)="password.set($event)"
       />
-      <div class="flex justify-end">
-        <a
-          class="font-body-sm text-body-sm text-on-primary-fixed-variant hover:text-on-primary-fixed transition-colors"
-          href="#"
-          (click)="$event.preventDefault()"
-        >
-          Forgot your password?
-        </a>
-      </div>
       @if (state$ | async; as state) {
         @if (state.error) {
           <p class="font-body-sm text-body-sm text-error text-center">{{ state.error }}</p>
         }
         <div class="mt-stack-lg">
-          <app-button variant="primary" type="submit" [disabled]="state.loading" [fullWidth]="true">
-            {{ state.loading ? 'SIGNING IN…' : 'SIGN IN' }}
-            <app-icon name="login" size="sm" />
+          <app-button
+            variant="secondary"
+            type="submit"
+            [disabled]="state.loading"
+            [fullWidth]="true"
+          >
+            {{ state.loading ? 'SIGNING UP…' : 'SIGN UP' }}
+            <app-icon name="how_to_reg" size="sm" />
           </app-button>
         </div>
       }
     </form>
 
     <p class="font-body-sm text-body-sm text-on-primary-fixed-variant text-center mt-6">
-      Don't have an account?
-      <a class="text-on-primary-fixed hover:underline" routerLink="/register">Sign up</a>
+      Already have an account?
+      <a class="text-on-primary-fixed hover:underline" routerLink="/login">Sign in</a>
     </p>
   </main>
 </div>

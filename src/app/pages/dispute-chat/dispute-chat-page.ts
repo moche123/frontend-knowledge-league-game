@@ -56,7 +56,15 @@ export class DisputeChatPage {
   protected onSend(text: string): void {
     this.messages.update((current) => [
       ...current,
-      { id: `msg-${nextMessageId++}`, tone: 'self', align: 'left', author: 'You (Elite)', time: 'Now', avatarInitial: 'T', text },
+      {
+        id: `msg-${nextMessageId++}`,
+        tone: 'self',
+        align: 'left',
+        author: 'You (Elite)',
+        time: 'Now',
+        avatarInitial: 'T',
+        text,
+      },
     ]);
   }
 }

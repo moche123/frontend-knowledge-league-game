@@ -65,7 +65,10 @@ const THEME: Record<PodiumRank, RankTheme> = {
   imports: [Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex flex-col items-center relative group" [class]="theme().wrapperWidth + ' ' + theme().lift">
+    <div
+      class="flex flex-col items-center relative group"
+      [class]="theme().wrapperWidth + ' ' + theme().lift"
+    >
       @if (rank() === 1) {
         <div class="absolute -top-12 w-full flex justify-center">
           <app-icon
@@ -96,13 +99,18 @@ const THEME: Record<PodiumRank, RankTheme> = {
       </div>
 
       <div class="mt-3 mb-2 flex flex-col items-center">
-        <span class="font-title-sm text-xs sm:text-title-sm text-center truncate w-full" [class]="theme().nameColor">
+        <span
+          class="font-title-sm text-xs sm:text-title-sm text-center truncate w-full"
+          [class]="theme().nameColor"
+        >
           {{ name() }}
           @if (isSelf()) {
             <span class="text-[10px] sm:text-xs font-normal text-on-surface-variant">(You)</span>
           }
         </span>
-        <span class="font-label-caps text-[10px] sm:text-label-caps" [class]="theme().pointsColor">{{ points() }} pts</span>
+        <span class="font-label-caps text-[10px] sm:text-label-caps" [class]="theme().pointsColor"
+          >{{ points() }} pts</span
+        >
       </div>
 
       <div
@@ -110,7 +118,11 @@ const THEME: Record<PodiumRank, RankTheme> = {
         [class]="theme().slabHeight + ' ' + theme().slabFrom + ' ' + theme().border"
       >
         <app-icon [name]="theme().icon" size="xl" [fill]="true" [class]="theme().pointsColor" />
-        <span class="font-display-lg text-2xl sm:text-display-lg mt-auto mb-2" [class]="theme().numberColor">{{ rank() }}</span>
+        <span
+          class="font-display-lg text-2xl sm:text-display-lg mt-auto mb-2"
+          [class]="theme().numberColor"
+          >{{ rank() }}</span
+        >
       </div>
     </div>
   `,

@@ -1,14 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 export type ButtonVariant =
-  | 'primary'
-  | 'secondary'
-  | 'outline'
-  | 'outline-neutral'
-  | 'accent'
-  | 'gold'
-  | 'ghost'
-  | 'danger';
+  'primary' | 'secondary' | 'outline' | 'outline-neutral' | 'accent' | 'gold' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const VARIANT_CLASS: Record<ButtonVariant, string> = {
@@ -16,10 +9,13 @@ const VARIANT_CLASS: Record<ButtonVariant, string> = {
     'bg-primary text-on-primary hover:bg-primary-fixed-dim shadow-[0_0_15px_rgba(185,199,228,0.2)] hover:shadow-[0_0_20px_rgba(185,199,228,0.4)]',
   secondary: 'bg-secondary-container text-on-secondary-container hover:brightness-110',
   outline: 'bg-transparent text-primary border border-primary hover:bg-primary/10',
-  'outline-neutral': 'bg-surface-container text-on-surface border border-outline-variant hover:bg-surface-variant',
-  accent: 'bg-accent text-on-primary-fixed hover:bg-accent/90 shadow-[0_0_10px_rgba(100,255,218,0.3)]',
+  'outline-neutral':
+    'bg-surface-container text-on-surface border border-outline-variant hover:bg-surface-variant',
+  accent:
+    'bg-accent text-on-primary-fixed hover:bg-accent/90 shadow-[0_0_10px_rgba(100,255,218,0.3)]',
   gold: 'bg-gold text-on-tertiary-fixed hover:brightness-105',
-  ghost: 'bg-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface',
+  ghost:
+    'bg-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface',
   danger: 'bg-error-container text-on-error-container hover:brightness-110',
 };
 

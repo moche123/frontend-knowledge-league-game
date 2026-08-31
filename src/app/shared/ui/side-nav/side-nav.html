@@ -15,7 +15,12 @@
 
 <!-- Backdrop (mobile only, while open) -->
 @if (mobileOpen()) {
-  <div class="fixed inset-0 bg-background/60 backdrop-blur-sm z-30 md:hidden" (click)="closeMobile()"></div>
+  <button
+    type="button"
+    aria-label="Close menu"
+    class="fixed inset-0 z-30 block w-full appearance-none border-0 bg-background/60 p-0 backdrop-blur-sm md:hidden"
+    (click)="closeMobile()"
+  ></button>
 }
 
 <aside

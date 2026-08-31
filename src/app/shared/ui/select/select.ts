@@ -18,12 +18,15 @@ export type SelectVariant = 'underline' | 'filled';
   template: `
     <div class="relative">
       <select
+        [id]="fieldId()"
         [ngModel]="value()"
         (ngModelChange)="value.set($event)"
         class="w-full appearance-none bg-surface-container text-on-surface pr-10 focus:ring-0 transition-colors font-body-sm text-body-sm"
-        [class]="variant() === 'underline'
-          ? 'border-0 border-b-2 border-outline-variant focus:border-accent px-4 py-3 rounded-t'
-          : 'border border-outline-variant focus:border-gold focus:ring-2 focus:ring-gold rounded-lg pl-4 py-2.5'"
+        [class]="
+          variant() === 'underline'
+            ? 'border-0 border-b-2 border-outline-variant focus:border-accent px-4 py-3 rounded-t'
+            : 'border border-outline-variant focus:border-gold focus:ring-2 focus:ring-gold rounded-lg pl-4 py-2.5'
+        "
       >
         @if (placeholder(); as ph) {
           <option value="" disabled selected>{{ ph }}</option>
@@ -44,6 +47,7 @@ export class Select {
   options = input.required<SelectOption[]>();
   placeholder = input<string>();
   variant = input<SelectVariant>('underline');
+  fieldId = input<string>();
 
   value = model('');
 }

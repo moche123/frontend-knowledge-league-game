@@ -15,7 +15,8 @@ import { Icon } from '../icon/icon';
           class="font-display text-[48px] font-bold tracking-[2px]"
           [class]="urgent() ? 'text-error' : 'text-gold'"
           style="text-shadow: 0 0 10px currentColor"
-        >{{ label() }}</span>
+          >{{ label() }}</span
+        >
       </div>
       <p class="font-body-sm text-body-sm text-on-surface-variant mt-2 text-center opacity-70">
         The timer turns red in the last 30 seconds.
