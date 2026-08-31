@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { AssignmentCard, AssignmentStatus } from '../../shared/ui/assignment-card/assignment-card';
-import { Avatar } from '../../shared/ui/avatar/avatar';
 import { ChatEntry, ChatPanel } from '../../shared/ui/chat-panel/chat-panel';
 import { Icon } from '../../shared/ui/icon/icon';
 import { NavItem } from '../../shared/ui/nav-item/nav-item';
 import { SideNav } from '../../shared/ui/side-nav/side-nav';
 import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
+import { SideNavHeader } from '../../shared/ui/side-nav-header/side-nav-header';
 
 interface Assignment {
   id: string;
@@ -17,20 +17,15 @@ interface Assignment {
   time?: string;
 }
 
-const ARBITER_AVATAR =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuC2Rnn5CDeIUxdxL5CzT3Kg8P-s7-4aTxcaX7sotprBE6iEgLAERgDyhMelQxIAfh2mtfq_yAwhLWlcDCQM4YD-cOQwp1cMpbxJ_bQSf8qe5QNDkFiSmFRCvJ0okBamddyMDdLtv1ly53MZqTYRrUWbUcn7dSatWV_ibzHKGJlpAHwAeQb2HDS4SHSJ6onrNr9J6Q8foX3TJf_anxZrUa1jckXUOaHq_0bCyT8Y0sWR1-cw7aGiToTX';
-
 let nextMessageId = 0;
 
 @Component({
   selector: 'app-judge-panel-page',
-  imports: [AssignmentCard, Avatar, ChatPanel, Icon, NavItem, SideNav, SideNavCommon],
+  imports: [AssignmentCard, ChatPanel, Icon, NavItem, SideNav, SideNavCommon, SideNavHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './judge-panel-page.html',
 })
 export class JudgePanelPage {
-  protected readonly arbiterAvatar = ARBITER_AVATAR;
-
   protected readonly assignments: Assignment[] = [
     {
       id: 'a1',

@@ -2,17 +2,7 @@
   class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body-md overflow-hidden"
 >
   <app-side-nav brand="Knowledge League" tone="surface">
-    <div side-nav-header class="mb-stack-lg flex flex-col items-center px-2">
-      <app-avatar
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDffAtGLqIZY2Na0DtPBwV_e0fHF7YacVC5fGMp04vJhsVle-SpMoSzWR6qHGTiNDCTR9kq7fKgY8a_OF_mXwDLQCskKpJFVdAKjggE0wFGXO0lbwjcb0nQklN1ZG25zyggOqAGeN3CpgD5bd5aNOr1RlTnsu6r7D_QUnWkBHia8VWI_C1KUe2BZ7o6X55KAKK0lpVla84fAeBY1sGCyS3ZRBI4OD4HEyTK_Mf1wdxgfGus-n_1sgA9"
-        size="lg"
-        ring="gold"
-        class="mb-stack-md"
-      />
-      <h2 class="font-title-sm text-title-sm text-primary text-center">Alejandro Silva</h2>
-      <p class="font-body-sm text-body-sm text-tertiary text-center">Grandmaster Rank</p>
-      <p class="font-body-sm text-body-sm text-on-surface-variant text-center mt-1">12,450 pts</p>
-    </div>
+    <app-side-nav-header side-nav-header />
 
     <div side-nav-body class="flex flex-col gap-1">
       <app-nav-item icon="dashboard" label="Dashboard" (clicked)="goHome()" />

@@ -9,6 +9,7 @@ import { PodiumRank, PodiumSlot } from '../../shared/ui/podium-slot/podium-slot'
 import { Select, SelectOption } from '../../shared/ui/select/select';
 import { SideNav } from '../../shared/ui/side-nav/side-nav';
 import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
+import { SideNavHeader } from '../../shared/ui/side-nav-header/side-nav-header';
 
 interface Podium {
   rank: PodiumRank;
@@ -32,7 +33,7 @@ interface RankingRow {
 
 @Component({
   selector: 'app-global-ranking-page',
-  imports: [Avatar, Icon, NavItem, PodiumSlot, Select, SideNav, SideNavCommon],
+  imports: [Avatar, Icon, NavItem, PodiumSlot, Select, SideNav, SideNavCommon, SideNavHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './global-ranking-page.html',
 })

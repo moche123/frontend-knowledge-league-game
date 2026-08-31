@@ -2,23 +2,7 @@
   class="bg-background text-on-background min-h-screen flex flex-col md:flex-row antialiased font-body-md"
 >
   <app-side-nav brand="KC Admin" tone="brand">
-    <div side-nav-header class="mb-stack-lg px-2">
-      <h1 class="font-display-lg text-display-lg text-tertiary-fixed truncate mb-stack-lg">
-        KC Admin
-      </h1>
-      <div class="flex items-center gap-3">
-        <app-avatar [src]="arbiterAvatar" size="md" ring="gold" />
-        <div>
-          <div class="font-title-sm text-title-sm text-on-surface truncate">Dr. Julian Arango</div>
-          <div class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
-            <span
-              class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_10px_rgba(100,255,218,0.2)]"
-            ></span>
-            5 Active Tournaments
-          </div>
-        </div>
-      </div>
-    </div>
+    <app-side-nav-header side-nav-header />
 
     <div side-nav-body class="flex flex-col gap-1">
       <app-nav-item icon="assignment" label="Assignments" [active]="true" />

@@ -1,0 +1,106 @@
+<div class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
+  <app-side-nav brand="Knowledge League" tone="surface">
+    <app-side-nav-header side-nav-header />
+
+    <div side-nav-body class="flex flex-col gap-1">
+      <app-nav-item icon="dashboard" label="Home" (clicked)="goHome()" />
+      <app-nav-item icon="person" label="Profile" [active]="true" />
+    </div>
+
+    <div side-nav-footer class="px-2">
+      <app-side-nav-common />
+    </div>
+  </app-side-nav>
+
+  <div class="flex-1 flex flex-col min-w-0 md:ml-64">
+    <header
+      class="border-b border-outline-variant bg-surface-container-low h-20 flex items-center px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto"
+    >
+      <h2 class="font-headline-md text-headline-md text-primary">Profile</h2>
+    </header>
+
+    <main
+      class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full overflow-y-auto flex flex-col gap-stack-lg"
+    >
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-gutter">
+        <div
+          class="bg-surface-container-high/40 border border-outline/20 rounded-xl p-6 flex flex-col gap-2"
+        >
+          <div class="flex items-center gap-2 text-on-surface-variant font-label-caps text-label-caps">
+            <app-icon name="military_tech" size="sm" />
+            Global Rank
+          </div>
+          <span class="font-display-lg-mobile text-display-lg-mobile text-tertiary-fixed">
+            {{ rankPosition() ? '#' + rankPosition() : 'Unranked' }}
+          </span>
+        </div>
+
+        <div
+          class="bg-surface-container-high/40 border border-outline/20 rounded-xl p-6 flex flex-col gap-2"
+        >
+          <div class="flex items-center gap-2 text-on-surface-variant font-label-caps text-label-caps">
+            <app-icon name="stars" size="sm" />
+            Total Points
+          </div>
+          <span class="font-display-lg-mobile text-display-lg-mobile text-primary">
+            {{ totalPoints() }}
+          </span>
+        </div>
+
+        <div
+          class="bg-surface-container-high/40 border border-outline/20 rounded-xl p-6 flex flex-col gap-2"
+        >
+          <div class="flex items-center gap-2 text-on-surface-variant font-label-caps text-label-caps">
+            <app-icon name="emoji_events" size="sm" />
+            Tournaments
+          </div>
+          <span class="font-display-lg-mobile text-display-lg-mobile text-on-surface">
+            {{ myEvents().length }}
+          </span>
+        </div>
+      </div>
+
+      <div
+        class="bg-surface-container border border-outline-variant/30 rounded-xl overflow-hidden shadow-lg"
+      >
+        <div class="p-4 border-b border-outline-variant bg-surface-container-high">
+          <h3 class="font-headline-md text-headline-md text-on-surface">My Tournaments</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr
+                class="bg-surface-container-high/50 border-b border-outline-variant/30 font-label-caps text-label-caps text-on-surface-variant"
+              >
+                <th class="p-4 font-semibold">Name</th>
+                <th class="p-4 font-semibold">Theme</th>
+                <th class="p-4 font-semibold">Date</th>
+                <th class="p-4 font-semibold">Status</th>
+              </tr>
+            </thead>
+            <tbody class="font-body-sm text-body-sm text-on-surface divide-y divide-outline-variant/20">
+              @for (event of myEvents(); track event.id) {
+                <tr class="hover:bg-surface-container-highest/30 transition-colors">
+                  <td class="p-4 font-title-sm text-title-sm">{{ event.name }}</td>
+                  <td class="p-4 text-on-surface-variant">{{ event.theme }}</td>
+                  <td class="p-4 text-on-surface-variant">{{ event.date }}</td>
+                  <td class="p-4">
+                    <app-badge [variant]="statusBadge[event.status]">
+                      {{ statusLabel[event.status] }}
+                    </app-badge>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="p-6 text-center text-on-surface-variant">
+                    Not registered in any tournament yet.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

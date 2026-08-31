@@ -9,29 +9,13 @@
   "
 >
   <app-side-nav brand="Knowledge Coliseum Admin" tone="brand">
-    <div side-nav-header class="mb-8 flex flex-col items-center gap-stack-sm">
-      <div
-        class="w-20 h-20 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden mb-2 border-2 border-tertiary-fixed"
-      >
-        <img
-          alt="Knowledge League"
-          class="w-full h-full object-cover"
-          src="https://lh3.googleusercontent.com/aida/AEtjO1XINWzavwId3se-vwYMWWTdNIGQdnsy4L-3LGMVD39EqMIVWE5xnJz2j0PS4RBibmyc-6FXsDSTzqsqrvHhLWAcbzlEs_ILdKri7jd8bUlC4jWS79mfrq1R3c6hCCVumwb1ijJDhLoqEcOYei1EVY7Mj5fCDkAv70ut7Vs-b9DNb3dxNMJxe0ptzE-uP1LkSZl7cerpV_Pqzp_7r8mlytXE6PS9LSAbOZAMXCmyx_hNkNiktK5HDHlLYtw"
-        />
-      </div>
-      <h1 class="font-title-sm text-title-sm text-on-surface font-bold text-center">
-        Tournament Control
-      </h1>
-      <p class="font-body-sm text-body-sm text-on-surface-variant">Elite Administrator</p>
-      <div class="w-full mt-4">
-        <app-button variant="accent" [fullWidth]="true" (click)="togglePanel()">
-          <app-icon name="add" size="sm" [fill]="true" />
-          New Tournament
-        </app-button>
-      </div>
-    </div>
+    <app-side-nav-header side-nav-header />
 
     <div side-nav-body class="flex flex-col gap-2">
+      <app-button variant="accent" [fullWidth]="true" (click)="togglePanel()">
+        <app-icon name="add" size="sm" [fill]="true" />
+        New Tournament
+      </app-button>
       <app-nav-item icon="event" label="Events" [active]="true" />
       <app-nav-item icon="database" label="Question Bank" />
     </div>

@@ -8,6 +8,7 @@ import { Icon } from '../../shared/ui/icon/icon';
 import { NavItem } from '../../shared/ui/nav-item/nav-item';
 import { SideNav } from '../../shared/ui/side-nav/side-nav';
 import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
+import { SideNavHeader } from '../../shared/ui/side-nav-header/side-nav-header';
 
 const PLAYER_AVATAR =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuBeOiAifDuYskPpc7psT9sp0STD4I8m-P_A9xh6KpyYlSIfI6SHhdnGrgM6cF2-YKcNaLvuVo6ApFJZB-i9iji224tP2pSezoKIcQFSPHXERmnIC-6z1uJE1ohpBxp315d8KPZzHG0weE731J93h_TNYkvQYfOJ3YGiWwVfUSXmW2cECnAHzipjnsr0NAtLDMXs15dRWB0gTIjrbPEWRhhIYtWuczIboeeVI1QB3fucZnaLYxIOTKiK';
@@ -18,7 +19,7 @@ let nextMessageId = 0;
 
 @Component({
   selector: 'app-dispute-chat-page',
-  imports: [Avatar, ChatPanel, Icon, NavItem, SideNav, SideNavCommon],
+  imports: [Avatar, ChatPanel, Icon, NavItem, SideNav, SideNavCommon, SideNavHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dispute-chat-page.html',
 })

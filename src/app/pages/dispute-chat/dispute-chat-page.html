@@ -1,15 +1,6 @@
 <div class="antialiased min-h-screen flex flex-col md:flex-row bg-background">
   <app-side-nav brand="Knowledge League" tone="surface">
-    <div side-nav-header class="mb-8 flex flex-col items-center px-2">
-      <app-avatar
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9GU5ZlDzW03Ituw6IWv-X-i2nX0mqdpFUhLE5QkrOdZHswQL-vmTTtf8Zk4xa2VMJcaMnScAPDhsvD0UFy-dUu2NnSiPbNG6YBo_rexEz4Lz_nKWpK5DnsRU1l9_apy3ptbpNMIjjPe1hNXU6dwKe7FcnFovowTLiULk-CkgeTi3avNFoc5DIl1ewx86XCqfz_KpCQJuXvCNpecvih8KP8BYfhcYS4PC9WkXLWAXm6pNQ2TSvdgbV"
-        size="lg"
-        ring="primary"
-        class="mb-4"
-      />
-      <h2 class="font-title-sm text-title-sm text-primary mb-1">Elite Scholar</h2>
-      <p class="font-body-sm text-body-sm text-on-surface-variant">Rank #42</p>
-    </div>
+    <app-side-nav-header side-nav-header />
 
     <div side-nav-body class="flex flex-col gap-2">
       <app-nav-item icon="dashboard" label="Home" (clicked)="goHome()" />

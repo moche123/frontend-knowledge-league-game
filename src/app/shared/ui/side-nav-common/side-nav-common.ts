@@ -25,7 +25,6 @@ export type SideNavCommonActive = 'ranking' | 'disputes' | null;
         [active]="active() === 'disputes'"
         (clicked)="goToDisputes()"
       />
-      <app-nav-item icon="help" label="Support" />
       <app-nav-item icon="logout" label="Logout" (clicked)="logout()" />
     </div>
   `,

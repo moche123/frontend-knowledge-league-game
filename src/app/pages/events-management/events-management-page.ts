@@ -7,6 +7,7 @@ import { ProgressBar } from '../../shared/ui/progress-bar/progress-bar';
 import { Select, SelectOption } from '../../shared/ui/select/select';
 import { SideNav } from '../../shared/ui/side-nav/side-nav';
 import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
+import { SideNavHeader } from '../../shared/ui/side-nav-header/side-nav-header';
 import { TextField } from '../../shared/ui/text-field/text-field';
 
 type EventStatus = 'finished' | 'live' | 'open';
@@ -55,7 +56,18 @@ const PLAYER_COUNTS = [4, 8, 16, 32] as const;
 
 @Component({
   selector: 'app-events-management-page',
-  imports: [Badge, Button, Icon, NavItem, ProgressBar, Select, SideNav, SideNavCommon, TextField],
+  imports: [
+    Badge,
+    Button,
+    Icon,
+    NavItem,
+    ProgressBar,
+    Select,
+    SideNav,
+    SideNavCommon,
+    SideNavHeader,
+    TextField,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './events-management-page.html',
 })
