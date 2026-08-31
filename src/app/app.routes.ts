@@ -49,4 +49,9 @@ export const routes: Routes = [
         (m) => m.EventsManagementPage,
       ),
   },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./pages/not-found/not-found-page').then((m) => m.NotFoundPage),
+  },
 ];

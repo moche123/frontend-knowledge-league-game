@@ -1,0 +1,62 @@
+<div class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+  <header
+    class="bg-primary-container text-primary shadow-sm border-b border-outline-variant flex items-center w-full px-margin-mobile md:px-margin-desktop h-16 shrink-0"
+  >
+    <div class="flex items-center gap-4">
+      <img [src]="logoUrl" alt="Knowledge League" class="h-8 w-auto" />
+      <h1
+        class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg tracking-tighter text-primary hidden md:block text-2xl"
+      >
+        Knowledge League
+      </h1>
+    </div>
+  </header>
+
+  <main
+    class="flex-grow flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop relative overflow-hidden"
+  >
+    <div class="absolute inset-0 z-0 opacity-10 pointer-events-none flex items-center justify-center">
+      <app-icon name="menu_book" size="watermark" class="text-tertiary" />
+    </div>
+
+    <div class="relative z-10 max-w-2xl w-full text-center flex flex-col items-center gap-stack-lg">
+      <div
+        class="w-64 h-64 md:w-80 md:h-80 relative rounded-xl overflow-hidden border border-outline-variant shadow-lg bg-surface-container flex items-center justify-center"
+      >
+        <div class="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-sm">
+          <span
+            class="font-display-lg text-[120px] md:text-[180px] font-bold text-tertiary drop-shadow-2xl opacity-90 leading-none"
+            >404</span
+          >
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-stack-sm items-center mt-stack-md">
+        <h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary tracking-tight">
+          Página No Encontrada
+        </h2>
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-lg mx-auto">
+          Parece que este fragmento de conocimiento se ha extraviado en los anales de la historia. El
+          archivo que buscas no existe en nuestra base de datos académica.
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-stack-md mt-stack-lg w-full sm:w-auto">
+        <a
+          [routerLink]="homeUrl()"
+          class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-accent text-on-primary-fixed font-title-sm text-title-sm rounded-lg hover:bg-accent/90 transition-all active:scale-95 shadow-[0_0_15px_rgba(100,255,218,0.2)] hover:shadow-[0_0_20px_rgba(100,255,218,0.4)]"
+        >
+          <app-icon name="home" size="sm" />
+          Volver al Inicio
+        </a>
+        <a
+          href="mailto:soporte@knowledgeleague.app"
+          class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-transparent border border-accent text-accent font-title-sm text-title-sm rounded-lg hover:bg-accent/10 transition-all active:scale-95"
+        >
+          <app-icon name="support_agent" size="sm" />
+          Contactar Soporte
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
