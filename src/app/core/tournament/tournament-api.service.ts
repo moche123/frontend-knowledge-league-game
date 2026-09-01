@@ -48,4 +48,10 @@ export class TournamentApi {
   drawFirstStage(eventId: string): Observable<unknown> {
     return this.http.post(`${this.baseUrl}/events/${eventId}/stages/draw`, {});
   }
+
+  // Undoes the draw on an in_progress event — wipes the bracket, resets to
+  // registration_open. Registrations are kept.
+  cancelBracket(eventId: string): Observable<EventDto> {
+    return this.http.post<EventDto>(`${this.baseUrl}/events/${eventId}/stages/cancel`, {});
+  }
 }

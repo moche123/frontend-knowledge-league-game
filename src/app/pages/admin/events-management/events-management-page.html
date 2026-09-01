@@ -55,7 +55,6 @@
                 <th class="p-4 font-semibold">Start / End</th>
                 <th class="p-4 font-semibold">Status</th>
                 <th class="p-4 font-semibold text-center">Enrolled</th>
-                <th class="p-4 font-semibold">Referee</th>
                 <th class="p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
@@ -111,11 +110,6 @@
                     </div>
                   </td>
                   <td class="p-4">
-                    <app-badge [variant]="event.refereeAssigned ? 'accent' : 'neutral'">
-                      {{ event.refereeAssigned ? 'Assigned' : 'Unassigned' }}
-                    </app-badge>
-                  </td>
-                  <td class="p-4">
                     <div class="flex items-center justify-end gap-2">
                       @if (event.status === 'registration_open') {
                         <button
@@ -140,6 +134,17 @@
                       >
                         <app-icon name="quiz" />
                       </button>
+                      @if (event.canCancel) {
+                        <button
+                          type="button"
+                          [disabled]="cancellingEventId() === event.id"
+                          title="Cancel event — undo the draw, back to open registration"
+                          class="text-on-surface-variant hover:text-error transition-colors p-1 disabled:opacity-30"
+                          (click)="cancelEvent(event)"
+                        >
+                          <app-icon name="restart_alt" />
+                        </button>
+                      }
                       <button
                         type="button"
                         [disabled]="deletingEventId() === event.id"
@@ -154,7 +159,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="7" class="p-6 text-center text-on-surface-variant">
+                  <td colspan="6" class="p-6 text-center text-on-surface-variant">
                     No events created yet.
                   </td>
                 </tr>
@@ -338,9 +343,6 @@
         </div>
       </div>
 
-      <p class="font-body-sm text-body-sm text-on-surface-variant border-t border-outline-variant/30 pt-4 mt-2">
-        The referee can be assigned later from the event's edit screen.
-      </p>
     </div>
 
     <div class="p-6 border-t border-outline-variant/30 bg-surface-container-high/50 flex gap-4">
@@ -370,5 +372,17 @@
     [loading]="deletingEventId() !== null"
     (confirmed)="confirmDeleteEvent()"
     (cancelled)="cancelDeleteEvent()"
+  />
+
+  <app-confirm-dialog
+    [open]="eventPendingCancel() !== null"
+    title="Cancel event"
+    [message]="cancelDialogMessage()"
+    confirmLabel="Cancel event"
+    loadingLabel="Cancelling…"
+    variant="danger"
+    [loading]="cancellingEventId() !== null"
+    (confirmed)="confirmCancelEvent()"
+    (cancelled)="cancelCancelEvent()"
   />
 </div>

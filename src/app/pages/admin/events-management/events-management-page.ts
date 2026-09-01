@@ -75,8 +75,8 @@ interface EventRow {
   enrolled: number;
   capacity: number;
   progress: number;
-  refereeAssigned: boolean;
   readyToDraw: boolean;
+  canCancel: boolean;
 }
 
 interface EventWithRegistrationCount {
@@ -144,8 +144,8 @@ export class EventsManagementPage {
         enrolled,
         capacity: event.maxPlayers,
         progress: Math.round((enrolled / event.maxPlayers) * 100),
-        refereeAssigned: event.refereeId !== null,
         readyToDraw: event.status === 'registration_open' && enrolled === event.maxPlayers,
+        canCancel: event.status === 'in_progress',
       }))
       .sort((a, b) => a.startLabel.localeCompare(b.startLabel)),
   );
@@ -344,6 +344,57 @@ export class EventsManagementPage {
       error: (error: { error?: { message?: string } }) => {
         this.drawingEventId.set(null);
         this.toastService.error(error.error?.message ?? 'Could not draw the bracket. Try again.');
+      },
+    });
+  }
+
+  // Undoes the draw on an in_progress event (2026-08-31, explicit user
+  // request — no way to walk back a bracket drawn too early). Wipes the
+  // bracket entirely, resets to registration_open.
+  protected cancellingEventId = signal<string | null>(null);
+  protected eventPendingCancel = signal<EventRow | null>(null);
+
+  protected readonly cancelDialogMessage = computed(() => {
+    const event = this.eventPendingCancel();
+    if (!event) {
+      return '';
+    }
+    return (
+      `Cancel "${event.name}"? This permanently erases its bracket, match history, ` +
+      'generated questions and any ranking points earned in it. Registered players stay ' +
+      'registered — the event goes back to open registration and can be re-drawn. This cannot be undone.'
+    );
+  });
+
+  protected cancelEvent(event: EventRow): void {
+    this.eventPendingCancel.set(event);
+  }
+
+  protected cancelCancelEvent(): void {
+    if (this.cancellingEventId()) {
+      return;
+    }
+    this.eventPendingCancel.set(null);
+  }
+
+  protected confirmCancelEvent(): void {
+    const event = this.eventPendingCancel();
+    if (!event || this.cancellingEventId()) {
+      return;
+    }
+
+    this.cancellingEventId.set(event.id);
+    this.tournamentApi.cancelBracket(event.id).subscribe({
+      next: () => {
+        this.cancellingEventId.set(null);
+        this.eventPendingCancel.set(null);
+        this.refresh$.next();
+        this.toastService.success(`"${event.name}" cancelled — back to open registration.`);
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.cancellingEventId.set(null);
+        this.eventPendingCancel.set(null);
+        this.toastService.error(error.error?.message ?? 'Could not cancel the event. Try again.');
       },
     });
   }

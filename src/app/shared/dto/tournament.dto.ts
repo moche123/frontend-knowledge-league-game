@@ -9,7 +9,6 @@ export interface EventDto {
   maxPlayers: number;
   questionsPerMatch: number;
   maxScorePerMatch: number;
-  refereeId: string | null;
   status: EventStatus;
   createdAt: string;
 }

@@ -83,4 +83,31 @@ export class MatchApi {
       { refereeId },
     );
   }
+
+  // Live match only — blocks that player's further answers, match keeps
+  // running for the opponent.
+  disqualifyPlayer(eventId: string, matchId: string, playerId: string): Observable<MatchDto> {
+    return this.http.post<MatchDto>(
+      `${this.baseUrl}/events/${eventId}/matches/${matchId}/disqualify`,
+      { playerId },
+    );
+  }
+
+  // Undoes a disqualification — clears the flag if still in_progress, or
+  // reopens the match from scratch if it already closed (backend-decided).
+  reinstatePlayer(eventId: string, matchId: string): Observable<MatchDto> {
+    return this.http.post<MatchDto>(
+      `${this.baseUrl}/events/${eventId}/matches/${matchId}/reinstate`,
+      {},
+    );
+  }
+
+  // Pending or expired only — it will never be played. Doesn't touch bracket
+  // advancement (backend-decided limitation, same as override/reopen).
+  cancelMatch(eventId: string, matchId: string): Observable<MatchDto> {
+    return this.http.post<MatchDto>(
+      `${this.baseUrl}/events/${eventId}/matches/${matchId}/cancel`,
+      {},
+    );
+  }
 }

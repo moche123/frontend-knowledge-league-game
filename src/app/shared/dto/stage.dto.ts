@@ -1,6 +1,7 @@
 export type StageType = 'round_of_16' | 'quarterfinal' | 'semifinal' | 'final' | 'third_place';
 
-export type MatchStatus = 'pending' | 'in_progress' | 'closed' | 'walkover' | 'expired';
+export type MatchStatus =
+  'pending' | 'in_progress' | 'closed' | 'walkover' | 'expired' | 'cancelled';
 
 export interface MatchDto {
   id: string;
@@ -10,6 +11,7 @@ export interface MatchDto {
   status: MatchStatus;
   winnerId: string | null;
   refereeId: string | null;
+  disqualifiedPlayerId: string | null;
   scoreA: number | null;
   scoreB: number | null;
   createdAt: string;

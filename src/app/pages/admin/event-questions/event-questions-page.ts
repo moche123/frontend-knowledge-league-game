@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   ChangeDetectionStrategy,
@@ -30,6 +31,7 @@ import { MatchStatus, StageType, StageWithMatchesDto } from '../../../shared/dto
 import { EventDto } from '../../../shared/dto/tournament.dto';
 import { Badge, BadgeVariant } from '../../../shared/ui/badge/badge';
 import { Button } from '../../../shared/ui/button/button';
+import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
 import { Icon } from '../../../shared/ui/icon/icon';
 import { Modal } from '../../../shared/ui/modal/modal';
 import { NavItem } from '../../../shared/ui/nav-item/nav-item';
@@ -55,16 +57,32 @@ const MATCH_STATUS_BADGE: Record<MatchStatus, BadgeVariant> = {
   closed: 'neutral',
   walkover: 'error',
   expired: 'error',
+  cancelled: 'neutral',
+};
+
+// Sort order for the Matches list — live matches first, then whatever's still
+// pending, closed/finished stuff last (2026-08-31 explicit user requirement:
+// "la parte superior debería tener los matches de instancias más actuales, o
+// las que están en vivo").
+const MATCH_GROUP_RANK: Record<MatchStatus, number> = {
+  in_progress: 0,
+  pending: 1,
+  closed: 2,
+  walkover: 2,
+  expired: 2,
+  cancelled: 3,
 };
 
 interface MatchOption {
   id: string;
   stageLabel: string;
+  stagePosition: number;
   status: MatchStatus;
   matchup: string;
   playerAId: string | null;
   playerBId: string | null;
   refereeId: string | null;
+  disqualifiedPlayerId: string | null;
   scheduledStartAt: string | null;
   scheduledEndAt: string | null;
 }
@@ -93,6 +111,8 @@ function toDateTimeLocal(iso: string): string {
   imports: [
     Badge,
     Button,
+    ConfirmDialog,
+    DatePipe,
     Icon,
     Modal,
     NavItem,
@@ -130,6 +150,7 @@ export class EventQuestionsPage {
 
   protected readonly eventName = computed(() => this.event()?.name ?? '');
   protected readonly maxScorePerMatch = computed(() => this.event()?.maxScorePerMatch ?? 0);
+  protected readonly eventEndDate = computed(() => this.event()?.endDate ?? null);
 
   private readonly stagesRefresh$ = new BehaviorSubject<void>(undefined);
 
@@ -147,21 +168,25 @@ export class EventQuestionsPage {
     const names = this.playerNames();
     const label = (id: string | null) => (id ? (names[id] ?? shortId(id)) : 'TBD');
     return this.stages()
-      .slice()
-      .sort((a, b) => a.position - b.position)
       .flatMap((stage) =>
         stage.matches.map((match) => ({
           id: match.id,
           stageLabel: STAGE_LABEL[stage.type],
+          stagePosition: stage.position,
           status: match.status,
           matchup: `${label(match.playerAId)} vs ${label(match.playerBId)}`,
           playerAId: match.playerAId,
           playerBId: match.playerBId,
           refereeId: match.refereeId,
+          disqualifiedPlayerId: match.disqualifiedPlayerId,
           scheduledStartAt: match.scheduledStartAt,
           scheduledEndAt: match.scheduledEndAt,
         })),
-      );
+      )
+      .sort((a, b) => {
+        const rank = MATCH_GROUP_RANK[a.status] - MATCH_GROUP_RANK[b.status];
+        return rank !== 0 ? rank : b.stagePosition - a.stagePosition;
+      });
   });
 
   // Draw-bracket gate: only once every seat is filled and registration is
@@ -225,6 +250,31 @@ export class EventQuestionsPage {
       ...registration,
       label: names[registration.userId] ?? shortId(registration.userId),
     }));
+  });
+
+  // Per-player "what's their current involvement" — drives the Players list
+  // row action (Remove / Disqualify / Reinstate). Only pending or in_progress
+  // matches matter here; a player only ever appears in one active match at a
+  // time (single elimination). in_progress wins over pending if somehow both.
+  protected readonly playerActiveMatch = computed(() => {
+    const map: Record<string, { matchId: string; status: MatchStatus; disqualified: boolean }> = {};
+    for (const match of this.matchOptions()) {
+      if (match.status !== 'pending' && match.status !== 'in_progress') {
+        continue;
+      }
+      for (const playerId of [match.playerAId, match.playerBId]) {
+        if (!playerId) continue;
+        const existing = map[playerId];
+        if (!existing || (match.status === 'in_progress' && existing.status !== 'in_progress')) {
+          map[playerId] = {
+            matchId: match.id,
+            status: match.status,
+            disqualified: match.disqualifiedPlayerId === playerId,
+          };
+        }
+      }
+    }
+    return map;
   });
 
   // Plain Set, NOT a signal — ids we've already requested (success or 404),
@@ -334,6 +384,17 @@ export class EventQuestionsPage {
   // would silently invalidate a quiz already in progress or scored.
   protected readonly isEditable = computed(() => this.selectedMatch()?.status === 'pending');
 
+  // Surfaces the disqualification here too, not just on the Players list row —
+  // "esto debe sincronizarse en la vista del match" (2026-08-31 explicit
+  // requirement). Same underlying field, just shown in both places.
+  protected readonly disqualifiedPlayerLabel = computed(() => {
+    const id = this.selectedMatch()?.disqualifiedPlayerId;
+    if (!id) {
+      return null;
+    }
+    return this.playerNames()[id] ?? shortId(id);
+  });
+
   // Scheduling (start time + duration) is the trigger for AI question
   // generation — one action, one button (2026-08-31, explicit user decision:
   // a same-day earlier version split these into "Schedule" + a separate
@@ -342,24 +403,59 @@ export class EventQuestionsPage {
   // once (hasSchedule) — see the template.
   protected scheduleStartAt = signal('');
   protected scheduleDurationMinutes = signal(30);
-  protected scheduling = signal(false);
+
+  // Tracks WHICH match is generating, not just whether one is (2026-08-31
+  // bug fix — a single shared boolean disabled every other match's Schedule
+  // button too while one was still generating, since the AI call can take a
+  // while). `scheduling()` below only reads true for the currently selected
+  // match, so switching to a different one shows it as free even mid-generation.
+  protected schedulingMatchId = signal<string | null>(null);
+  protected readonly scheduling = computed(
+    () => this.schedulingMatchId() !== null && this.schedulingMatchId() === this.selectedMatchId(),
+  );
 
   protected readonly hasSchedule = computed(() => !!this.selectedMatch()?.scheduledStartAt);
 
-  protected readonly canSchedule = computed(
-    () =>
+  // Computed end of the proposed schedule (start + duration) — used both to
+  // gate the button and to explain why it's disabled.
+  protected readonly scheduleEndPreview = computed(() => {
+    const start = this.scheduleStartAt();
+    const minutes = this.scheduleDurationMinutes();
+    if (!start || !minutes || minutes <= 0) {
+      return null;
+    }
+    return new Date(new Date(start).getTime() + minutes * 60_000);
+  });
+
+  protected readonly scheduleExceedsEventEnd = computed(() => {
+    const end = this.scheduleEndPreview();
+    const eventEnd = this.event()?.endDate;
+    return !!end && !!eventEnd && end > new Date(eventEnd);
+  });
+
+  // 2026-08-31, explicit user decision: can't be clicked at all unless both
+  // participants and the referee are already set, and the resulting window
+  // can't run past the event's own end date.
+  protected readonly canSchedule = computed(() => {
+    const match = this.selectedMatch();
+    return (
       this.isEditable() &&
       !this.scheduling() &&
+      !!match?.playerAId &&
+      !!match?.playerBId &&
+      !!match?.refereeId &&
       this.scheduleStartAt().length > 0 &&
-      this.scheduleDurationMinutes() > 0,
-  );
+      this.scheduleDurationMinutes() > 0 &&
+      !this.scheduleExceedsEventEnd()
+    );
+  });
 
   protected scheduleMatch(): void {
     const matchId = this.selectedMatchId();
     if (!matchId || !this.canSchedule()) {
       return;
     }
-    this.scheduling.set(true);
+    this.schedulingMatchId.set(matchId);
     this.matchApi
       .schedule(this.eventId, matchId, {
         scheduledStartAt: new Date(this.scheduleStartAt()).toISOString(),
@@ -367,18 +463,68 @@ export class EventQuestionsPage {
       })
       .subscribe({
         next: () => {
-          this.scheduling.set(false);
+          this.schedulingMatchId.set(null);
           this.stagesRefresh$.next();
           this.loadQuestions(matchId);
           this.toastService.success('Match scheduled — questions generated by AI.');
         },
         error: (error: { error?: { message?: string } }) => {
-          this.scheduling.set(false);
+          this.schedulingMatchId.set(null);
           this.toastService.error(
             error.error?.message ?? 'Could not schedule the match. Check MOONSHOT_API_KEY.',
           );
         },
       });
+  }
+
+  // Match cancellation — expired or live only; it will never be played.
+  // NOT for a pending match (2026-08-31, explicit user correction) — a
+  // pending match is meant to be *edited* (participants/referee/reschedule),
+  // not cancelled, cancel doesn't add anything there. Separate confirm-dialog
+  // from the Players list's remove/disqualify/reinstate one, since this
+  // targets the whole match, not a specific player.
+  protected readonly canCancelMatch = computed(() => {
+    const status = this.selectedMatch()?.status;
+    return status === 'expired' || status === 'in_progress';
+  });
+
+  protected cancellingMatchId = signal<string | null>(null);
+  protected matchPendingCancel = signal<MatchOption | null>(null);
+
+  protected openCancelMatch(): void {
+    const match = this.selectedMatch();
+    if (!match || !this.canCancelMatch()) {
+      return;
+    }
+    this.matchPendingCancel.set(match);
+  }
+
+  protected cancelCancelMatch(): void {
+    if (this.cancellingMatchId()) {
+      return;
+    }
+    this.matchPendingCancel.set(null);
+  }
+
+  protected confirmCancelMatch(): void {
+    const match = this.matchPendingCancel();
+    if (!match || this.cancellingMatchId()) {
+      return;
+    }
+    this.cancellingMatchId.set(match.id);
+    this.matchApi.cancelMatch(this.eventId, match.id).subscribe({
+      next: () => {
+        this.cancellingMatchId.set(null);
+        this.matchPendingCancel.set(null);
+        this.stagesRefresh$.next();
+        this.toastService.success('Match cancelled.');
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.cancellingMatchId.set(null);
+        this.matchPendingCancel.set(null);
+        this.toastService.error(error.error?.message ?? 'Could not cancel the match.');
+      },
+    });
   }
 
   // Participants / referee — same "pending only" edit window as the questions.
@@ -538,17 +684,123 @@ export class EventQuestionsPage {
     });
   }
 
-  protected removePlayer(registration: RegistrationDto & { label: string }): void {
-    if (!confirm(`Remove ${registration.label} from this event?`)) {
+  // Which action the Players list row's button performs — see
+  // playerActiveMatch(): "in a live match, not yet disqualified" is the only
+  // case that isn't a plain remove (2026-08-31, explicit user decision).
+  protected rowAction(userId: string): 'remove' | 'disqualify' {
+    const active = this.playerActiveMatch()[userId];
+    return active && active.status === 'in_progress' && !active.disqualified
+      ? 'disqualify'
+      : 'remove';
+  }
+
+  protected rowDisqualified(userId: string): boolean {
+    return !!this.playerActiveMatch()[userId]?.disqualified;
+  }
+
+  protected playerActionPending = signal<{
+    type: 'remove' | 'disqualify' | 'reinstate';
+    registration: RegistrationDto & { label: string };
+  } | null>(null);
+  protected playerActionSubmitting = signal(false);
+
+  protected readonly playerActionDialog = computed(() => {
+    const pending = this.playerActionPending();
+    if (!pending) {
+      return null;
+    }
+    const name = pending.registration.label;
+    if (pending.type === 'remove') {
+      return {
+        title: 'Remove player',
+        message: `Remove ${name} from this event? If they're in a pending match, that match's slot will be cleared and you'll need to assign a replacement.`,
+        confirmLabel: 'Remove',
+      };
+    }
+    if (pending.type === 'disqualify') {
+      return {
+        title: 'Disqualify player',
+        message: `Disqualify ${name} from their current live match? They won't be able to submit any more answers — the match keeps running for the opponent. You can reinstate them later.`,
+        confirmLabel: 'Disqualify',
+      };
+    }
+    return {
+      title: 'Reinstate player',
+      message: `Reinstate ${name}? If their match already closed, this fully reopens it — answers, questions and the ranking entry get reset, and you'll need to reschedule.`,
+      confirmLabel: 'Reinstate',
+    };
+  });
+
+  protected openPlayerAction(
+    type: 'remove' | 'disqualify' | 'reinstate',
+    registration: RegistrationDto & { label: string },
+  ): void {
+    this.playerActionPending.set({ type, registration });
+  }
+
+  protected cancelPlayerAction(): void {
+    if (this.playerActionSubmitting()) {
       return;
     }
-    this.tournamentApi.unregisterByAdmin(this.eventId, registration.userId).subscribe({
+    this.playerActionPending.set(null);
+  }
+
+  protected confirmPlayerAction(): void {
+    const pending = this.playerActionPending();
+    if (!pending || this.playerActionSubmitting()) {
+      return;
+    }
+    const { type, registration } = pending;
+    this.playerActionSubmitting.set(true);
+
+    if (type === 'remove') {
+      this.tournamentApi.unregisterByAdmin(this.eventId, registration.userId).subscribe({
+        next: () => {
+          this.playerActionSubmitting.set(false);
+          this.playerActionPending.set(null);
+          this.registrationsRefresh$.next();
+          this.stagesRefresh$.next();
+          this.toastService.success(`${registration.label} removed from this event.`);
+        },
+        error: (error: { error?: { message?: string } }) => {
+          this.playerActionSubmitting.set(false);
+          this.toastService.error(error.error?.message ?? 'Could not remove this player.');
+        },
+      });
+      return;
+    }
+
+    const matchId = this.playerActiveMatch()[registration.userId]?.matchId;
+    if (!matchId) {
+      this.playerActionSubmitting.set(false);
+      this.playerActionPending.set(null);
+      return;
+    }
+
+    const request$ =
+      type === 'disqualify'
+        ? this.matchApi.disqualifyPlayer(this.eventId, matchId, registration.userId)
+        : this.matchApi.reinstatePlayer(this.eventId, matchId);
+
+    request$.subscribe({
       next: () => {
-        this.registrationsRefresh$.next();
-        this.toastService.success(`${registration.label} removed from this event.`);
+        this.playerActionSubmitting.set(false);
+        this.playerActionPending.set(null);
+        this.stagesRefresh$.next();
+        this.toastService.success(
+          type === 'disqualify'
+            ? `${registration.label} disqualified.`
+            : `${registration.label} reinstated.`,
+        );
       },
       error: (error: { error?: { message?: string } }) => {
-        this.toastService.error(error.error?.message ?? 'Could not remove this player.');
+        this.playerActionSubmitting.set(false);
+        this.toastService.error(
+          error.error?.message ??
+            (type === 'disqualify'
+              ? 'Could not disqualify this player.'
+              : 'Could not reinstate this player.'),
+        );
       },
     });
   }
