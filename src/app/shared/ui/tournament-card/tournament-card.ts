@@ -73,7 +73,7 @@ export type TournamentCardState = 'register' | 'registered' | 'full' | 'ongoing'
             </app-button>
           }
           @case ('ongoing') {
-            <app-button variant="outline-neutral" [disabled]="true" [fullWidth]="true">
+            <app-button variant="secondary" [disabled]="false" [fullWidth]="true">
               En Curso
               <app-icon name="bolt" size="sm" />
             </app-button>
@@ -111,8 +111,9 @@ export class TournamentCard {
 
   register = output<void>();
 
-  protected readonly dimmed = computed(() => {
-    const state = this.state();
-    return state === 'full' || state === 'ongoing';
-  });
+  protected readonly dimmed = computed(() => this.state() === 'full');
+
+  ngOnInit(): void {
+    console.log('TournamentCard initialized with state:', this.state());
+  }
 }

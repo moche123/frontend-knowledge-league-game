@@ -34,7 +34,7 @@ const SIZE_CLASS: Record<ButtonSize, string> = {
       [type]="type()"
       [disabled]="disabled()"
       class="inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-150 cursor-pointer active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
-      [class]="[variantClass(), sizeClass(), fullWidth() ? 'w-full' : '']"
+      [class]="classes()"
     >
       <ng-content />
     </button>
@@ -48,6 +48,9 @@ export class Button {
   disabled = input(false);
   fullWidth = input(false);
 
-  protected variantClass = computed(() => VARIANT_CLASS[this.variant()]);
-  protected sizeClass = computed(() => SIZE_CLASS[this.size()]);
+  protected readonly classes = computed(() =>
+    [VARIANT_CLASS[this.variant()], SIZE_CLASS[this.size()], this.fullWidth() ? 'w-full' : '']
+      .filter(Boolean)
+      .join(' '),
+  );
 }

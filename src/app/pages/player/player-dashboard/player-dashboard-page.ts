@@ -74,7 +74,7 @@ export class PlayerDashboardPage {
     { id: 'open', label: 'Open Registration' },
     { id: 'ongoing', label: 'Ongoing' },
   ];
-  protected activeTab = signal('open');
+  protected activeTab = signal('registered');
 
   protected readonly registeringEventId = signal<string | null>(null);
 
