@@ -226,6 +226,18 @@
         (cancelled)="cancelCancelMatch()"
       />
 
+      <app-confirm-dialog
+        [open]="stagePendingRedraw() !== null"
+        title="Redraw stage"
+        message="Redraw this stage's matchups? A fresh random seed pairs up the same players differently. This cannot be undone."
+        confirmLabel="Redraw"
+        loadingLabel="Redrawing…"
+        variant="danger"
+        [loading]="redrawingStage()"
+        (confirmed)="confirmRedrawStage()"
+        (cancelled)="cancelRedrawStage()"
+      />
+
       <section class="flex-1 flex flex-col gap-gutter min-w-0">
         @if (!selectedMatchId()) {
           <div
@@ -250,16 +262,28 @@
                   · questions are locked once a match starts
                 }
               </p>
-              @if (canCancelMatch()) {
-                <button
-                  type="button"
-                  class="mt-2 font-label-caps text-label-caps text-on-surface-variant hover:text-error transition-colors flex items-center gap-1"
-                  (click)="openCancelMatch()"
-                >
-                  <app-icon name="event_busy" size="sm" />
-                  Cancel match
-                </button>
-              }
+              <div class="flex items-center gap-3">
+                @if (canCancelMatch()) {
+                  <button
+                    type="button"
+                    class="mt-2 font-label-caps text-label-caps text-on-surface-variant hover:text-error transition-colors flex items-center gap-1"
+                    (click)="openCancelMatch()"
+                  >
+                    <app-icon name="event_busy" size="sm" />
+                    Cancel match
+                  </button>
+                }
+                @if (canRedrawStage()) {
+                  <button
+                    type="button"
+                    class="mt-2 font-label-caps text-label-caps text-on-surface-variant hover:text-accent transition-colors flex items-center gap-1"
+                    (click)="openRedrawStage()"
+                  >
+                    <app-icon name="shuffle" size="sm" />
+                    Redraw stage
+                  </button>
+                }
+              </div>
             </div>
             <div class="text-right">
               <p

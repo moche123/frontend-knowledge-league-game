@@ -15,7 +15,9 @@ import {
   catchError,
   debounceTime,
   forkJoin,
+  interval,
   map,
+  merge,
   of,
   switchMap,
   tap,
@@ -75,6 +77,7 @@ const MATCH_GROUP_RANK: Record<MatchStatus, number> = {
 
 interface MatchOption {
   id: string;
+  stageId: string;
   stageLabel: string;
   stagePosition: number;
   status: MatchStatus;
@@ -154,8 +157,15 @@ export class EventQuestionsPage {
 
   private readonly stagesRefresh$ = new BehaviorSubject<void>(undefined);
 
+  // Later stages (semis, final, third place) draw themselves server-side as
+  // prior matches close — via a cron, not a user click. Without a WS/push
+  // mechanism yet (2026-09-01, explicit decision — no WS infra in the
+  // monolith MVP), a short poll is the cheap stand-in so the admin sees new
+  // matchups appear without having to manually refresh.
+  private readonly stagesPoll$ = merge(this.stagesRefresh$, interval(15_000));
+
   private readonly stages = toSignal(
-    this.stagesRefresh$.pipe(switchMap(() => this.matchApi.listStages(this.eventId))),
+    this.stagesPoll$.pipe(switchMap(() => this.matchApi.listStages(this.eventId))),
     { initialValue: [] as StageWithMatchesDto[] },
   );
 
@@ -171,6 +181,7 @@ export class EventQuestionsPage {
       .flatMap((stage) =>
         stage.matches.map((match) => ({
           id: match.id,
+          stageId: stage.id,
           stageLabel: STAGE_LABEL[stage.type],
           stagePosition: stage.position,
           status: match.status,
@@ -523,6 +534,59 @@ export class EventQuestionsPage {
         this.cancellingMatchId.set(null);
         this.matchPendingCancel.set(null);
         this.toastService.error(error.error?.message ?? 'Could not cancel the match.');
+      },
+    });
+  }
+
+  // Redraw a whole stage's matchups (new seed, same participant pool) —
+  // 2026-09-01, explicit user request. Only while EVERY match in the
+  // selected match's stage is still pending — mirrors the backend guard in
+  // StageService.redrawStage.
+  protected readonly canRedrawStage = computed(() => {
+    const stageId = this.selectedMatch()?.stageId;
+    if (!stageId) {
+      return false;
+    }
+    const stageMatches = this.matchOptions().filter((match) => match.stageId === stageId);
+    return stageMatches.length > 0 && stageMatches.every((match) => match.status === 'pending');
+  });
+
+  protected redrawingStage = signal(false);
+  protected stagePendingRedraw = signal<string | null>(null);
+
+  protected openRedrawStage(): void {
+    const stageId = this.selectedMatch()?.stageId;
+    if (!stageId || !this.canRedrawStage()) {
+      return;
+    }
+    this.stagePendingRedraw.set(stageId);
+  }
+
+  protected cancelRedrawStage(): void {
+    if (this.redrawingStage()) {
+      return;
+    }
+    this.stagePendingRedraw.set(null);
+  }
+
+  protected confirmRedrawStage(): void {
+    const stageId = this.stagePendingRedraw();
+    if (!stageId || this.redrawingStage()) {
+      return;
+    }
+    this.redrawingStage.set(true);
+    this.tournamentApi.redrawStage(this.eventId, stageId).subscribe({
+      next: () => {
+        this.redrawingStage.set(false);
+        this.stagePendingRedraw.set(null);
+        this.selectedMatchId.set(null);
+        this.stagesRefresh$.next();
+        this.toastService.success('Stage redrawn — new matchups.');
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.redrawingStage.set(false);
+        this.stagePendingRedraw.set(null);
+        this.toastService.error(error.error?.message ?? 'Could not redraw this stage.');
       },
     });
   }

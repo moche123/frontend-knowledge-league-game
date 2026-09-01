@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CreateEventDto, EventDto } from '../../shared/dto/tournament.dto';
 import { RegistrationDto } from '../../shared/dto/registration.dto';
+import { StageWithMatchesDto } from '../../shared/dto/stage.dto';
 
 @Injectable({ providedIn: 'root' })
 export class TournamentApi {
@@ -53,5 +54,14 @@ export class TournamentApi {
   // registration_open. Registrations are kept.
   cancelBracket(eventId: string): Observable<EventDto> {
     return this.http.post<EventDto>(`${this.baseUrl}/events/${eventId}/stages/cancel`, {});
+  }
+
+  // Re-shuffles one already-drawn stage's matchups (new seed, same
+  // participant pool) — only while every match in it is still pending.
+  redrawStage(eventId: string, stageId: string): Observable<StageWithMatchesDto> {
+    return this.http.post<StageWithMatchesDto>(
+      `${this.baseUrl}/events/${eventId}/stages/${stageId}/redraw`,
+      {},
+    );
   }
 }
