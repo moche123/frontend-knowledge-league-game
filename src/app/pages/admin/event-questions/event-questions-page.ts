@@ -720,13 +720,13 @@ export class EventQuestionsPage {
     if (pending.type === 'disqualify') {
       return {
         title: 'Disqualify player',
-        message: `Disqualify ${name} from their current live match? They won't be able to submit any more answers — the match keeps running for the opponent. You can reinstate them later.`,
+        message: `Disqualify ${name} from their current live match? They won't be able to submit any more answers — the match keeps running for the opponent. You can reinstate them only while the match is still live; once it closes, the disqualification is final for this event.`,
         confirmLabel: 'Disqualify',
       };
     }
     return {
       title: 'Reinstate player',
-      message: `Reinstate ${name}? If their match already closed, this fully reopens it — answers, questions and the ranking entry get reset, and you'll need to reschedule.`,
+      message: `Reinstate ${name}? This reverses the disqualification and lets them keep playing their current live match.`,
       confirmLabel: 'Reinstate',
     };
   });
