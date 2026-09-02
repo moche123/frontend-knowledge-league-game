@@ -54,6 +54,12 @@ function formatRemaining(ms: number): string {
         <app-icon name="flag" size="sm" />
         {{ endLabel() }}
       </span>
+      @if (showNow()) {
+        <span class="flex items-center gap-1 text-on-surface">
+          <app-icon name="schedule" size="sm" />
+          Now: {{ nowLabel() }}
+        </span>
+      }
       @switch (phase()) {
         @case ('upcoming') {
           <span class="flex items-center gap-1 font-medium text-primary">
@@ -81,14 +87,25 @@ function formatRemaining(ms: number): string {
 export class EventTiming {
   startAt = input<string | null>(null);
   endAt = input<string | null>(null);
+  // Off by default (most callers just want start/end/remaining) — set to
+  // show a live "Now: ..." reading next to start/end, so the viewer can
+  // compare their own clock straight against the two dates and rule out a
+  // timezone mismatch themselves instead of just trusting the math
+  // (2026-09-02, explicit user request — "quiero descartar" a mismatch).
+  showNow = input(false);
 
-  // Ticks once a second purely to force remainingMs()/remainingLabel() to
-  // recompute — same pattern as answer-question-page's countdown, the value
-  // itself is always derived fresh from wall-clock time, never accumulated.
+  // Ticks once a second purely to force remainingMs()/remainingLabel()/
+  // nowLabel() to recompute — same pattern as answer-question-page's
+  // countdown, the value itself is always derived fresh from wall-clock
+  // time, never accumulated.
   private readonly tick = toSignal(interval(1000), { initialValue: 0 });
 
   protected readonly startLabel = computed(() => formatDateTime(this.startAt()));
   protected readonly endLabel = computed(() => formatDateTime(this.endAt()));
+  protected readonly nowLabel = computed(() => {
+    this.tick();
+    return DATE_TIME_FORMAT.format(new Date());
+  });
 
   // 'upcoming' (before startAt — counts down to the start, not the end,
   // 2026-09-02 fix: was always counting down to endAt regardless of

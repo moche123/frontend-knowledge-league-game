@@ -39,9 +39,16 @@
               <p class="font-label-caps text-label-caps text-on-surface-variant mb-1">
                 {{ row.stageLabel }}
               </p>
-              <p class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+              <p class="font-title-sm text-title-sm text-on-surface flex items-center gap-2 flex-wrap">
                 vs {{ row.opponentName }}
                 <app-badge [variant]="statusBadge[row.status]">{{ statusLabel[row.status] }}</app-badge>
+                @if (row.outcome === 'won') {
+                  <span class="font-label-caps text-label-caps text-green-400">Won</span>
+                } @else if (row.outcome === 'lost') {
+                  <span class="font-label-caps text-label-caps text-error">Lost</span>
+                } @else if (row.outcome === 'tie') {
+                  <span class="font-label-caps text-label-caps text-on-surface-variant">Tie</span>
+                }
               </p>
               <div class="mt-1">
                 <app-event-timing [startAt]="row.scheduledStartAt" [endAt]="row.scheduledEndAt" />

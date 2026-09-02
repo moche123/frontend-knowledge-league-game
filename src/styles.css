@@ -140,6 +140,17 @@ body {
   font-family: var(--font-body);
 }
 
+/* Tailwind v4's preflight resets <button> to cursor: default (no longer
+   "pointer" like older Tailwind/browser defaults) — most buttons across the
+   app rely on the browser/Tailwind default instead of an explicit
+   `cursor-pointer` utility, so this restores it globally for every enabled
+   button. Disabled ones are excluded automatically (:not(:disabled)) and
+   keep whatever cursor their own disabled: variant sets (usually
+   not-allowed, e.g. the shared Button component). */
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 .material-symbols-outlined {
   font-variation-settings:
     'FILL' 0,

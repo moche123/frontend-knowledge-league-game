@@ -536,6 +536,19 @@
                   Start time + duration. Generates this match's questions via AI once set.
                 }
               </p>
+              <div class="mt-2 flex items-center gap-1.5">
+                <span class="font-label-caps text-label-caps text-on-surface-variant shrink-0"
+                  >Event window:</span
+                >
+                <app-event-timing
+                  [startAt]="eventStartDate()"
+                  [endAt]="eventEndDate()"
+                  [showNow]="true"
+                />
+              </div>
+              <p class="font-label-caps text-label-caps text-on-surface-variant/70 mt-1">
+                Match Start + Duration must fit inside this window. Shown in your own local time.
+              </p>
             </div>
             @if (!isEditable()) {
               <p class="font-body-sm text-body-sm text-on-surface-variant">
@@ -578,7 +591,7 @@
                 </p>
               } @else if (scheduleExceedsEventEnd()) {
                 <p class="font-label-caps text-label-caps text-error">
-                  This would end after the event's end date ({{ eventEndDate() | date: 'short' }}).
+                  This would end after the event's own end date (see "Event window" above).
                 </p>
               }
               <app-button variant="accent" [disabled]="!canSchedule()" (click)="scheduleMatch()">

@@ -37,12 +37,19 @@ const STATUS_LABEL: Record<MatchStatus, string> = {
   cancelled: 'Cancelled',
 };
 
+// The player's own outcome for a closed/walkover match — 'won'/'lost' when
+// there's a real winnerId, 'tie' for the rare exact-tie edge case
+// (winnerId left null, see match-scoring.service.ts), null while the match
+// hasn't reached a terminal result yet.
+type MatchOutcome = 'won' | 'lost' | 'tie' | null;
+
 interface MyMatchRow {
   matchId: string;
   stageLabel: string;
   stagePosition: number;
   status: MatchStatus;
   opponentName: string;
+  outcome: MatchOutcome;
   scheduledStartAt: string | null;
   scheduledEndAt: string | null;
 }
@@ -79,6 +86,7 @@ export class MyMatchesPage {
               stageLabel: STAGE_LABEL[stage.type],
               stagePosition: stage.position,
               status: match.status,
+              outcome: this.deriveOutcome(match.status, match.winnerId),
               opponentId: match.playerAId === this.userId ? match.playerBId : match.playerAId,
               scheduledStartAt: match.scheduledStartAt,
               scheduledEndAt: match.scheduledEndAt,
@@ -105,6 +113,12 @@ export class MyMatchesPage {
     ),
     { initialValue: null },
   );
+
+  private deriveOutcome(status: MatchStatus, winnerId: string | null): MatchOutcome {
+    if (status !== 'closed' && status !== 'walkover') return null;
+    if (winnerId === null) return 'tie';
+    return winnerId === this.userId ? 'won' : 'lost';
+  }
 
   protected enterMatch(matchId: string): void {
     this.router.navigateByUrl(`/answer-question/${this.eventId}/${matchId}`);

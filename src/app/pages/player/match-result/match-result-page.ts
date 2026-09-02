@@ -19,12 +19,20 @@ interface QuestionRow {
   b: AnswerWithQuestionDto | null;
 }
 
+// The VIEWER's own outcome, distinct from the generic "Ganador: X" line —
+// 2026-09-02, explicit user request: the page listed both players' names/
+// scores but never called out "you won"/"you lost" for the person actually
+// looking at it. null when the viewer isn't one of the two players (e.g.
+// admin/referee viewing it) — nothing self-relative to show them.
+type SelfOutcome = 'won' | 'lost' | 'tie' | null;
+
 interface MatchResultView {
   match: MatchDto;
   theme: string;
   playerAName: string;
   playerBName: string;
   questions: QuestionRow[];
+  selfOutcome: SelfOutcome;
 }
 
 @Component({
@@ -42,6 +50,7 @@ export class MatchResultPage {
 
   private readonly eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
   private readonly matchId = this.route.snapshot.paramMap.get('matchId') ?? '';
+  protected readonly currentUserId = this.authService.currentUser()?.id ?? null;
 
   // Set on any load failure (e.g. the match hasn't actually closed yet —
   // getMatchAnswers 409s for a participant until status is closed/walkover)
@@ -99,7 +108,18 @@ export class MatchResultPage {
                     answer.playerId === match.playerBId,
                 ) ?? null,
             }));
-          return { match, theme, playerAName, playerBName, questions };
+          const isParticipant =
+            this.currentUserId !== null &&
+            (this.currentUserId === match.playerAId || this.currentUserId === match.playerBId);
+          const selfOutcome: SelfOutcome = !isParticipant
+            ? null
+            : match.winnerId === null
+              ? 'tie'
+              : match.winnerId === this.currentUserId
+                ? 'won'
+                : 'lost';
+
+          return { match, theme, playerAName, playerBName, questions, selfOutcome };
         },
       ),
       catchError((error: { error?: { message?: string } }) => {

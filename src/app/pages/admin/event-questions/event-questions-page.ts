@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   ChangeDetectionStrategy,
@@ -116,7 +115,6 @@ function toDateTimeLocal(iso: string): string {
     Badge,
     Button,
     ConfirmDialog,
-    DatePipe,
     EventTiming,
     Icon,
     Modal,
@@ -155,6 +153,7 @@ export class EventQuestionsPage {
 
   protected readonly eventName = computed(() => this.event()?.name ?? '');
   protected readonly maxScorePerMatch = computed(() => this.event()?.maxScorePerMatch ?? 0);
+  protected readonly eventStartDate = computed(() => this.event()?.startDate ?? null);
   protected readonly eventEndDate = computed(() => this.event()?.endDate ?? null);
 
   private readonly stagesRefresh$ = new BehaviorSubject<void>(undefined);

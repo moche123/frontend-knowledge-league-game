@@ -26,6 +26,32 @@
           class="bg-surface-container rounded-xl p-stack-lg border border-outline-variant text-center flex flex-col items-center"
         >
           <h1 class="font-headline-md text-headline-md text-primary mb-2">Resultado del Match</h1>
+
+          @switch (result()!.selfOutcome) {
+            @case ('won') {
+              <p
+                class="font-display-lg-mobile text-display-lg-mobile text-green-400 mb-stack-sm flex items-center gap-2 justify-center"
+              >
+                <app-icon name="emoji_events" size="lg" [fill]="true" />
+                ¡Ganaste!
+              </p>
+            }
+            @case ('lost') {
+              <p
+                class="font-display-lg-mobile text-display-lg-mobile text-error mb-stack-sm flex items-center gap-2 justify-center"
+              >
+                Perdiste
+              </p>
+            }
+            @case ('tie') {
+              <p
+                class="font-display-lg-mobile text-display-lg-mobile text-on-surface-variant mb-stack-sm flex items-center gap-2 justify-center"
+              >
+                Empate
+              </p>
+            }
+          }
+
           @if (result()!.match.winnerId; as winnerId) {
             <p
               class="font-title-sm text-title-sm text-gold mb-stack-md flex items-center gap-2 justify-center"
@@ -47,9 +73,12 @@
                 size="xl"
                 [ring]="result()!.match.winnerId === result()!.match.playerAId ? 'gold' : 'outline'"
               />
-              <span class="font-title-sm text-title-sm text-on-surface mt-2">{{
-                result()!.playerAName
-              }}</span>
+              <span class="font-title-sm text-title-sm text-on-surface mt-2">
+                {{ result()!.playerAName }}
+                @if (currentUserId === result()!.match.playerAId) {
+                  <span class="text-on-surface-variant font-body-sm text-body-sm">(You)</span>
+                }
+              </span>
               <span class="font-display-lg text-display-lg text-primary mt-2">{{
                 result()!.match.scoreA ?? '—'
               }}</span>
@@ -61,9 +90,12 @@
                 size="xl"
                 [ring]="result()!.match.winnerId === result()!.match.playerBId ? 'gold' : 'outline'"
               />
-              <span class="font-title-sm text-title-sm text-on-surface mt-2">{{
-                result()!.playerBName
-              }}</span>
+              <span class="font-title-sm text-title-sm text-on-surface mt-2">
+                {{ result()!.playerBName }}
+                @if (currentUserId === result()!.match.playerBId) {
+                  <span class="text-on-surface-variant font-body-sm text-body-sm">(You)</span>
+                }
+              </span>
               <span class="font-display-lg text-display-lg text-on-surface-variant mt-2">{{
                 result()!.match.scoreB ?? '—'
               }}</span>
