@@ -3,10 +3,10 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Router } from '@angular/router';
 import { BehaviorSubject, forkJoin, map, of, switchMap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
+import { ToastService } from '../../../core/toast/toast.service';
 import { TournamentApi } from '../../../core/tournament/tournament-api.service';
 import { RegistrationDto } from '../../../shared/dto/registration.dto';
 import { EventDto } from '../../../shared/dto/tournament.dto';
-import { Button } from '../../../shared/ui/button/button';
 import { Icon } from '../../../shared/ui/icon/icon';
 import { NavItem } from '../../../shared/ui/nav-item/nav-item';
 import { SideNav } from '../../../shared/ui/side-nav/side-nav';
@@ -47,23 +47,14 @@ interface TournamentCardModel {
 
 @Component({
   selector: 'app-player-dashboard-page',
-  imports: [
-    Button,
-    Icon,
-    NavItem,
-    SideNav,
-    SideNavCommon,
-    SideNavHeader,
-    Tabs,
-    TopBar,
-    TournamentCard,
-  ],
+  imports: [Icon, NavItem, SideNav, SideNavCommon, SideNavHeader, Tabs, TopBar, TournamentCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './player-dashboard-page.html',
 })
 export class PlayerDashboardPage {
   public authService = inject(AuthService);
   private readonly tournamentApi = inject(TournamentApi);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   protected readonly tabs: TabItem[] = [
@@ -144,8 +135,12 @@ export class PlayerDashboardPage {
       next: () => {
         this.registeringEventId.set(null);
         this.refresh$.next();
+        this.toastService.success('Inscrito.');
       },
-      error: () => this.registeringEventId.set(null),
+      error: (error: { error?: { message?: string } }) => {
+        this.registeringEventId.set(null);
+        this.toastService.error(error.error?.message ?? 'Could not register for this event.');
+      },
     });
   }
 

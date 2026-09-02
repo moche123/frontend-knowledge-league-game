@@ -54,14 +54,25 @@ function formatRemaining(ms: number): string {
         <app-icon name="flag" size="sm" />
         {{ endLabel() }}
       </span>
-      @if (endAt()) {
-        <span
-          class="flex items-center gap-1 font-medium"
-          [class]="remainingMs() === 0 ? 'text-error' : 'text-accent'"
-        >
-          <app-icon name="hourglass_top" size="sm" />
-          {{ remainingLabel() }}
-        </span>
+      @switch (phase()) {
+        @case ('upcoming') {
+          <span class="flex items-center gap-1 font-medium text-primary">
+            <app-icon name="hourglass_top" size="sm" />
+            Starts in {{ remainingLabel() }}
+          </span>
+        }
+        @case ('ongoing') {
+          <span class="flex items-center gap-1 font-medium text-accent">
+            <app-icon name="hourglass_top" size="sm" />
+            {{ remainingLabel() }}
+          </span>
+        }
+        @case ('ended') {
+          <span class="flex items-center gap-1 font-medium text-error">
+            <app-icon name="hourglass_top" size="sm" />
+            0
+          </span>
+        }
       }
     </div>
   `,
@@ -79,11 +90,27 @@ export class EventTiming {
   protected readonly startLabel = computed(() => formatDateTime(this.startAt()));
   protected readonly endLabel = computed(() => formatDateTime(this.endAt()));
 
-  protected readonly remainingMs = computed(() => {
+  // 'upcoming' (before startAt — counts down to the start, not the end,
+  // 2026-09-02 fix: was always counting down to endAt regardless of
+  // whether the event/match had even started, showing a live-looking green
+  // countdown for something that hadn't started yet), 'ongoing' (between
+  // start and end — counts down to end, as before), 'ended' (past endAt).
+  protected readonly phase = computed<'upcoming' | 'ongoing' | 'ended' | null>(() => {
     this.tick();
     const end = this.endAt();
-    if (!end) return 0;
-    return Math.max(0, new Date(end).getTime() - Date.now());
+    if (!end) return null;
+    const now = Date.now();
+    const start = this.startAt();
+    if (start && now < new Date(start).getTime()) return 'upcoming';
+    if (now < new Date(end).getTime()) return 'ongoing';
+    return 'ended';
+  });
+
+  private readonly remainingMs = computed(() => {
+    this.tick();
+    const target = this.phase() === 'upcoming' ? this.startAt() : this.endAt();
+    if (!target) return 0;
+    return Math.max(0, new Date(target).getTime() - Date.now());
   });
 
   protected readonly remainingLabel = computed(() => formatRemaining(this.remainingMs()));

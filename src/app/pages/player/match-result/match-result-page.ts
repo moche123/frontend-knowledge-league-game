@@ -117,6 +117,6 @@ export class MatchResultPage {
   }
 
   protected goToDisputes(): void {
-    this.router.navigateByUrl('/disputes');
+    this.router.navigateByUrl(`/disputes/${this.eventId}/${this.matchId}`);
   }
 }

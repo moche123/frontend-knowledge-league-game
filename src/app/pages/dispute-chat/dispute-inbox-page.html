@@ -1,0 +1,52 @@
+<div class="antialiased min-h-screen flex flex-col md:flex-row bg-background">
+  <app-side-nav brand="Knowledge League" tone="surface">
+    <app-side-nav-header side-nav-header />
+
+    <div side-nav-body class="flex flex-col gap-2">
+      <app-nav-item icon="dashboard" label="Home" (clicked)="goHome()" />
+    </div>
+
+    <div side-nav-footer class="flex flex-col gap-2 px-2">
+      <app-side-nav-common active="disputes" />
+    </div>
+  </app-side-nav>
+
+  <main
+    class="flex-1 md:ml-64 pt-20 md:pt-12 px-margin-mobile md:px-margin-desktop pb-24 mx-auto w-full max-w-3xl flex flex-col gap-stack-lg min-h-screen"
+  >
+    <header class="mb-2 shrink-0">
+      <h1
+        class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-2 tracking-tight"
+      >
+        Dispute Chats
+      </h1>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+        Pick a match to view or continue its dispute chat.
+      </p>
+    </header>
+
+    @if (rows().length === 0) {
+      <p class="text-on-surface-variant font-body-md text-body-md text-center mt-16">
+        No matches with an available dispute chat yet.
+      </p>
+    } @else {
+      <div class="flex flex-col gap-3">
+        @for (row of rows(); track row.matchId) {
+          <button
+            type="button"
+            (click)="openChat(row)"
+            class="text-left bg-surface-container-high/40 border border-outline/20 rounded-xl p-5 flex items-center justify-between gap-4 hover:bg-surface-container-highest/50 transition-colors"
+          >
+            <div>
+              <p class="font-label-caps text-label-caps text-on-surface-variant mb-1">
+                {{ row.eventName }} · {{ row.stageLabel }}
+              </p>
+              <p class="font-title-sm text-title-sm text-on-surface">{{ row.matchup }}</p>
+            </div>
+            <app-badge [variant]="statusBadge[row.status]">{{ statusLabel[row.status] }}</app-badge>
+          </button>
+        }
+      </div>
+    }
+  </main>
+</div>

@@ -47,6 +47,12 @@ export const routes: Routes = [
     path: 'disputes',
     canActivate: [authGuard],
     loadComponent: () =>
+      import('./pages/dispute-chat/dispute-inbox-page').then((m) => m.DisputeInboxPage),
+  },
+  {
+    path: 'disputes/:eventId/:matchId',
+    canActivate: [authGuard],
+    loadComponent: () =>
       import('./pages/dispute-chat/dispute-chat-page').then((m) => m.DisputeChatPage),
   },
   {

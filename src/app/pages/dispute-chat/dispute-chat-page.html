@@ -7,13 +7,6 @@
     </div>
 
     <div side-nav-footer class="flex flex-col gap-2 px-2">
-      <!-- <button
-        type="button"
-        class="w-full flex items-center justify-center gap-2 bg-accent text-on-primary-fixed font-title-sm text-title-sm font-bold py-3 rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-[0_0_10px_rgba(100,255,218,0.3)] mb-4"
-      >
-        <app-icon name="add" size="sm" />
-        New Tournament
-      </button> -->
       <app-side-nav-common active="disputes" />
     </div>
   </app-side-nav>
@@ -21,79 +14,111 @@
   <main
     class="flex-1 md:ml-64 pt-20 md:pt-12 px-margin-mobile md:px-margin-desktop pb-24 mx-auto w-full flex flex-col gap-stack-lg min-h-screen"
   >
-    <header class="mb-4 shrink-0">
-      <h1
-        class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-2 tracking-tight"
-      >
-        Dispute Form
-      </h1>
-      <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-        Submit your technical or academic arguments if you believe the AI evaluation needs review.
-      </p>
-    </header>
-
-    <section
-      class="bg-surface-container-low border border-secondary-container rounded-xl p-6 relative overflow-hidden shrink-0"
-    >
-      <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-        <app-icon name="sports_esports" size="decorative" />
+    @if (summaryError()) {
+      <div class="flex flex-col items-center gap-4 mt-24 text-center px-4">
+        <app-icon name="error" size="xl" class="text-error" />
+        <p class="font-body-md text-body-md text-on-surface-variant">{{ summaryError() }}</p>
       </div>
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-title-sm text-title-sm text-primary flex items-center gap-2">
-          <app-icon name="info" size="lg" /> Match Summary
-        </h3>
-        <span
-          class="font-label-caps text-label-caps bg-surface-variant text-on-surface-variant px-2 py-1 rounded-sm"
-          >ID: MTCH-8492</span
+    } @else if (!summary()) {
+      <div class="flex flex-col items-center gap-4 mt-24">
+        <app-icon name="hourglass_top" size="xl" class="text-on-surface-variant animate-pulse" />
+        <p class="font-body-md text-body-md text-on-surface-variant">Loading match…</p>
+      </div>
+    } @else {
+      <header class="mb-4 shrink-0">
+        <h1
+          class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-2 tracking-tight"
         >
-      </div>
-      <div
-        class="flex flex-col md:flex-row items-center justify-between gap-6 bg-background rounded-lg p-4 border border-surface-variant"
+          Dispute Chat
+        </h1>
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+          Discuss the AI evaluation with your opponent and the referee. Admin can see this thread
+          and correct a score based on what's discussed here.
+        </p>
+      </header>
+
+      <section
+        class="bg-surface-container-low border border-secondary-container rounded-xl p-6 relative overflow-hidden shrink-0"
       >
-        <div class="flex items-center gap-4 w-full md:w-auto justify-center md:justify-start">
-          <div class="text-center">
-            <div class="mx-auto mb-2 w-fit">
-              <app-avatar [src]="playerAvatar" size="md" ring="primary" />
-            </div>
-            <span class="font-body-sm text-body-sm text-on-surface block truncate w-24"
-              >You (Elite)</span
-            >
-          </div>
-          <div class="flex flex-col items-center px-4">
-            <span class="font-display-lg-mobile text-display-lg-mobile text-on-surface font-bold"
-              >85</span
-            >
-            <span class="font-label-caps text-label-caps text-on-surface-variant">Points</span>
+        <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+          <app-icon name="sports_esports" size="decorative" />
+        </div>
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <h3 class="font-title-sm text-title-sm text-primary flex items-center gap-2">
+            <app-icon name="info" size="lg" /> {{ summary()!.eventName }}
+          </h3>
+          <div class="flex items-center gap-2">
+            @if (summary()!.refereeName) {
+              <span
+                class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1"
+              >
+                <app-icon name="gavel" size="sm" />
+                {{ summary()!.refereeName }}
+              </span>
+            }
+            <app-badge [variant]="statusBadge[summary()!.match.status]">
+              {{ statusLabel[summary()!.match.status] }}
+            </app-badge>
           </div>
         </div>
-        <div class="text-on-surface-variant font-title-sm text-title-sm px-4">VS</div>
         <div
-          class="flex items-center gap-4 w-full md:w-auto justify-center md:justify-end flex-row-reverse"
+          class="flex flex-col md:flex-row items-center justify-between gap-6 bg-background rounded-lg p-4 border border-surface-variant"
         >
-          <div class="text-center">
-            <div class="mx-auto mb-2 w-fit opacity-80 grayscale">
-              <app-avatar [src]="opponentAvatar" size="md" ring="outline" />
+          <div class="flex items-center gap-4 w-full md:w-auto justify-center md:justify-start">
+            <div class="text-center">
+              <div class="mx-auto mb-2 w-fit">
+                <app-avatar
+                  [initials]="summary()!.playerAName.slice(0, 2).toUpperCase()"
+                  size="md"
+                  ring="primary"
+                />
+              </div>
+              <span class="font-body-sm text-body-sm text-on-surface block truncate w-24">{{
+                summary()!.playerAName
+              }}</span>
             </div>
-            <span class="font-body-sm text-body-sm text-on-surface-variant block truncate w-24"
-              >Opponent</span
-            >
+            <div class="flex flex-col items-center px-4">
+              <span class="font-display-lg-mobile text-display-lg-mobile text-on-surface font-bold">
+                {{ summary()!.match.scoreA ?? '—' }}
+              </span>
+              <span class="font-label-caps text-label-caps text-on-surface-variant">Points</span>
+            </div>
           </div>
-          <div class="flex flex-col items-center px-4">
-            <span
-              class="font-display-lg-mobile text-display-lg-mobile text-on-surface-variant font-bold"
-              >92</span
-            >
-            <span class="font-label-caps text-label-caps text-on-surface-variant">Points</span>
+          <div class="text-on-surface-variant font-title-sm text-title-sm px-4">VS</div>
+          <div
+            class="flex items-center gap-4 w-full md:w-auto justify-center md:justify-end flex-row-reverse"
+          >
+            <div class="text-center">
+              <div class="mx-auto mb-2 w-fit">
+                <app-avatar
+                  [initials]="summary()!.playerBName.slice(0, 2).toUpperCase()"
+                  size="md"
+                  ring="outline"
+                />
+              </div>
+              <span class="font-body-sm text-body-sm text-on-surface-variant block truncate w-24">{{
+                summary()!.playerBName
+              }}</span>
+            </div>
+            <div class="flex flex-col items-center px-4">
+              <span
+                class="font-display-lg-mobile text-display-lg-mobile text-on-surface-variant font-bold"
+              >
+                {{ summary()!.match.scoreB ?? '—' }}
+              </span>
+              <span class="font-label-caps text-label-caps text-on-surface-variant">Points</span>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <app-chat-panel
-      matchLabel="Match #MTCH-8492"
-      sendTone="primary"
-      [messages]="messages()"
-      (send)="onSend($event)"
-    />
+      <app-chat-panel
+        matchLabel="Match"
+        sendTone="primary"
+        [messages]="messages()"
+        [sending]="sending()"
+        (send)="onSend($event)"
+      />
+    }
   </main>
 </div>

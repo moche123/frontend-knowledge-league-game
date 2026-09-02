@@ -7,6 +7,7 @@ import {
   MatchQuestionDto,
   UpdateMatchQuestionDto,
 } from '../../shared/dto/match-question.dto';
+import { DisputeChatMessageDto, SendChatMessageDto } from '../../shared/dto/dispute-chat.dto';
 import {
   AnswerDto,
   AnswerWithQuestionDto,
@@ -186,5 +187,25 @@ export class MatchApi {
     return this.http.post<MatchDto>(`${this.baseUrl}/events/${eventId}/matches/${matchId}/reopen`, {
       reason,
     });
+  }
+
+  // Participants: the match's two players, its assigned referee, or admin —
+  // no static role restriction, the backend validates per-match/event.
+  // Stays open after the match closes.
+  getChatMessages(eventId: string, matchId: string): Observable<DisputeChatMessageDto[]> {
+    return this.http.get<DisputeChatMessageDto[]>(
+      `${this.baseUrl}/events/${eventId}/matches/${matchId}/chat`,
+    );
+  }
+
+  sendChatMessage(
+    eventId: string,
+    matchId: string,
+    dto: SendChatMessageDto,
+  ): Observable<DisputeChatMessageDto> {
+    return this.http.post<DisputeChatMessageDto>(
+      `${this.baseUrl}/events/${eventId}/matches/${matchId}/chat`,
+      dto,
+    );
   }
 }

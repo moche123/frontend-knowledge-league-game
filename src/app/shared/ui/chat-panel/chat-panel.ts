@@ -33,6 +33,9 @@ export class ChatPanel {
   composerPlaceholder = input('Write a message...');
   sendTone = input<ChatSendTone>('primary');
   showAiHint = input(false);
+  // Disables the composer while a send is in flight — guards against
+  // double-submitting the same message on a slow connection.
+  sending = input(false);
 
   send = output<string>();
 
@@ -45,6 +48,7 @@ export class ChatPanel {
   );
 
   protected submit(): void {
+    if (this.sending()) return;
     const text = this.draft().trim();
     if (!text) return;
     this.send.emit(text);
