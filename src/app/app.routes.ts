@@ -16,12 +16,24 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/register/register-page').then((m) => m.RegisterPage),
   },
   {
-    path: 'answer-question',
+    path: 'answer-question/:eventId/:matchId',
     canActivate: [authGuard, roleGuard('player')],
     loadComponent: () =>
       import('./pages/player/answer-question/answer-question-page').then(
         (m) => m.AnswerQuestionPage,
       ),
+  },
+  {
+    path: 'match-result/:eventId/:matchId',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/player/match-result/match-result-page').then((m) => m.MatchResultPage),
+  },
+  {
+    path: 'my-matches/:eventId',
+    canActivate: [authGuard, roleGuard('player')],
+    loadComponent: () =>
+      import('./pages/player/my-matches/my-matches-page').then((m) => m.MyMatchesPage),
   },
   {
     path: 'dashboard',

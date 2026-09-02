@@ -43,13 +43,15 @@
               [glowClass]="tournament.glowClass"
               [title]="tournament.title"
               [points]="tournament.points"
-              [date]="tournament.date"
+              [startAt]="tournament.startAt"
+              [endAt]="tournament.endAt"
               [enrolled]="tournament.enrolled"
               [capacity]="tournament.capacity"
               [progress]="tournament.progress"
               [state]="tournament.state"
               [registering]="registeringEventId() === tournament.id"
               (register)="register(tournament.id)"
+              (enterMatch)="enterMatch(tournament.id)"
             />
           } @empty {
             <p class="text-on-surface-variant font-body-md text-body-md col-span-full">

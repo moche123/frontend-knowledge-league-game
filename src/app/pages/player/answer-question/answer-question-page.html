@@ -10,17 +10,14 @@
         >
       </div>
       <div class="flex items-center gap-6">
-        <div class="flex items-center gap-2">
-          <app-icon name="military_tech" class="text-tertiary" />
-          <span class="font-label-caps text-label-caps text-tertiary uppercase tracking-wider"
-            >Grandmaster</span
-          >
-        </div>
         <div class="flex items-center gap-3">
           <span class="font-title-sm text-title-sm text-on-surface hidden md:block"
             >{{ authService.getLoggedInUser()?.name }}</span
           >
-          <app-avatar initials="AS" ring="primary" />
+          <app-avatar
+            [initials]="(authService.getLoggedInUser()?.name ?? '?').slice(0, 2).toUpperCase()"
+            ring="primary"
+          />
         </div>
       </div>
     </div>
@@ -29,55 +26,86 @@
   <main
     class="flex-grow flex flex-col items-center justify-start pt-12 pb-24 px-margin-mobile md:px-0"
   >
-    <div class="w-full max-w-[800px] flex flex-col items-center">
-      <div class="flex flex-col items-center mb-stack-lg w-full">
-        <span
-          class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mb-stack-sm"
-        >
-          Question {{ questionNumber }} of {{ questionCount }}
-        </span>
-        <div class="mt-4">
-          <app-countdown-timer label="01:45" />
-        </div>
+    @if (!currentQuestion()) {
+      <div class="flex flex-col items-center gap-4 mt-24">
+        <app-icon name="hourglass_top" size="xl" class="text-on-surface-variant animate-pulse" />
+        <p class="font-body-md text-body-md text-on-surface-variant">Loading question…</p>
       </div>
+    } @else {
+      <div class="w-full max-w-[800px] flex flex-col items-center">
+        <div class="flex flex-col items-center mb-stack-lg w-full">
+          <span
+            class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mb-stack-sm"
+          >
+            Question {{ currentQuestion()!.position }} of {{ currentQuestion()!.totalQuestions }}
+          </span>
+          <div class="mt-4">
+            <app-countdown-timer [label]="timerLabel()" [urgent]="urgent()" />
+          </div>
+        </div>
 
-      <div
-        class="w-full bg-surface-container-low border border-secondary/20 rounded-xl p-8 md:p-12 flex flex-col shadow-2xl relative overflow-hidden"
-      >
         <div
-          class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"
-        ></div>
+          class="w-full bg-surface-container-low border border-secondary/20 rounded-xl p-8 md:p-12 flex flex-col shadow-2xl relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"
+          ></div>
 
-        <div class="self-start mb-6">
-          <app-badge variant="primary" icon="science">Quantum Physics</app-badge>
+          @if (theme(); as event) {
+            <div class="self-start mb-6">
+              <app-badge variant="primary" icon="menu_book">{{ event.theme }}</app-badge>
+            </div>
+          }
+
+          <h1 class="font-headline-md text-headline-md text-on-surface mb-8 leading-relaxed">
+            {{ currentQuestion()!.questionText }}
+          </h1>
+
+          @if (currentQuestion()!.youAnswered) {
+            <div
+              class="flex items-center gap-3 bg-surface-container rounded-lg p-4 text-on-surface-variant"
+            >
+              <app-icon name="check_circle" class="text-accent" />
+              <span class="font-body-sm text-body-sm">
+                Answer submitted — waiting for
+                {{
+                  currentQuestion()!.opponentAnswered
+                    ? 'the next question…'
+                    : 'your opponent…'
+                }}
+              </span>
+            </div>
+          } @else {
+            <div class="flex flex-col gap-4 mt-4 w-full">
+              <label class="sr-only" for="answer-input">Your answer</label>
+              <app-textarea
+                id="answer-input"
+                [rows]="6"
+                [disabled]="remainingSeconds() === 0"
+                placeholder="Write your detailed answer here..."
+                [value]="answer()"
+                (valueChange)="answer.set($event)"
+              />
+            </div>
+
+            <div class="mt-8 flex justify-end w-full">
+              <app-button
+                variant="primary"
+                size="lg"
+                [disabled]="!canSubmit()"
+                (click)="submitAnswer()"
+              >
+                {{ submitting() ? 'Submitting…' : 'Submit answer' }}
+                <app-icon name="send" />
+              </app-button>
+            </div>
+          }
         </div>
 
-        <h1 class="font-headline-md text-headline-md text-on-surface mb-8 leading-relaxed">
-          {{ question }}
-        </h1>
-
-        <div class="flex flex-col gap-4 mt-4 w-full">
-          <label class="sr-only" for="answer-input">Your answer</label>
-          <app-textarea
-            id="answer-input"
-            [rows]="6"
-            placeholder="Write your detailed answer here..."
-            [value]="answer()"
-            (valueChange)="answer.set($event)"
-          />
-        </div>
-
-        <div class="mt-8 flex justify-end w-full">
-          <app-button variant="primary" size="lg" [disabled]="!canSubmit()">
-            Submit answer
-            <app-icon name="send" />
-          </app-button>
+        <div class="mt-16 opacity-10 flex items-center justify-center">
+          <app-icon name="school" size="decorative" class="text-primary" />
         </div>
       </div>
-
-      <div class="mt-16 opacity-10 flex items-center justify-center">
-        <app-icon name="school" size="decorative" class="text-primary" />
-      </div>
-    </div>
+    }
   </main>
 </div>

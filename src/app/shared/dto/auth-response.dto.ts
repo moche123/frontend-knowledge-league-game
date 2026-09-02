@@ -8,6 +8,12 @@ export interface PublicUserDto {
   createdAt: string;
 }
 
+// GET /auth/users/:id/name — any authenticated user, no email/role/createdAt.
+export interface PublicNameDto {
+  id: string;
+  name: string;
+}
+
 export interface AuthResponseDto {
   accessToken: string;
   refreshToken: string;

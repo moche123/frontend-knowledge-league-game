@@ -34,6 +34,7 @@ import { EventDto } from '../../../shared/dto/tournament.dto';
 import { Badge, BadgeVariant } from '../../../shared/ui/badge/badge';
 import { Button } from '../../../shared/ui/button/button';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
+import { EventTiming } from '../../../shared/ui/event-timing/event-timing';
 import { Icon } from '../../../shared/ui/icon/icon';
 import { Modal } from '../../../shared/ui/modal/modal';
 import { NavItem } from '../../../shared/ui/nav-item/nav-item';
@@ -116,6 +117,7 @@ function toDateTimeLocal(iso: string): string {
     Button,
     ConfirmDialog,
     DatePipe,
+    EventTiming,
     Icon,
     Modal,
     NavItem,
@@ -365,6 +367,18 @@ export class EventQuestionsPage {
     });
   }
 
+  // Bracket map modal — placeholder for now (2026-09-01), see
+  // knowledge/drawings.md for how the real tree visualization gets built.
+  protected bracketModalOpen = signal(false);
+
+  protected openBracketModal(): void {
+    this.bracketModalOpen.set(true);
+  }
+
+  protected closeBracketModal(): void {
+    this.bracketModalOpen.set(false);
+  }
+
   protected addPlayerModalOpen = signal(false);
   protected searchQuery = signal('');
   protected searching = signal(false);
@@ -486,6 +500,176 @@ export class EventQuestionsPage {
           );
         },
       });
+  }
+
+  // Starting the match — admin or referee, mirrors the backend's own gates
+  // (start() in match.service.ts) so the button is disabled with a reason
+  // instead of just failing on click. No trigger existed anywhere in the
+  // frontend before this (2026-09-01, explicit user request) — matches had
+  // to be started via curl/Swagger.
+  protected readonly startBlockedReason = computed(() => {
+    const match = this.selectedMatch();
+    if (!match || match.status !== 'pending') return null; // not applicable, button hidden
+    if (!match.scheduledStartAt || !match.scheduledEndAt) {
+      return 'Schedule the match first.';
+    }
+    const now = new Date();
+    if (now < new Date(match.scheduledStartAt)) {
+      return `Can't start before ${new Date(match.scheduledStartAt).toLocaleString()}.`;
+    }
+    if (now > new Date(match.scheduledEndAt)) {
+      return 'Past its scheduled end time — reschedule it first.';
+    }
+    if (this.budgetState() !== 'exact') {
+      return 'Questions must add up to exactly the point budget first.';
+    }
+    return null;
+  });
+
+  protected readonly canStartMatch = computed(
+    () => this.selectedMatch()?.status === 'pending' && this.startBlockedReason() === null,
+  );
+
+  protected startingMatchId = signal<string | null>(null);
+  protected matchPendingStart = signal<MatchOption | null>(null);
+
+  protected openStartMatch(): void {
+    const match = this.selectedMatch();
+    if (!match || !this.canStartMatch()) {
+      return;
+    }
+    this.matchPendingStart.set(match);
+  }
+
+  protected cancelStartMatch(): void {
+    if (this.startingMatchId()) {
+      return;
+    }
+    this.matchPendingStart.set(null);
+  }
+
+  protected confirmStartMatch(): void {
+    const match = this.matchPendingStart();
+    if (!match || this.startingMatchId()) {
+      return;
+    }
+    this.startingMatchId.set(match.id);
+    this.matchApi.startMatch(this.eventId, match.id).subscribe({
+      next: () => {
+        this.startingMatchId.set(null);
+        this.matchPendingStart.set(null);
+        this.stagesRefresh$.next();
+        this.toastService.success('Match started.');
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.startingMatchId.set(null);
+        this.matchPendingStart.set(null);
+        this.toastService.error(error.error?.message ?? 'Could not start the match.');
+      },
+    });
+  }
+
+  // Ending a live match early — admin or referee. Also the only way (short
+  // of curl/Adminer) to unstick a match stuck in a bad in_progress state,
+  // e.g. no active deadline — end it, then reopen() to replay properly.
+  protected readonly canEndMatch = computed(() => this.selectedMatch()?.status === 'in_progress');
+
+  protected endingMatchId = signal<string | null>(null);
+  protected matchPendingEnd = signal<MatchOption | null>(null);
+
+  protected openEndMatch(): void {
+    const match = this.selectedMatch();
+    if (!match || !this.canEndMatch()) {
+      return;
+    }
+    this.matchPendingEnd.set(match);
+  }
+
+  protected cancelEndMatch(): void {
+    if (this.endingMatchId()) {
+      return;
+    }
+    this.matchPendingEnd.set(null);
+  }
+
+  protected confirmEndMatch(): void {
+    const match = this.matchPendingEnd();
+    if (!match || this.endingMatchId()) {
+      return;
+    }
+    this.endingMatchId.set(match.id);
+    this.matchApi.endMatch(this.eventId, match.id).subscribe({
+      next: () => {
+        this.endingMatchId.set(null);
+        this.matchPendingEnd.set(null);
+        this.stagesRefresh$.next();
+        this.toastService.success('Match ended.');
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.endingMatchId.set(null);
+        this.matchPendingEnd.set(null);
+        this.toastService.error(error.error?.message ?? 'Could not end the match.');
+      },
+    });
+  }
+
+  // Reopen (Fase 10) — closed/walkover only. Full reset: answers, questions,
+  // score/winner and ranking entry all cleared, back to pending. No frontend
+  // trigger existed at all before this (2026-09-01, found while unsticking a
+  // corrupted match — same gap as Start/End match). Uses its own small modal
+  // (not app-confirm-dialog) because it needs a text field for the required
+  // `reason`, which the shared confirm dialog doesn't support.
+  protected readonly canReopenMatch = computed(() => {
+    const status = this.selectedMatch()?.status;
+    return status === 'closed' || status === 'walkover';
+  });
+
+  protected reopenModalOpen = signal(false);
+  protected reopeningMatchId = signal<string | null>(null);
+  protected reopenReason = signal('');
+  private matchPendingReopen: MatchOption | null = null;
+
+  protected readonly canConfirmReopen = computed(
+    () => this.reopenReason().trim().length > 0 && this.reopeningMatchId() === null,
+  );
+
+  protected openReopenMatch(): void {
+    const match = this.selectedMatch();
+    if (!match || !this.canReopenMatch()) {
+      return;
+    }
+    this.matchPendingReopen = match;
+    this.reopenReason.set('');
+    this.reopenModalOpen.set(true);
+  }
+
+  protected cancelReopenMatch(): void {
+    if (this.reopeningMatchId()) {
+      return;
+    }
+    this.reopenModalOpen.set(false);
+    this.matchPendingReopen = null;
+  }
+
+  protected confirmReopenMatch(): void {
+    const match = this.matchPendingReopen;
+    if (!match || !this.canConfirmReopen()) {
+      return;
+    }
+    this.reopeningMatchId.set(match.id);
+    this.matchApi.reopenMatch(this.eventId, match.id, this.reopenReason().trim()).subscribe({
+      next: () => {
+        this.reopeningMatchId.set(null);
+        this.reopenModalOpen.set(false);
+        this.matchPendingReopen = null;
+        this.stagesRefresh$.next();
+        this.toastService.success('Match reopened — reschedule it to play again.');
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.reopeningMatchId.set(null);
+        this.toastService.error(error.error?.message ?? 'Could not reopen the match.');
+      },
+    });
   }
 
   // Match cancellation — expired or live only; it will never be played.

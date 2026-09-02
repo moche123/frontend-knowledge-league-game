@@ -1,0 +1,81 @@
+<div class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+  <header class="border-b border-outline-variant bg-surface-container-low w-full">
+    <div
+      class="flex items-center gap-4 w-full px-margin-mobile md:px-margin-desktop h-20 max-w-container-max mx-auto"
+    >
+      <button
+        type="button"
+        title="Back to dashboard"
+        class="text-on-surface-variant hover:text-on-surface transition-colors p-1"
+        (click)="goToDashboard()"
+      >
+        <app-icon name="arrow_back" />
+      </button>
+      <span class="font-headline-md text-headline-md text-primary">
+        My Matches @if (view(); as v) {— {{ v.eventName }}}
+      </span>
+    </div>
+  </header>
+
+  <main
+    class="flex-grow flex flex-col items-center pt-12 pb-24 px-margin-mobile md:px-0 w-full max-w-[700px] mx-auto"
+  >
+    @if (!view()) {
+      <div class="flex flex-col items-center gap-4 mt-24">
+        <app-icon name="hourglass_top" size="xl" class="text-on-surface-variant animate-pulse" />
+        <p class="font-body-md text-body-md text-on-surface-variant">Loading your matches…</p>
+      </div>
+    } @else if (view()!.rows.length === 0) {
+      <p class="text-on-surface-variant font-body-md text-body-md text-center mt-24">
+        You don't have a match in this tournament yet.
+      </p>
+    } @else {
+      <div class="flex flex-col gap-4 w-full">
+        @for (row of view()!.rows; track row.matchId) {
+          <div
+            class="bg-surface-container-high/40 border border-outline/20 rounded-xl p-5 flex items-center justify-between gap-4"
+          >
+            <div>
+              <p class="font-label-caps text-label-caps text-on-surface-variant mb-1">
+                {{ row.stageLabel }}
+              </p>
+              <p class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+                vs {{ row.opponentName }}
+                <app-badge [variant]="statusBadge[row.status]">{{ statusLabel[row.status] }}</app-badge>
+              </p>
+              <div class="mt-1">
+                <app-event-timing [startAt]="row.scheduledStartAt" [endAt]="row.scheduledEndAt" />
+              </div>
+              @if (row.status === 'pending' && !row.scheduledStartAt) {
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Not scheduled yet</p>
+              } @else if (row.status === 'pending') {
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                  Scheduled — waiting for admin/referee to start it
+                </p>
+              }
+            </div>
+
+            @switch (row.status) {
+              @case ('in_progress') {
+                <app-button variant="accent" (click)="enterMatch(row.matchId)">
+                  Enter match
+                  <app-icon name="bolt" size="sm" />
+                </app-button>
+              }
+              @case ('closed') {
+                <app-button variant="outline" (click)="viewResult(row.matchId)">
+                  View result
+                </app-button>
+              }
+              @case ('walkover') {
+                <app-button variant="outline" (click)="viewResult(row.matchId)">
+                  View result
+                </app-button>
+              }
+            }
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>

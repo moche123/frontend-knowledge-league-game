@@ -8,6 +8,7 @@ import { EventDto, EventStatus } from '../../../shared/dto/tournament.dto';
 import { Badge, BadgeVariant } from '../../../shared/ui/badge/badge';
 import { Button } from '../../../shared/ui/button/button';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
+import { EventTiming } from '../../../shared/ui/event-timing/event-timing';
 import { Icon } from '../../../shared/ui/icon/icon';
 import { NavItem } from '../../../shared/ui/nav-item/nav-item';
 import { ProgressBar, ProgressTone } from '../../../shared/ui/progress-bar/progress-bar';
@@ -40,14 +41,6 @@ const PLAYER_COUNTS = [4, 8, 16, 32] as const;
 // Must match the drawer's `duration-300` class in the template.
 const DRAWER_TRANSITION_MS = 300;
 
-const DATE_TIME_FORMAT = new Intl.DateTimeFormat('en-US', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
 function pad(value: number): string {
   return value.toString().padStart(2, '0');
 }
@@ -70,8 +63,8 @@ interface EventRow {
   name: string;
   theme: string;
   status: EventStatus;
-  startLabel: string;
-  endLabel: string;
+  startAt: string;
+  endAt: string;
   enrolled: number;
   capacity: number;
   progress: number;
@@ -90,6 +83,7 @@ interface EventWithRegistrationCount {
     Badge,
     Button,
     ConfirmDialog,
+    EventTiming,
     Icon,
     NavItem,
     ProgressBar,
@@ -139,15 +133,15 @@ export class EventsManagementPage {
         name: event.name,
         theme: event.theme,
         status: event.status,
-        startLabel: DATE_TIME_FORMAT.format(new Date(event.startDate)),
-        endLabel: DATE_TIME_FORMAT.format(new Date(event.endDate)),
+        startAt: event.startDate,
+        endAt: event.endDate,
         enrolled,
         capacity: event.maxPlayers,
         progress: Math.round((enrolled / event.maxPlayers) * 100),
         readyToDraw: event.status === 'registration_open' && enrolled === event.maxPlayers,
         canCancel: event.status === 'in_progress',
       }))
-      .sort((a, b) => a.startLabel.localeCompare(b.startLabel)),
+      .sort((a, b) => a.startAt.localeCompare(b.startAt)),
   );
 
   // The drawer is not mounted in the DOM at all until first opened (panelVisible),

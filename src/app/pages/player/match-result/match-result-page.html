@@ -1,0 +1,212 @@
+<div class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+  <header
+    class="bg-primary-container border-b border-outline-variant flex items-center w-full px-margin-mobile md:px-margin-desktop h-16"
+  >
+    <span class="font-display text-display-lg-mobile tracking-tighter text-primary"
+      >Knowledge League</span
+    >
+  </header>
+
+  <div class="flex flex-1">
+    <main class="flex-1 w-full max-w-[800px] mx-auto px-margin-mobile md:px-0 py-stack-lg flex flex-col gap-stack-lg">
+      @if (loadError()) {
+        <div class="flex flex-col items-center gap-4 mt-24 text-center px-4">
+          <app-icon name="error" size="xl" class="text-error" />
+          <p class="font-body-md text-body-md text-on-surface-variant">{{ loadError() }}</p>
+          <app-button variant="outline" (click)="goToDashboard()">Back to dashboard</app-button>
+        </div>
+      } @else if (!result()) {
+        <div class="flex flex-col items-center gap-4 mt-24">
+          <app-icon name="hourglass_top" size="xl" class="text-on-surface-variant animate-pulse" />
+          <p class="font-body-md text-body-md text-on-surface-variant">Loading result…</p>
+        </div>
+      } @else {
+        <!-- Final score summary -->
+        <section
+          class="bg-surface-container rounded-xl p-stack-lg border border-outline-variant text-center flex flex-col items-center"
+        >
+          <h1 class="font-headline-md text-headline-md text-primary mb-2">Resultado del Match</h1>
+          @if (result()!.match.winnerId; as winnerId) {
+            <p
+              class="font-title-sm text-title-sm text-gold mb-stack-md flex items-center gap-2 justify-center"
+            >
+              <app-icon name="emoji_events" [fill]="true" />
+              Ganador:
+              {{ winnerId === result()!.match.playerAId ? result()!.playerAName : result()!.playerBName }}
+            </p>
+          } @else {
+            <p class="font-title-sm text-title-sm text-on-surface-variant mb-stack-md">
+              Empate — sin ganador
+            </p>
+          }
+
+          <div class="flex w-full items-center justify-between max-w-md mx-auto mt-stack-md">
+            <div class="flex flex-col items-center flex-1">
+              <app-avatar
+                [initials]="result()!.playerAName.slice(0, 2).toUpperCase()"
+                size="xl"
+                [ring]="result()!.match.winnerId === result()!.match.playerAId ? 'gold' : 'outline'"
+              />
+              <span class="font-title-sm text-title-sm text-on-surface mt-2">{{
+                result()!.playerAName
+              }}</span>
+              <span class="font-display-lg text-display-lg text-primary mt-2">{{
+                result()!.match.scoreA ?? '—'
+              }}</span>
+            </div>
+            <div class="font-headline-md text-headline-md text-outline-variant px-4">VS</div>
+            <div class="flex flex-col items-center flex-1">
+              <app-avatar
+                [initials]="result()!.playerBName.slice(0, 2).toUpperCase()"
+                size="xl"
+                [ring]="result()!.match.winnerId === result()!.match.playerBId ? 'gold' : 'outline'"
+              />
+              <span class="font-title-sm text-title-sm text-on-surface mt-2">{{
+                result()!.playerBName
+              }}</span>
+              <span class="font-display-lg text-display-lg text-on-surface-variant mt-2">{{
+                result()!.match.scoreB ?? '—'
+              }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Questions -->
+        <section class="flex flex-col gap-stack-lg mt-stack-lg pb-32">
+          @for (question of result()!.questions; track question.position) {
+            <article class="bg-surface rounded-xl border border-outline-variant overflow-hidden">
+              <div class="bg-surface-container-high p-4 border-b border-outline-variant">
+                <div class="flex justify-between items-start mb-2">
+                  <span class="font-label-caps text-label-caps text-primary"
+                    >Pregunta {{ question.position }}</span
+                  >
+                  <span
+                    class="font-label-caps text-label-caps text-outline bg-surface-container px-2 py-1 rounded"
+                    >{{ result()!.theme }}</span
+                  >
+                </div>
+                <h3 class="font-title-sm text-title-sm text-on-surface leading-relaxed">
+                  {{ question.questionText }}
+                </h3>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2">
+                <div
+                  class="p-4 border-b md:border-b-0 md:border-r border-outline-variant flex flex-col relative"
+                  [class]="
+                    question.a
+                      ? question.a.aiScore === question.maxScore
+                        ? 'bg-green-500/10'
+                        : 'bg-error/10'
+                      : ''
+                  "
+                >
+                  @if (question.a; as answer) {
+                    <div
+                      class="absolute top-2 right-2 font-title-sm text-title-sm opacity-70"
+                      [class]="answer.aiScore === question.maxScore ? 'text-green-400' : 'text-error'"
+                    >
+                      {{ answer.aiScore ?? '—' }}/{{ question.maxScore }}
+                    </div>
+                    <h4 class="font-label-caps text-label-caps text-on-surface-variant mb-2">
+                      {{ result()!.playerAName }}
+                    </h4>
+                    <p class="font-body-sm text-body-sm text-on-surface mb-4 flex-1">
+                      {{ answer.answerText }}
+                    </p>
+                    <div class="bg-surface-container rounded p-3 mt-auto">
+                      <p
+                        class="font-label-caps text-label-caps text-primary mb-1 flex items-center gap-1"
+                      >
+                        <app-icon name="psychology" size="sm" /> AI Evaluación
+                      </p>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        {{ answer.aiJustification }}
+                      </p>
+                    </div>
+                  } @else {
+                    <h4 class="font-label-caps text-label-caps text-on-surface-variant mb-2">
+                      {{ result()!.playerAName }}
+                    </h4>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant italic">
+                      No answer submitted.
+                    </p>
+                  }
+                </div>
+                <div
+                  class="p-4 flex flex-col relative"
+                  [class]="
+                    question.b
+                      ? question.b.aiScore === question.maxScore
+                        ? 'bg-green-500/10'
+                        : 'bg-error/10'
+                      : ''
+                  "
+                >
+                  @if (question.b; as answer) {
+                    <div
+                      class="absolute top-2 right-2 font-title-sm text-title-sm opacity-70"
+                      [class]="answer.aiScore === question.maxScore ? 'text-green-400' : 'text-error'"
+                    >
+                      {{ answer.aiScore ?? '—' }}/{{ question.maxScore }}
+                    </div>
+                    <h4 class="font-label-caps text-label-caps text-on-surface-variant mb-2">
+                      {{ result()!.playerBName }}
+                    </h4>
+                    <p class="font-body-sm text-body-sm text-on-surface mb-4 flex-1">
+                      {{ answer.answerText }}
+                    </p>
+                    <div class="bg-surface-container rounded p-3 mt-auto">
+                      <p
+                        class="font-label-caps text-label-caps text-primary mb-1 flex items-center gap-1"
+                      >
+                        <app-icon name="psychology" size="sm" /> AI Evaluación
+                      </p>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        {{ answer.aiJustification }}
+                      </p>
+                    </div>
+                  } @else {
+                    <h4 class="font-label-caps text-label-caps text-on-surface-variant mb-2">
+                      {{ result()!.playerBName }}
+                    </h4>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant italic">
+                      No answer submitted.
+                    </p>
+                  }
+                </div>
+              </div>
+            </article>
+          } @empty {
+            <p class="text-center text-on-surface-variant font-body-md text-body-md">
+              No questions to show for this match.
+            </p>
+          }
+        </section>
+
+        <!-- Actions -->
+        <div
+          class="fixed bottom-0 left-0 w-full bg-surface-dim border-t border-outline-variant p-4 flex justify-center z-40 lg:hidden shadow-lg"
+        >
+          <div class="flex flex-col w-full gap-2">
+            <app-button variant="primary" size="lg" [fullWidth]="true" (click)="goToDashboard()">
+              Aceptar resultado
+            </app-button>
+            <app-button variant="danger" size="lg" [fullWidth]="true" (click)="goToDisputes()">
+              Reportar un reclamo
+            </app-button>
+          </div>
+        </div>
+        <div class="hidden lg:flex justify-center mt-8 mb-16">
+          <div class="flex flex-col items-center gap-4">
+            <app-button variant="primary" size="lg" (click)="goToDashboard()">
+              Aceptar resultado
+            </app-button>
+            <app-button variant="danger" size="lg" (click)="goToDisputes()">
+              Reportar un reclamo
+            </app-button>
+          </div>
+        </div>
+      }
+    </main>
+  </div>
+</div>

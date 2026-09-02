@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { Badge, BadgeVariant } from '../badge/badge';
 import { Button } from '../button/button';
+import { EventTiming } from '../event-timing/event-timing';
 import { Icon } from '../icon/icon';
 import { ProgressBar, ProgressTone } from '../progress-bar/progress-bar';
 
@@ -11,7 +12,7 @@ export type TournamentCardState = 'register' | 'registered' | 'full' | 'ongoing'
  *  real state (open to join, already joined, full, or already running). */
 @Component({
   selector: 'app-tournament-card',
-  imports: [Badge, Button, Icon, ProgressBar],
+  imports: [Badge, Button, EventTiming, Icon, ProgressBar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -40,10 +41,7 @@ export type TournamentCardState = 'register' | 'registered' | 'full' | 'ongoing'
       <h5 class="font-title-sm text-title-sm text-on-surface mb-2">{{ title() }}</h5>
 
       <div class="flex flex-col gap-2 mt-auto pt-6 border-t border-outline-variant/50">
-        <div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
-          <app-icon name="calendar_today" size="sm" />
-          {{ date() }}
-        </div>
+        <app-event-timing [startAt]="startAt()" [endAt]="endAt()" />
         <div
           class="flex items-center gap-2 font-body-sm text-body-sm font-medium"
           [class]="state() === 'full' ? 'text-error' : 'text-on-surface-variant'"
@@ -73,7 +71,7 @@ export type TournamentCardState = 'register' | 'registered' | 'full' | 'ongoing'
             </app-button>
           }
           @case ('ongoing') {
-            <app-button variant="secondary" [disabled]="false" [fullWidth]="true">
+            <app-button variant="secondary" [fullWidth]="true" (click)="enterMatch.emit()">
               En Curso
               <app-icon name="bolt" size="sm" />
             </app-button>
@@ -102,7 +100,8 @@ export class TournamentCard {
   glowClass = input('bg-primary');
   title = input.required<string>();
   points = input.required<number>();
-  date = input.required<string>();
+  startAt = input.required<string>();
+  endAt = input.required<string>();
   enrolled = input.required<number>();
   capacity = input.required<number>();
   progress = input.required<number>();
@@ -110,6 +109,10 @@ export class TournamentCard {
   registering = input(false);
 
   register = output<void>();
+  // 'ongoing' only — navigates to the "my matches in this tournament" list
+  // (see my-matches-page), not straight into a specific match: the event
+  // being in_progress doesn't mean THIS player has a live match right now.
+  enterMatch = output<void>();
 
   protected readonly dimmed = computed(() => this.state() === 'full');
 

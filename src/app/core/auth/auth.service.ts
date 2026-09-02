@@ -2,7 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponseDto, PublicUserDto, UserRole } from '../../shared/dto/auth-response.dto';
+import {
+  AuthResponseDto,
+  PublicNameDto,
+  PublicUserDto,
+  UserRole,
+} from '../../shared/dto/auth-response.dto';
 import { CreateUserByAdminDto } from '../../shared/dto/create-user.dto';
 import { LoginDto } from '../../shared/dto/login.dto';
 import { RegisterDto } from '../../shared/dto/register.dto';
@@ -47,8 +52,17 @@ export class AuthService {
     return this.http.get<PublicUserDto[]>(`${this.baseUrl}/users`, { params: { search } });
   }
 
+  // Admin-only (backend-enforced) — full profile, including email.
   getUser(userId: string): Observable<PublicUserDto> {
     return this.http.get<PublicUserDto>(`${this.baseUrl}/users/${userId}`);
+  }
+
+  // Any authenticated user — id/name only, no email. For resolving an
+  // opponent/other participant's display name from a player-facing page
+  // (match-result-page, my-matches-page) — getUser() above 403s for
+  // non-admins.
+  getUserName(userId: string): Observable<PublicNameDto> {
+    return this.http.get<PublicNameDto>(`${this.baseUrl}/users/${userId}/name`);
   }
 
   // Admin users management page — lists players and/or referees (never admins),

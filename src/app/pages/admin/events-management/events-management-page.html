@@ -44,129 +44,231 @@
       <div
         class="bg-secondary-container/20 border border-secondary-container rounded-xl overflow-hidden shadow-lg"
       >
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr
-                class="bg-surface-container-high border-b border-outline-variant/50 font-label-caps text-label-caps text-on-surface-variant"
-              >
-                <th class="p-4 font-semibold">Name</th>
-                <th class="p-4 font-semibold">Theme</th>
-                <th class="p-4 font-semibold">Start / End</th>
-                <th class="p-4 font-semibold">Status</th>
-                <th class="p-4 font-semibold text-center">Enrolled</th>
-                <th class="p-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody
-              class="font-body-sm text-body-sm text-on-surface divide-y divide-outline-variant/30"
-            >
-              @for (event of events(); track event.id) {
+        @if (events().length === 0) {
+          <p class="p-6 text-center text-on-surface-variant">No events created yet.</p>
+        } @else {
+          <!-- Desktop: table -->
+          <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
                 <tr
-                  class="hover:bg-surface-container-highest/50 transition-colors"
-                  [class]="event.status === 'in_progress' ? 'bg-primary-container/20' : ''"
+                  class="bg-surface-container-high border-b border-outline-variant/50 font-label-caps text-label-caps text-on-surface-variant"
                 >
-                  <td class="p-4">
-                    <div
-                      class="font-title-sm text-title-sm font-semibold flex items-center gap-2"
-                      [class]="event.status === 'in_progress' ? 'text-accent' : 'text-on-surface'"
-                    >
-                      {{ event.name }}
-                      @if (event.status === 'in_progress') {
-                        <span class="relative flex h-2 w-2">
-                          <span
-                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"
-                          ></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
-                        </span>
-                      }
-                    </div>
-                  </td>
-                  <td class="p-4">
-                    <app-badge variant="secondary">{{ event.theme }}</app-badge>
-                  </td>
-                  <td class="p-4 text-on-surface-variant text-xs">
-                    {{ event.startLabel }}<br />
-                    <span class="text-on-surface-variant/70">→ {{ event.endLabel }}</span>
-                  </td>
-                  <td class="p-4">
-                    <app-badge
-                      [variant]="statusBadge[event.status]"
-                      [dot]="event.status !== 'finished'"
-                      [pulse]="event.status === 'in_progress'"
-                    >
-                      {{ statusLabel[event.status] }}
-                    </app-badge>
-                  </td>
-                  <td class="p-4 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                      <div class="w-16">
-                        <app-progress-bar
-                          [value]="event.progress"
-                          [tone]="statusProgressTone[event.status]"
-                        />
+                  <th class="p-4 font-semibold">Name</th>
+                  <th class="p-4 font-semibold">Theme</th>
+                  <th class="p-4 font-semibold">Start / End</th>
+                  <th class="p-4 font-semibold">Status</th>
+                  <th class="p-4 font-semibold text-center">Enrolled</th>
+                  <th class="p-4 font-semibold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody
+                class="font-body-sm text-body-sm text-on-surface divide-y divide-outline-variant/30"
+              >
+                @for (event of events(); track event.id) {
+                  <tr
+                    class="hover:bg-surface-container-highest/50 transition-colors"
+                    [class]="event.status === 'in_progress' ? 'bg-primary-container/20' : ''"
+                  >
+                    <td class="p-4">
+                      <div
+                        class="font-title-sm text-title-sm font-semibold flex items-center gap-2"
+                        [class]="
+                          event.status === 'in_progress' ? 'text-accent' : 'text-on-surface'
+                        "
+                      >
+                        {{ event.name }}
+                        @if (event.status === 'in_progress') {
+                          <span class="relative flex h-2 w-2">
+                            <span
+                              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"
+                            ></span>
+                            <span
+                              class="relative inline-flex rounded-full h-2 w-2 bg-accent"
+                            ></span>
+                          </span>
+                        }
                       </div>
-                      <span class="font-mono">{{ event.enrolled }}/{{ event.capacity }}</span>
-                    </div>
-                  </td>
-                  <td class="p-4">
-                    <div class="flex items-center justify-end gap-2">
-                      @if (event.status === 'registration_open') {
-                        <button
-                          type="button"
-                          [disabled]="!event.readyToDraw || drawingEventId() === event.id"
-                          [title]="
-                            event.readyToDraw
-                              ? 'Draw the bracket and start the tournament'
-                              : 'Needs ' + event.capacity + ' registered players (' + event.enrolled + ' so far)'
-                          "
-                          class="text-on-surface-variant hover:text-accent transition-colors p-1 disabled:opacity-30 disabled:hover:text-on-surface-variant disabled:cursor-not-allowed"
-                          (click)="generateMatches(event)"
-                        >
-                          <app-icon name="shuffle" />
-                        </button>
-                      }
-                      <button
-                        type="button"
-                        title="Manage questions"
-                        class="text-on-surface-variant hover:text-primary transition-colors p-1"
-                        (click)="goToQuestions(event)"
+                    </td>
+                    <td class="p-4">
+                      <app-badge variant="secondary">{{ event.theme }}</app-badge>
+                    </td>
+                    <td class="p-4 text-on-surface-variant text-xs">
+                      <app-event-timing [startAt]="event.startAt" [endAt]="event.endAt" />
+                    </td>
+                    <td class="p-4">
+                      <app-badge
+                        [variant]="statusBadge[event.status]"
+                        [dot]="event.status !== 'finished'"
+                        [pulse]="event.status === 'in_progress'"
                       >
-                        <app-icon name="quiz" />
-                      </button>
-                      @if (event.canCancel) {
+                        {{ statusLabel[event.status] }}
+                      </app-badge>
+                    </td>
+                    <td class="p-4 text-center">
+                      <div class="flex items-center justify-center gap-2">
+                        <div class="w-16">
+                          <app-progress-bar
+                            [value]="event.progress"
+                            [tone]="statusProgressTone[event.status]"
+                          />
+                        </div>
+                        <span class="font-mono">{{ event.enrolled }}/{{ event.capacity }}</span>
+                      </div>
+                    </td>
+                    <td class="p-4">
+                      <div class="flex items-center justify-end gap-2">
+                        @if (event.status === 'registration_open') {
+                          <button
+                            type="button"
+                            [disabled]="!event.readyToDraw || drawingEventId() === event.id"
+                            [title]="
+                              event.readyToDraw
+                                ? 'Draw the bracket and start the tournament'
+                                : 'Needs ' + event.capacity + ' registered players (' + event.enrolled + ' so far)'
+                            "
+                            class="text-on-surface-variant hover:text-accent transition-colors p-1 disabled:opacity-30 disabled:hover:text-on-surface-variant disabled:cursor-not-allowed"
+                            (click)="generateMatches(event)"
+                          >
+                            <app-icon name="shuffle" />
+                          </button>
+                        }
                         <button
                           type="button"
-                          [disabled]="cancellingEventId() === event.id"
-                          title="Cancel event — undo the draw, back to open registration"
+                          title="Manage questions"
+                          class="text-on-surface-variant hover:text-primary transition-colors p-1"
+                          (click)="goToQuestions(event)"
+                        >
+                          <app-icon name="quiz" />
+                        </button>
+                        @if (event.canCancel) {
+                          <button
+                            type="button"
+                            [disabled]="cancellingEventId() === event.id"
+                            title="Cancel event — undo the draw, back to open registration"
+                            class="text-on-surface-variant hover:text-error transition-colors p-1 disabled:opacity-30"
+                            (click)="cancelEvent(event)"
+                          >
+                            <app-icon name="restart_alt" />
+                          </button>
+                        }
+                        <button
+                          type="button"
+                          [disabled]="deletingEventId() === event.id"
+                          title="Delete event"
                           class="text-on-surface-variant hover:text-error transition-colors p-1 disabled:opacity-30"
-                          (click)="cancelEvent(event)"
+                          (click)="deleteEvent(event)"
                         >
-                          <app-icon name="restart_alt" />
+                          <app-icon name="delete" />
                         </button>
-                      }
-                      <button
-                        type="button"
-                        [disabled]="deletingEventId() === event.id"
-                        title="Delete event"
-                        class="text-on-surface-variant hover:text-error transition-colors p-1 disabled:opacity-30"
-                        (click)="deleteEvent(event)"
-                      >
-                        <app-icon name="delete" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="6" class="p-6 text-center text-on-surface-variant">
-                    No events created yet.
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile: vertical cards, one per event -->
+          <div class="md:hidden flex flex-col gap-3 p-3">
+            @for (event of events(); track event.id) {
+              <div
+                class="bg-surface-container-high/60 border border-outline-variant/40 rounded-lg p-4 flex flex-col gap-3"
+                [class]="event.status === 'in_progress' ? 'bg-primary-container/20' : ''"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <div
+                    class="font-title-sm text-title-sm font-semibold flex items-center gap-2 min-w-0"
+                    [class]="event.status === 'in_progress' ? 'text-accent' : 'text-on-surface'"
+                  >
+                    <span class="truncate">{{ event.name }}</span>
+                    @if (event.status === 'in_progress') {
+                      <span class="relative flex h-2 w-2 shrink-0">
+                        <span
+                          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"
+                        ></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                      </span>
+                    }
+                  </div>
+                  <app-badge
+                    [variant]="statusBadge[event.status]"
+                    [dot]="event.status !== 'finished'"
+                    [pulse]="event.status === 'in_progress'"
+                  >
+                    {{ statusLabel[event.status] }}
+                  </app-badge>
+                </div>
+
+                <app-badge variant="secondary" class="self-start">{{ event.theme }}</app-badge>
+
+                <div class="text-on-surface-variant text-xs font-body-sm">
+                  <app-event-timing [startAt]="event.startAt" [endAt]="event.endAt" />
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <div class="flex-1">
+                    <app-progress-bar
+                      [value]="event.progress"
+                      [tone]="statusProgressTone[event.status]"
+                    />
+                  </div>
+                  <span class="font-mono text-body-sm text-body-sm text-on-surface-variant"
+                    >{{ event.enrolled }}/{{ event.capacity }}</span
+                  >
+                </div>
+
+                <div
+                  class="flex items-center justify-end gap-3 pt-2 border-t border-outline-variant/30"
+                >
+                  @if (event.status === 'registration_open') {
+                    <button
+                      type="button"
+                      [disabled]="!event.readyToDraw || drawingEventId() === event.id"
+                      [title]="
+                        event.readyToDraw
+                          ? 'Draw the bracket and start the tournament'
+                          : 'Needs ' + event.capacity + ' registered players (' + event.enrolled + ' so far)'
+                      "
+                      class="text-on-surface-variant hover:text-accent transition-colors p-1 disabled:opacity-30 disabled:hover:text-on-surface-variant disabled:cursor-not-allowed"
+                      (click)="generateMatches(event)"
+                    >
+                      <app-icon name="shuffle" />
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    title="Manage questions"
+                    class="text-on-surface-variant hover:text-primary transition-colors p-1"
+                    (click)="goToQuestions(event)"
+                  >
+                    <app-icon name="quiz" />
+                  </button>
+                  @if (event.canCancel) {
+                    <button
+                      type="button"
+                      [disabled]="cancellingEventId() === event.id"
+                      title="Cancel event — undo the draw, back to open registration"
+                      class="text-on-surface-variant hover:text-error transition-colors p-1 disabled:opacity-30"
+                      (click)="cancelEvent(event)"
+                    >
+                      <app-icon name="restart_alt" />
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    [disabled]="deletingEventId() === event.id"
+                    title="Delete event"
+                    class="text-on-surface-variant hover:text-error transition-colors p-1 disabled:opacity-30"
+                    (click)="deleteEvent(event)"
+                  >
+                    <app-icon name="delete" />
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
       </div>
     </main>
   </div>

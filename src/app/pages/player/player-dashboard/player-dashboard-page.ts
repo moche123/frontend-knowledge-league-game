@@ -1,5 +1,6 @@
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject, forkJoin, map, of, switchMap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { TournamentApi } from '../../../core/tournament/tournament-api.service';
@@ -24,12 +25,6 @@ const CARD_TONES: { categoryTone: 'primary' | 'secondary' | 'neutral'; glowClass
   { categoryTone: 'neutral', glowClass: 'bg-outline' },
 ];
 
-const DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-});
-
 interface EventWithRegistrations {
   event: EventDto;
   registrations: RegistrationDto[];
@@ -42,7 +37,8 @@ interface TournamentCardModel {
   glowClass: string;
   title: string;
   points: number;
-  date: string;
+  startAt: string;
+  endAt: string;
   enrolled: number;
   capacity: number;
   progress: number;
@@ -68,6 +64,7 @@ interface TournamentCardModel {
 export class PlayerDashboardPage {
   public authService = inject(AuthService);
   private readonly tournamentApi = inject(TournamentApi);
+  private readonly router = inject(Router);
 
   protected readonly tabs: TabItem[] = [
     { id: 'registered', label: 'My Registrations' },
@@ -106,11 +103,18 @@ export class PlayerDashboardPage {
       .map((entry, index) => this.toCardModel(entry, index)),
   );
 
-  protected readonly ongoingEvents = computed(() =>
-    this.eventsWithRegistrations()
-      .filter((entry) => entry.event.status === 'in_progress')
-      .map((entry, index) => this.toCardModel(entry, index)),
-  );
+  // Requires isRegistered too (2026-09-01 fix) — was showing every
+  // in-progress event platform-wide, not just the player's own.
+  protected readonly ongoingEvents = computed(() => {
+    const userId = this.currentUserId();
+    return this.eventsWithRegistrations()
+      .filter(
+        (entry) =>
+          entry.event.status === 'in_progress' &&
+          entry.registrations.some((registration) => registration.userId === userId),
+      )
+      .map((entry, index) => this.toCardModel(entry, index));
+  });
 
   protected readonly registeredEvents = computed(() => {
     const userId = this.currentUserId();
@@ -145,6 +149,15 @@ export class PlayerDashboardPage {
     });
   }
 
+  // 'ongoing' state only — goes to the "my matches in this tournament" list
+  // (my-matches-page), not straight into a specific match. The event being
+  // in_progress doesn't mean this player has a live match right now (could
+  // be eliminated, or waiting on their own match to start) — that's resolved
+  // per-match on that page instead of pre-fetched here for every card.
+  protected enterMatch(eventId: string): void {
+    this.router.navigateByUrl(`/my-matches/${eventId}`);
+  }
+
   private toCardModel(entry: EventWithRegistrations, index: number): TournamentCardModel {
     const enrolledCount = entry.registrations.length;
     const isRegistered = entry.registrations.some(
@@ -159,7 +172,8 @@ export class PlayerDashboardPage {
       glowClass: tone.glowClass,
       title: entry.event.name,
       points: entry.event.maxScorePerMatch,
-      date: DATE_FORMAT.format(new Date(entry.event.startDate)),
+      startAt: entry.event.startDate,
+      endAt: entry.event.endDate,
       enrolled: enrolledCount,
       capacity: entry.event.maxPlayers,
       progress: Math.round((enrolledCount / entry.event.maxPlayers) * 100),
@@ -172,7 +186,13 @@ export class PlayerDashboardPage {
     enrolledCount: number,
     isRegistered: boolean,
   ): TournamentCardState {
-    if (event.status === 'in_progress') {
+    // Registration is only for registration_open events (RegistrationModule)
+    // — a non-registered user never legitimately reaches this branch, since
+    // every tab that can show an in_progress entry already filters by
+    // isRegistered upstream. Kept as an explicit gate anyway, not just
+    // relying on the caller: this is a shared helper, not just this page's
+    // filtered views.
+    if (event.status === 'in_progress' && isRegistered) {
       return 'ongoing';
     }
     if (isRegistered) {
