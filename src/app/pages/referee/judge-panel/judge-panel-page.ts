@@ -7,9 +7,10 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Subject, catchError, forkJoin, map, merge, of, switchMap, timer } from 'rxjs';
+import { Subject, catchError, filter, forkJoin, map, merge, of, scan, switchMap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { MatchApi } from '../../../core/match/match-api.service';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
 import { ToastService } from '../../../core/toast/toast.service';
 import { TournamentApi } from '../../../core/tournament/tournament-api.service';
 import { DisputeChatMessageDto } from '../../../shared/dto/dispute-chat.dto';
@@ -65,9 +66,6 @@ const STATUS_RANK: Record<MatchStatus, number> = {
 const DATE_FORMAT = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
 const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' });
 
-// No WS/push yet (same stopgap as dispute-chat-page/event-questions-page).
-const POLL_INTERVAL_MS = 5000;
-
 interface AssignmentRow {
   eventId: string;
   matchId: string;
@@ -98,6 +96,7 @@ export class JudgePanelPage {
   private readonly authService = inject(AuthService);
   private readonly tournamentApi = inject(TournamentApi);
   private readonly matchApi = inject(MatchApi);
+  private readonly realtime = inject(RealtimeService);
   private readonly toastService = inject(ToastService);
 
   private readonly currentUserId = this.authService.currentUser()?.id ?? null;
@@ -224,21 +223,27 @@ export class JudgePanelPage {
     { initialValue: null as MatchDto | null },
   );
 
-  // Messages — polled, plus refreshed immediately after a successful send.
-  // Re-keyed off the selection so switching assignments restarts the poll
-  // against the newly selected match.
-  private readonly refresh$ = new Subject<void>();
-
+  // Hydrate once, then receive messages from the selected match room.
   private readonly rawMessages = toSignal(
     this.selection$.pipe(
       switchMap((row) => {
         if (!row) return of<DisputeChatMessageDto[] | null>(null);
-        return merge(timer(0, POLL_INTERVAL_MS), this.refresh$).pipe(
-          switchMap(() =>
-            this.matchApi
-              .getChatMessages(row.eventId, row.matchId)
-              .pipe(catchError(() => of(null))),
+        return this.matchApi.getChatMessages(row.eventId, row.matchId).pipe(
+          switchMap((initial) =>
+            merge(
+              of(initial),
+              this.realtime.matchEvents(row.eventId, row.matchId).pipe(
+                filter((event) => event.chat !== undefined),
+                map((event) => [event.chat!]),
+              ),
+            ).pipe(
+              scan((messages, next) => {
+                const existing = new Set(messages.map((message) => message.id));
+                return [...messages, ...next.filter((message) => !existing.has(message.id))];
+              }, initial),
+            ),
           ),
+          catchError(() => of(null)),
         );
       }),
     ),
@@ -338,10 +343,9 @@ export class JudgePanelPage {
     const row = this.selectedRow();
     if (!row) return;
     this.sending.set(true);
-    this.matchApi.sendChatMessage(row.eventId, row.matchId, { text }).subscribe({
+    this.realtime.sendChatMessage(row.eventId, row.matchId, { text }).subscribe({
       next: () => {
         this.sending.set(false);
-        this.refresh$.next();
       },
       error: (error: { error?: { message?: string } }) => {
         this.sending.set(false);
@@ -431,7 +435,6 @@ export class JudgePanelPage {
         this.declareWinnerSubmitting.set(false);
         this.declareWinnerPending.set(null);
         this.matchRefresh$.next();
-        this.refresh$.next();
       },
       error: (error: { error?: { message?: string } }) => {
         this.declareWinnerSubmitting.set(false);

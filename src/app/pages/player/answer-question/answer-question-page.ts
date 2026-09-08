@@ -8,9 +8,10 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EMPTY, Subject, catchError, interval, merge, switchMap, tap, timer } from 'rxjs';
+import { EMPTY, Subject, catchError, filter, interval, map, merge, of, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { MatchApi } from '../../../core/match/match-api.service';
+import { RealtimeService } from '../../../core/realtime/realtime.service';
 import { ToastService } from '../../../core/toast/toast.service';
 import { TournamentApi } from '../../../core/tournament/tournament-api.service';
 import { CurrentQuestionDto } from '../../../shared/dto/match-play.dto';
@@ -23,12 +24,6 @@ import { Textarea } from '../../../shared/ui/textarea/textarea';
 
 const LOGO_URL =
   'https://lh3.googleusercontent.com/aida/AEtjO1XINWzavwId3se-vwYMWWTdNIGQdnsy4L-3LGMVD39EqMIVWE5xnJz2j0PS4RBibmyc-6FXsDSTzqsqrvHhLWAcbzlEs_ILdKri7jd8bUlC4jWS79mfrq1R3c6hCCVumwb1ijJDhLoqEcOYei1EVY7Mj5fCDkAv70ut7Vs-b9DNb3dxNMJxe0ptzE-uP1LkSZl7cerpV_Pqzp_7r8mlytXE6PS9LSAbOZAMXCmyx_hNkNiktK5HDHlLYtw';
-
-// Polling stand-in for a WS/push mechanism (none in the MVP monolith yet —
-// see CLAUDE.md/knowledge/... for the same gap elsewhere). Short enough to
-// feel responsive against the backend's own 10s advance-question cron and
-// per-question deadlines (30s default).
-const POLL_INTERVAL_MS = 3000;
 
 function pad(value: number): string {
   return value.toString().padStart(2, '0');
@@ -44,6 +39,7 @@ export class AnswerQuestionPage {
   protected readonly logoUrl = LOGO_URL;
   protected readonly authService = inject(AuthService);
   private readonly matchApi = inject(MatchApi);
+  private readonly realtime = inject(RealtimeService);
   private readonly tournamentApi = inject(TournamentApi);
   private readonly toastService = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
@@ -66,17 +62,21 @@ export class AnswerQuestionPage {
     { initialValue: null },
   );
 
-  // Polls the active question: immediately on load, every POLL_INTERVAL_MS
-  // after, and right after a successful submit (this.refresh$). A failed
-  // fetch means the match is no longer in_progress (closed/walkover/expired/
-  // cancelled) — see CLAUDE.md, no other reason getCurrentQuestion 409s once
-  // we've already loaded it successfully once — so that's the signal to move
-  // on to the result view.
+  // The server pushes a state event whenever an answer advances the question,
+  // a deadline advances it, or the match closes. The initial REST read is
+  // still useful for hydration and is not a polling loop.
   private readonly refresh$ = new Subject<void>();
-  private readonly poll$ = merge(timer(0, POLL_INTERVAL_MS), this.refresh$);
+  private readonly battleEvents$ = this.realtime
+    .matchEvents(this.eventId, this.matchId)
+    .pipe(filter((event) => event.battle !== undefined));
+  private readonly questionRefresh$ = merge(
+    of(undefined),
+    this.battleEvents$.pipe(map(() => undefined)),
+    this.refresh$,
+  );
 
   protected readonly currentQuestion = toSignal<CurrentQuestionDto | null>(
-    this.poll$.pipe(
+    this.questionRefresh$.pipe(
       switchMap(() =>
         this.matchApi.getCurrentQuestion(this.eventId, this.matchId).pipe(
           catchError(() => {

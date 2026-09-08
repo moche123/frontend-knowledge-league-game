@@ -1,10 +1,11 @@
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, catchError, forkJoin, map, merge, of, switchMap, tap, timer } from 'rxjs';
+import { catchError, filter, forkJoin, map, merge, of, scan, switchMap } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { HOME_BY_ROLE } from '../../core/auth/home-by-role';
 import { MatchApi } from '../../core/match/match-api.service';
+import { RealtimeService } from '../../core/realtime/realtime.service';
 import { ToastService } from '../../core/toast/toast.service';
 import { TournamentApi } from '../../core/tournament/tournament-api.service';
 import { DisputeChatMessageDto } from '../../shared/dto/dispute-chat.dto';
@@ -37,10 +38,6 @@ const STATUS_LABEL: Record<MatchStatus, string> = {
   cancelled: 'Cancelled',
 };
 
-// No WS/push yet (same gap as answer-question-page/event-questions-page) —
-// short poll so an active back-and-forth feels reasonably live.
-const POLL_INTERVAL_MS = 5000;
-
 const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' });
 
 interface MatchSummary {
@@ -61,6 +58,7 @@ export class DisputeChatPage {
   private readonly authService = inject(AuthService);
   private readonly tournamentApi = inject(TournamentApi);
   private readonly matchApi = inject(MatchApi);
+  private readonly realtime = inject(RealtimeService);
   private readonly toastService = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -111,15 +109,26 @@ export class DisputeChatPage {
     { initialValue: null },
   );
 
-  // Messages — polled, plus refreshed immediately after a successful send.
-  private readonly refresh$ = new Subject<void>();
-  private readonly poll$ = merge(timer(0, POLL_INTERVAL_MS), this.refresh$);
-
+  // Hydrate once over REST, then append server-authenticated messages pushed
+  // through the match room. The server also broadcasts the sender's message,
+  // so there is no optimistic duplicate or refresh request.
   private readonly rawMessages = toSignal(
-    this.poll$.pipe(
-      switchMap(() =>
-        this.matchApi.getChatMessages(this.eventId, this.matchId).pipe(catchError(() => of(null))),
+    this.matchApi.getChatMessages(this.eventId, this.matchId).pipe(
+      switchMap((initial) =>
+        merge(
+          of(initial),
+          this.realtime.matchEvents(this.eventId, this.matchId).pipe(
+            filter((event) => event.chat !== undefined),
+            map((event) => [event.chat!]),
+          ),
+        ).pipe(
+          scan((messages, next) => {
+            const existing = new Set(messages.map((message) => message.id));
+            return [...messages, ...next.filter((message) => !existing.has(message.id))];
+          }, initial),
+        ),
       ),
+      catchError(() => of(null)),
     ),
     { initialValue: null as DisputeChatMessageDto[] | null },
   );
@@ -202,16 +211,13 @@ export class DisputeChatPage {
 
   protected onSend(text: string): void {
     this.sending.set(true);
-    this.matchApi
-      .sendChatMessage(this.eventId, this.matchId, { text })
-      .pipe(tap(() => this.refresh$.next()))
-      .subscribe({
-        next: () => this.sending.set(false),
-        error: (error: { error?: { message?: string } }) => {
-          this.sending.set(false);
-          this.toastService.error(error.error?.message ?? 'Could not send message.');
-        },
-      });
+    this.realtime.sendChatMessage(this.eventId, this.matchId, { text }).subscribe({
+      next: () => this.sending.set(false),
+      error: (error: { error?: { message?: string } }) => {
+        this.sending.set(false);
+        this.toastService.error(error.error?.message ?? 'Could not send message.');
+      },
+    });
   }
 
   protected goHome(): void {
