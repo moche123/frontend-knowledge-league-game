@@ -6,8 +6,6 @@ Angular 22, generated with Angular CLI. Styled with Tailwind CSS (`@theme` in `s
 
 ## Current status
 
-Mock screens only, **100% visual, no functional logic yet**: no connection to the backend (`backend/`), no real auth, no state shared between pages — each page carries its own hardcoded data in the component.
-
 - Basic routing in `src/app/app.routes.ts`, all pages lazy-loaded standalone:
   - `/login` — login (mock)
   - `/dashboard` — player dashboard
