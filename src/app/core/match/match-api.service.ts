@@ -179,6 +179,16 @@ export class MatchApi {
     return this.http.post<MatchDto>(`${this.baseUrl}/events/${eventId}/matches/${matchId}/end`, {});
   }
 
+  // Admin or the match's own referee — closed/walkover only. Overturns
+  // winnerId based on the dispute chat discussion; scoreA/scoreB are left
+  // as the AI's assessment.
+  declareWinner(eventId: string, matchId: string, winnerId: string): Observable<MatchDto> {
+    return this.http.post<MatchDto>(
+      `${this.baseUrl}/events/${eventId}/matches/${matchId}/declare-winner`,
+      { winnerId },
+    );
+  }
+
   // Admin, Fase 10 — closed/walkover only. Full reset: answers, questions,
   // score/winner, ranking entry all cleared, back to pending. Reason is
   // required (min 1 char) and gets logged as a system message in the

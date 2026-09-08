@@ -1,114 +1,442 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subject, catchError, forkJoin, map, merge, of, switchMap, timer } from 'rxjs';
+import { AuthService } from '../../../core/auth/auth.service';
+import { MatchApi } from '../../../core/match/match-api.service';
+import { ToastService } from '../../../core/toast/toast.service';
+import { TournamentApi } from '../../../core/tournament/tournament-api.service';
+import { DisputeChatMessageDto } from '../../../shared/dto/dispute-chat.dto';
+import {
+  MatchDto,
+  MatchStatus,
+  StageType,
+  StageWithMatchesDto,
+} from '../../../shared/dto/stage.dto';
 import {
   AssignmentCard,
   AssignmentStatus,
 } from '../../../shared/ui/assignment-card/assignment-card';
+import { Button } from '../../../shared/ui/button/button';
 import { ChatEntry, ChatPanel } from '../../../shared/ui/chat-panel/chat-panel';
+import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
 import { Icon } from '../../../shared/ui/icon/icon';
 import { NavItem } from '../../../shared/ui/nav-item/nav-item';
 import { SideNav } from '../../../shared/ui/side-nav/side-nav';
 import { SideNavCommon } from '../../../shared/ui/side-nav-common/side-nav-common';
 import { SideNavHeader } from '../../../shared/ui/side-nav-header/side-nav-header';
 
-interface Assignment {
-  id: string;
-  status: AssignmentStatus;
+const STAGE_LABEL: Record<StageType, string> = {
+  round_of_16: 'Round of 16',
+  quarterfinal: 'Quarterfinal',
+  semifinal: 'Semifinal',
+  final: 'Final',
+  third_place: 'Third Place',
+};
+
+// AssignmentCard only knows 4 visual states — expired/cancelled fold into
+// "closed" (faded, nothing left to officiate), matching how a referee
+// actually cares about these: is it live, waiting, or done.
+const ASSIGNMENT_STATUS: Record<MatchStatus, AssignmentStatus> = {
+  pending: 'pending',
+  in_progress: 'live',
+  closed: 'closed',
+  walkover: 'walkover',
+  expired: 'closed',
+  cancelled: 'closed',
+};
+
+// Same ordering rule as dispute-inbox-page: live floats to the top.
+const STATUS_RANK: Record<MatchStatus, number> = {
+  in_progress: 0,
+  pending: 1,
+  walkover: 2,
+  expired: 3,
+  closed: 4,
+  cancelled: 5,
+};
+
+const DATE_FORMAT = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' });
+
+// No WS/push yet (same stopgap as dispute-chat-page/event-questions-page).
+const POLL_INTERVAL_MS = 5000;
+
+interface AssignmentRow {
+  eventId: string;
+  matchId: string;
   tournament: string;
   matchup: string;
   stage: string;
-  metaLabel: string;
-  time?: string;
+  status: MatchStatus;
+  scheduledStartAt: string | null;
 }
-
-let nextMessageId = 0;
 
 @Component({
   selector: 'app-judge-panel-page',
-  imports: [AssignmentCard, ChatPanel, Icon, NavItem, SideNav, SideNavCommon, SideNavHeader],
+  imports: [
+    AssignmentCard,
+    Button,
+    ChatPanel,
+    ConfirmDialog,
+    Icon,
+    NavItem,
+    SideNav,
+    SideNavCommon,
+    SideNavHeader,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './judge-panel-page.html',
 })
 export class JudgePanelPage {
-  protected readonly assignments: Assignment[] = [
-    {
-      id: 'a1',
-      status: 'live',
-      tournament: 'History Olympiad',
-      matchup: 'Alejandro Silva vs Sofia Mendez',
-      stage: 'Quarterfinal',
-      metaLabel: 'Today',
-      time: '14:30',
-    },
-    {
-      id: 'a2',
-      status: 'pending',
-      tournament: 'Science Cup',
-      matchup: 'Mateo Ruiz vs Clara Ortiz',
-      stage: 'Semifinal',
-      metaLabel: 'Tomorrow',
-      time: '10:00',
-    },
-    {
-      id: 'a3',
-      status: 'closed',
-      tournament: 'Literary Debate',
-      matchup: 'Diego Torres vs Laura Gomez',
-      stage: 'Group stage',
-      metaLabel: 'Yesterday',
-    },
-    {
-      id: 'a4',
-      status: 'walkover',
-      tournament: 'Mathematics Tournament',
-      matchup: 'Andres Vega vs Carlos Pico',
-      stage: 'Round 1',
-      metaLabel: 'Review required',
-    },
-  ];
+  private readonly authService = inject(AuthService);
+  private readonly tournamentApi = inject(TournamentApi);
+  private readonly matchApi = inject(MatchApi);
+  private readonly toastService = inject(ToastService);
 
-  protected messages = signal<ChatEntry[]>([
-    { id: 'sys-1', tone: 'system', align: 'left', text: 'Dispute opened: Today 14:35' },
-    {
-      id: 'msg-1',
-      tone: 'self',
-      align: 'left',
-      author: 'Alejandro Silva',
-      time: '14:36',
-      avatarInitial: 'A',
-      text: 'Referee, question 4 about the French Revolution has an ambiguity in the National Constituent Assembly deadline. My sources indicate 1791.',
-    },
-    {
-      id: 'msg-2',
-      tone: 'opponent',
-      align: 'right',
-      author: 'Sofia Mendez',
-      time: '14:38',
-      avatarInitial: 'S',
-      text: "I disagree. The tournament's official text specifies September 1791, which I marked correctly in my answer.",
-    },
-    {
-      id: 'msg-3',
-      tone: 'arbiter',
-      align: 'right',
-      author: 'Dr. Julian Arango',
-      time: '14:42',
-      verified: true,
-      text: "Reviewing the official Knowledge League manual (2023 Ed.), chapter 4. Sofia's answer is the one accepted by the academic committee. The score stands.",
-    },
-  ]);
+  private readonly currentUserId = this.authService.currentUser()?.id ?? null;
 
-  protected onSend(text: string): void {
-    this.messages.update((current) => [
-      ...current,
-      {
-        id: `msg-${nextMessageId++}`,
+  protected readonly assignmentStatus = ASSIGNMENT_STATUS;
+
+  private matchupLabel(match: MatchDto, names: Record<string, string>): string {
+    const label = (id: string | null) => (id ? (names[id] ?? '…') : 'TBD');
+    return `${label(match.playerAId)} vs ${label(match.playerBId)}`;
+  }
+
+  // Every match across every event where this referee is assigned
+  // (match.refereeId) — same participant rule the backend enforces.
+  protected readonly rows = toSignal(
+    this.tournamentApi.listEvents().pipe(
+      switchMap((events) =>
+        events.length === 0
+          ? of<AssignmentRow[]>([])
+          : forkJoin(
+              events.map((event) =>
+                (event.status === 'registration_open'
+                  ? of<StageWithMatchesDto[]>([])
+                  : this.matchApi.listStages(event.id)
+                ).pipe(
+                  switchMap((stages) => {
+                    const entries = stages.flatMap((stage) =>
+                      stage.matches
+                        .filter((match) => match.refereeId === this.currentUserId)
+                        .map((match) => ({ stage, match })),
+                    );
+                    if (entries.length === 0) return of<AssignmentRow[]>([]);
+
+                    const ids = new Set<string>();
+                    entries.forEach(({ match }) => {
+                      if (match.playerAId) ids.add(match.playerAId);
+                      if (match.playerBId) ids.add(match.playerBId);
+                    });
+
+                    return forkJoin(
+                      [...ids].map((id) =>
+                        this.authService
+                          .getUserName(id)
+                          .pipe(map((user) => [id, user.name] as const)),
+                      ),
+                    ).pipe(
+                      map((pairs) => Object.fromEntries(pairs)),
+                      map((names) =>
+                        entries.map(({ stage, match }): AssignmentRow => ({
+                          eventId: event.id,
+                          matchId: match.id,
+                          tournament: event.name,
+                          matchup: this.matchupLabel(match, names),
+                          stage: STAGE_LABEL[stage.type],
+                          status: match.status,
+                          scheduledStartAt: match.scheduledStartAt,
+                        })),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ).pipe(map((rowsPerEvent) => rowsPerEvent.flat())),
+      ),
+      map((rows) => rows.sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status])),
+      catchError(() => of<AssignmentRow[]>([])),
+    ),
+    { initialValue: [] as AssignmentRow[] },
+  );
+
+  protected metaLabel(row: AssignmentRow): string {
+    return row.scheduledStartAt
+      ? DATE_FORMAT.format(new Date(row.scheduledStartAt))
+      : 'Not scheduled';
+  }
+
+  protected timeLabel(row: AssignmentRow): string | undefined {
+    return row.scheduledStartAt ? TIME_FORMAT.format(new Date(row.scheduledStartAt)) : undefined;
+  }
+
+  // Selected assignment — defaults to the top of the (already live-first
+  // sorted) list as soon as it loads, so the chat panel isn't empty on open.
+  // Skips anything the referee has locally "ignored" (see ignoreAndClose).
+  protected readonly selectedMatchId = signal<string | null>(null);
+  private readonly ignoredMatchIds = signal<ReadonlySet<string>>(new Set());
+
+  constructor() {
+    effect(() => {
+      const rows = this.rows();
+      const ignored = this.ignoredMatchIds();
+      if (this.selectedMatchId() === null) {
+        const next = rows.find((row) => !ignored.has(row.matchId));
+        if (next) this.selectedMatchId.set(next.matchId);
+      }
+    });
+  }
+
+  protected selectRow(row: AssignmentRow): void {
+    this.selectedMatchId.set(row.matchId);
+  }
+
+  protected readonly selectedRow = computed(
+    () => this.rows().find((row) => row.matchId === this.selectedMatchId()) ?? null,
+  );
+
+  private readonly selection$ = toObservable(this.selectedRow);
+
+  // Match itself, refetched whenever the selection changes, and again on
+  // demand (matchRefresh$) right after declareWinner succeeds — needed to
+  // know which player id is which for message tone, and to reflect a
+  // corrected winnerId immediately.
+  private readonly matchRefresh$ = new Subject<void>();
+
+  protected readonly selectedMatch = toSignal(
+    this.selection$.pipe(
+      switchMap((row) => {
+        if (!row) return of<MatchDto | null>(null);
+        return merge(of(undefined), this.matchRefresh$).pipe(
+          switchMap(() =>
+            this.matchApi.getMatch(row.eventId, row.matchId).pipe(catchError(() => of(null))),
+          ),
+        );
+      }),
+    ),
+    { initialValue: null as MatchDto | null },
+  );
+
+  // Messages — polled, plus refreshed immediately after a successful send.
+  // Re-keyed off the selection so switching assignments restarts the poll
+  // against the newly selected match.
+  private readonly refresh$ = new Subject<void>();
+
+  private readonly rawMessages = toSignal(
+    this.selection$.pipe(
+      switchMap((row) => {
+        if (!row) return of<DisputeChatMessageDto[] | null>(null);
+        return merge(timer(0, POLL_INTERVAL_MS), this.refresh$).pipe(
+          switchMap(() =>
+            this.matchApi
+              .getChatMessages(row.eventId, row.matchId)
+              .pipe(catchError(() => of(null))),
+          ),
+        );
+      }),
+    ),
+    { initialValue: null as DisputeChatMessageDto[] | null },
+  );
+
+  protected readonly authorNames = signal<Record<string, string>>({});
+  private readonly resolvedAuthorIds = new Set<string>();
+
+  private resolveAuthorNames(ids: string[]): void {
+    const missing = ids.filter((id) => !this.resolvedAuthorIds.has(id));
+    if (missing.length === 0) return;
+    missing.forEach((id) => this.resolvedAuthorIds.add(id));
+    missing.forEach((id) => {
+      this.authService.getUserName(id).subscribe({
+        next: (user) => this.authorNames.update((names) => ({ ...names, [id]: user.name })),
+        error: () => {
+          /* leave unresolved — falls back to "Loading…" below */
+        },
+      });
+    });
+  }
+
+  protected readonly messages = computed<ChatEntry[]>(() => {
+    const raw = this.rawMessages();
+    const match = this.selectedMatch();
+    if (!raw) return [];
+
+    this.resolveAuthorNames([...new Set(raw.map((message) => message.authorId))]);
+    const names = this.authorNames();
+
+    return raw.map((message): ChatEntry => {
+      if (message.text.startsWith('[System]')) {
+        return {
+          id: message.id,
+          tone: 'system',
+          align: 'left',
+          text: message.text.replace(/^\[System\]\s*/, ''),
+        };
+      }
+
+      const authorName = names[message.authorId] ?? 'Loading…';
+      const isSelf = this.currentUserId !== null && message.authorId === this.currentUserId;
+      const isPlayerA = match != null && message.authorId === match.playerAId;
+      const isPlayerB = match != null && message.authorId === match.playerBId;
+
+      if (isSelf) {
+        return {
+          id: message.id,
+          tone: 'arbiter',
+          align: 'right',
+          author: authorName,
+          time: TIME_FORMAT.format(new Date(message.createdAt)),
+          verified: true,
+          text: message.text,
+        };
+      }
+      if (isPlayerA) {
+        return {
+          id: message.id,
+          tone: 'self',
+          align: 'left',
+          author: authorName,
+          time: TIME_FORMAT.format(new Date(message.createdAt)),
+          avatarInitial: authorName.slice(0, 1).toUpperCase(),
+          text: message.text,
+        };
+      }
+      if (isPlayerB) {
+        return {
+          id: message.id,
+          tone: 'opponent',
+          align: 'right',
+          author: authorName,
+          time: TIME_FORMAT.format(new Date(message.createdAt)),
+          avatarInitial: authorName.slice(0, 1).toUpperCase(),
+          text: message.text,
+        };
+      }
+      // Not a player, not this referee — the only other role that can post
+      // here is admin (see DisputeChatService's participant check).
+      return {
+        id: message.id,
         tone: 'arbiter',
         align: 'right',
-        author: 'Dr. Julian Arango',
-        time: 'Now',
+        author: `${authorName} (Admin)`,
+        time: TIME_FORMAT.format(new Date(message.createdAt)),
         verified: true,
-        text,
+        text: message.text,
+      };
+    });
+  });
+
+  protected sending = signal(false);
+
+  protected onSend(text: string): void {
+    const row = this.selectedRow();
+    if (!row) return;
+    this.sending.set(true);
+    this.matchApi.sendChatMessage(row.eventId, row.matchId, { text }).subscribe({
+      next: () => {
+        this.sending.set(false);
+        this.refresh$.next();
       },
-    ]);
+      error: (error: { error?: { message?: string } }) => {
+        this.sending.set(false);
+        this.toastService.error(error.error?.message ?? 'Could not send message.');
+      },
+    });
+  }
+
+  protected matchLabel(row: AssignmentRow | null): string {
+    return row ? `${row.tournament} · ${row.matchup}` : 'No assignment selected';
+  }
+
+  // Winner / claim-author / loser, for the "resolve this dispute" header —
+  // resolves whatever names are missing through the same authorNames cache
+  // the chat messages use.
+  protected readonly disputeSummary = computed(() => {
+    const match = this.selectedMatch();
+    if (!match) return null;
+
+    const ids: string[] = [];
+    if (match.playerAId) ids.push(match.playerAId);
+    if (match.playerBId) ids.push(match.playerBId);
+    if (match.winnerId) ids.push(match.winnerId);
+
+    // The dispute's opening message — first non-system entry in the thread.
+    const claimMessage = this.rawMessages()?.find((m) => !m.text.startsWith('[System]')) ?? null;
+    if (claimMessage) ids.push(claimMessage.authorId);
+
+    this.resolveAuthorNames(ids);
+    const names = this.authorNames();
+
+    const loserId = match.winnerId
+      ? match.winnerId === match.playerAId
+        ? match.playerBId
+        : match.playerAId
+      : null;
+
+    return {
+      winnerName: match.winnerId ? (names[match.winnerId] ?? '…') : null,
+      loserId,
+      loserName: loserId ? (names[loserId] ?? '…') : null,
+      claimAuthorName: claimMessage ? (names[claimMessage.authorId] ?? '…') : null,
+    };
+  });
+
+  // "Solo cierra el thread visualmente" — local-only, doesn't touch the
+  // backend. Deselects the current dispute and excludes it from
+  // auto-selection going forward; the referee can still reopen it by
+  // clicking its card again.
+  protected ignoreAndClose(): void {
+    const id = this.selectedMatchId();
+    if (id) this.ignoredMatchIds.update((current) => new Set(current).add(id));
+    this.selectedMatchId.set(null);
+  }
+
+  protected readonly declareWinnerPending = signal<{
+    eventId: string;
+    matchId: string;
+    loserId: string;
+    loserName: string;
+  } | null>(null);
+  protected readonly declareWinnerSubmitting = signal(false);
+
+  protected askDeclareWinner(): void {
+    const row = this.selectedRow();
+    const summary = this.disputeSummary();
+    if (!row || !summary?.loserId) return;
+    this.declareWinnerPending.set({
+      eventId: row.eventId,
+      matchId: row.matchId,
+      loserId: summary.loserId,
+      loserName: summary.loserName ?? 'the other player',
+    });
+  }
+
+  protected cancelDeclareWinner(): void {
+    if (this.declareWinnerSubmitting()) return;
+    this.declareWinnerPending.set(null);
+  }
+
+  protected confirmDeclareWinner(): void {
+    const pending = this.declareWinnerPending();
+    if (!pending) return;
+    this.declareWinnerSubmitting.set(true);
+    this.matchApi.declareWinner(pending.eventId, pending.matchId, pending.loserId).subscribe({
+      next: () => {
+        this.declareWinnerSubmitting.set(false);
+        this.declareWinnerPending.set(null);
+        this.matchRefresh$.next();
+        this.refresh$.next();
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.declareWinnerSubmitting.set(false);
+        this.toastService.error(error.error?.message ?? 'Could not update the winner.');
+      },
+    });
   }
 }

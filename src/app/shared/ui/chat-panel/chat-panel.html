@@ -6,27 +6,28 @@
   ></div>
 
   <!-- Header -->
-  <div
-    class="p-4 border-b border-secondary-container bg-surface-container-high flex justify-between items-center z-10 relative"
-  >
-    <div>
-      <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
-        <app-icon name="forum" class="text-primary" />
-        {{ title() }}
-      </h2>
-      @if (matchLabel()) {
-        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1 font-mono">
-          {{ matchLabel() }}
-        </p>
-      }
+  <div class="border-b border-secondary-container bg-surface-container-high z-10 relative">
+    <div class="p-4 flex justify-between items-center">
+      <div>
+        <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+          <app-icon name="forum" class="text-primary" />
+          {{ title() }}
+        </h2>
+        @if (matchLabel()) {
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1 font-mono">
+            {{ matchLabel() }}
+          </p>
+        }
+      </div>
+      <button
+        type="button"
+        class="p-2 text-on-surface-variant hover:text-primary transition-colors bg-surface rounded-md border border-outline-variant hover:border-primary"
+        title="View Match Details"
+      >
+        <app-icon name="info" />
+      </button>
     </div>
-    <button
-      type="button"
-      class="p-2 text-on-surface-variant hover:text-primary transition-colors bg-surface rounded-md border border-outline-variant hover:border-primary"
-      title="View Match Details"
-    >
-      <app-icon name="info" />
-    </button>
+    <ng-content select="[chatHeaderExtra]" />
   </div>
 
   <!-- Messages -->

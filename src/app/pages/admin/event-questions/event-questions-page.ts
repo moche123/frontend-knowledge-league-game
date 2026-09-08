@@ -84,11 +84,16 @@ interface MatchOption {
   matchup: string;
   playerAId: string | null;
   playerBId: string | null;
+  winnerId: string | null;
   refereeId: string | null;
   disqualifiedPlayerId: string | null;
   scheduledStartAt: string | null;
   scheduledEndAt: string | null;
 }
+
+// Only these statuses have a result worth showing — pending/in_progress
+// have no winner yet, expired/cancelled never got one.
+const RESULT_STATUSES: ReadonlySet<MatchStatus> = new Set(['closed', 'walkover']);
 
 function shortId(id: string): string {
   return `Player #${id.slice(0, 8)}`;
@@ -189,6 +194,7 @@ export class EventQuestionsPage {
           matchup: `${label(match.playerAId)} vs ${label(match.playerBId)}`,
           playerAId: match.playerAId,
           playerBId: match.playerBId,
+          winnerId: match.winnerId,
           refereeId: match.refereeId,
           disqualifiedPlayerId: match.disqualifiedPlayerId,
           scheduledStartAt: match.scheduledStartAt,
@@ -418,6 +424,15 @@ export class EventQuestionsPage {
     }
     return this.playerNames()[id] ?? shortId(id);
   });
+
+  // Result of a closed/walkover match — null on anything still pending/live,
+  // 'Tie' on an exact-tie close (winnerId left null on purpose, see
+  // computeMatchResult), otherwise the winner's name.
+  protected winnerLabel(match: MatchOption): string | null {
+    if (!RESULT_STATUSES.has(match.status)) return null;
+    if (!match.winnerId) return 'Tie';
+    return this.playerNames()[match.winnerId] ?? shortId(match.winnerId);
+  }
 
   // Scheduling (start time + duration) is the trigger for AI question
   // generation — one action, one button (2026-08-31, explicit user decision:
