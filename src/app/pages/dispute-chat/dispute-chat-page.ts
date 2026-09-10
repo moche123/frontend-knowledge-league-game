@@ -1,7 +1,19 @@
-import { toSignal } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, filter, forkJoin, map, merge, of, scan, switchMap } from 'rxjs';
+import {
+  catchError,
+  filter,
+  forkJoin,
+  map,
+  merge,
+  of,
+  scan,
+  Subject,
+  switchMap,
+  tap,
+  throttleTime,
+} from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { HOME_BY_ROLE } from '../../core/auth/home-by-role';
 import { MatchApi } from '../../core/match/match-api.service';
@@ -12,13 +24,13 @@ import { DisputeChatMessageDto } from '../../shared/dto/dispute-chat.dto';
 import { MatchDto, MatchStatus } from '../../shared/dto/stage.dto';
 import { Avatar } from '../../shared/ui/avatar/avatar';
 import { Badge, BadgeVariant } from '../../shared/ui/badge/badge';
-import { ChatEntry, ChatPanel } from '../../shared/ui/chat-panel/chat-panel';
 import { ChatMessageTone } from '../../shared/ui/chat-message/chat-message';
+import { ChatEntry, ChatPanel } from '../../shared/ui/chat-panel/chat-panel';
 import { Icon } from '../../shared/ui/icon/icon';
 import { NavItem } from '../../shared/ui/nav-item/nav-item';
-import { SideNav } from '../../shared/ui/side-nav/side-nav';
 import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
 import { SideNavHeader } from '../../shared/ui/side-nav-header/side-nav-header';
+import { SideNav } from '../../shared/ui/side-nav/side-nav';
 
 const STATUS_BADGE: Record<MatchStatus, BadgeVariant> = {
   pending: 'gold',
@@ -66,14 +78,24 @@ export class DisputeChatPage {
   private readonly eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
   private readonly matchId = this.route.snapshot.paramMap.get('matchId') ?? '';
   private readonly currentUserId = this.authService.currentUser()?.id ?? null;
+  private typingTimeout: ReturnType<typeof setTimeout> | undefined;
+  private readonly typingEvents$ = new Subject<void>();
 
   protected readonly statusBadge = STATUS_BADGE;
   protected readonly statusLabel = STATUS_LABEL;
+  protected readonly sending = signal(false);
+  protected readonly typingLabel = signal('');
 
   protected readonly homeUrl = computed(() => {
     const user = this.authService.currentUser();
     return user ? HOME_BY_ROLE[user.role] : '/login';
   });
+
+  constructor() {
+    this.typingEvents$
+      .pipe(throttleTime(300), takeUntilDestroyed())
+      .subscribe(() => this.realtime.typing(this.eventId, this.matchId));
+  }
 
   // Match summary — players, referee, event name — fetched once (doesn't
   // change while chatting). Errors here (not a participant, match not
@@ -118,6 +140,15 @@ export class DisputeChatPage {
         merge(
           of(initial),
           this.realtime.matchEvents(this.eventId, this.matchId).pipe(
+            tap((event) => {
+              if (!event.typing || event.typing.authorId === this.currentUserId) return;
+              this.authService.getUserName(event.typing.authorId).subscribe({
+                next: (user) => this.typingLabel.set(`${user.name} is typing…`),
+                error: () => this.typingLabel.set('Someone is typing…'),
+              });
+              if (this.typingTimeout) clearTimeout(this.typingTimeout);
+              this.typingTimeout = setTimeout(() => this.typingLabel.set(''), 1500);
+            }),
             filter((event) => event.chat !== undefined),
             map((event) => [event.chat!]),
           ),
@@ -207,7 +238,9 @@ export class DisputeChatPage {
     });
   });
 
-  protected sending = signal(false);
+  protected onTyping(): void {
+    this.typingEvents$.next();
+  }
 
   protected onSend(text: string): void {
     this.sending.set(true);

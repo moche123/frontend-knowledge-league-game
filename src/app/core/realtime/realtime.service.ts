@@ -17,6 +17,10 @@ export interface BattleStateEvent {
   winnerId: string | null;
 }
 
+export interface ChatTypingEvent {
+  authorId: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RealtimeService {
   private readonly authService = inject(AuthService);
@@ -49,7 +53,11 @@ export class RealtimeService {
   matchEvents(
     eventId: string,
     matchId: string,
-  ): Observable<{ chat?: DisputeChatMessageDto; battle?: BattleStateEvent }> {
+  ): Observable<{
+    chat?: DisputeChatMessageDto;
+    battle?: BattleStateEvent;
+    typing?: ChatTypingEvent;
+  }> {
     return defer(() => {
       const socket = this.connect();
       const chat$ = fromEvent<DisputeChatMessageDto>(socket, 'chat:message').pipe(
@@ -58,10 +66,13 @@ export class RealtimeService {
       const battle$ = fromEvent<BattleStateEvent>(socket, 'battle.state').pipe(
         map((battle) => ({ battle })),
       );
+      const typing$ = fromEvent<ChatTypingEvent>(socket, 'chat:typing').pipe(
+        map((typing) => ({ typing })),
+      );
       const room = `${eventId}:${matchId}`;
       this.joinedRooms.set(room, (this.joinedRooms.get(room) ?? 0) + 1);
       socket.emit('match:join', { eventId, matchId });
-      return merge(chat$, battle$);
+      return merge(chat$, battle$, typing$);
     }).pipe(
       share(),
       finalize(() => {
@@ -82,5 +93,9 @@ export class RealtimeService {
     return defer(() =>
       from(this.connect().emitWithAck('chat:send', { eventId, matchId, message })),
     );
+  }
+
+  typing(eventId: string, matchId: string): void {
+    this.connect().emit('chat:typing', { eventId, matchId });
   }
 }

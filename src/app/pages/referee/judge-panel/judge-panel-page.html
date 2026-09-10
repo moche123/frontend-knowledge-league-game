@@ -63,8 +63,10 @@
           sendTone="gold"
           [showAiHint]="true"
           [messages]="messages()"
+          [typingLabel]="typingLabel()"
           [sending]="sending()"
           (send)="onSend($event)"
+          (typing)="onTyping($event)"
         >
           @if (disputeSummary(); as summary) {
             <div

@@ -36,8 +36,10 @@ export class ChatPanel {
   // Disables the composer while a send is in flight — guards against
   // double-submitting the same message on a slow connection.
   sending = input(false);
+  typingLabel = input('');
 
   send = output<string>();
+  typing = output<void>();
 
   protected draft = signal('');
 
@@ -46,6 +48,11 @@ export class ChatPanel {
       ? 'bg-tertiary text-on-tertiary hover:bg-tertiary-fixed shadow-[0_0_10px_rgba(231,191,153,0.2)]'
       : 'bg-primary text-on-primary hover:opacity-90 shadow-[0_0_10px_rgba(185,199,228,0.2)]',
   );
+
+  protected setEvent(event: string, draft: typeof this.draft): void {
+    draft.set(event);
+    if (event.trim()) this.typing.emit();
+  }
 
   protected submit(): void {
     if (this.sending()) return;

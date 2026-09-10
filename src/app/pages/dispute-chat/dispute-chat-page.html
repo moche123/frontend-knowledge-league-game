@@ -116,8 +116,10 @@
         matchLabel="Match"
         sendTone="primary"
         [messages]="messages()"
+        [typingLabel]="typingLabel()"
         [sending]="sending()"
         (send)="onSend($event)"
+        (typing)="onTyping()"
       />
     }
   </main>

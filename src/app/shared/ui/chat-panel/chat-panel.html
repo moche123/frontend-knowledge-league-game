@@ -50,6 +50,11 @@
 
   <!-- Composer -->
   <div class="p-4 bg-surface-container border-t border-secondary-container relative z-10">
+    @if (typingLabel()) {
+      <p class="mb-2 px-1 text-xs text-on-surface-variant italic">
+        {{ typingLabel() }}
+      </p>
+    }
     <div
       class="flex items-end gap-2 bg-background p-2 rounded-lg border border-outline-variant focus-within:border-accent focus-within:ring-1 focus-within:ring-accent transition-all"
     >
@@ -66,7 +71,8 @@
         [disabled]="sending()"
         [placeholder]="composerPlaceholder()"
         [value]="draft()"
-        (valueChange)="draft.set($event)"
+        /* (valueChange)="draft.set($event)" */
+        (valueChange)="setEvent($event,draft)"
       />
       <button
         type="button"

@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Subject, catchError, filter, forkJoin, map, merge, of, scan, switchMap } from 'rxjs';
+import { Subject, catchError, filter, forkJoin, map, merge, of, scan, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { MatchApi } from '../../../core/match/match-api.service';
 import { RealtimeService } from '../../../core/realtime/realtime.service';
@@ -233,6 +233,15 @@ export class JudgePanelPage {
             merge(
               of(initial),
               this.realtime.matchEvents(row.eventId, row.matchId).pipe(
+                tap((event) => {
+                  if (!event.typing || event.typing.authorId === this.currentUserId) return;
+                  this.authService.getUserName(event.typing.authorId).subscribe({
+                    next: (user) => this.typingLabel.set(`${user.name} is typing…`),
+                    error: () => this.typingLabel.set('Someone is typing…'),
+                  });
+                  if (this.typingTimeout) clearTimeout(this.typingTimeout);
+                  this.typingTimeout = setTimeout(() => this.typingLabel.set(''), 1500);
+                }),
                 filter((event) => event.chat !== undefined),
                 map((event) => [event.chat!]),
               ),
@@ -338,6 +347,14 @@ export class JudgePanelPage {
   });
 
   protected sending = signal(false);
+  protected typingLabel = signal('');
+  private typingTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  protected onTyping($event: void): void {
+    console.log('typing event', $event);
+    const row = this.selectedRow();
+    if (row) this.realtime.typing(row.eventId, row.matchId);
+  }
 
   protected onSend(text: string): void {
     const row = this.selectedRow();
