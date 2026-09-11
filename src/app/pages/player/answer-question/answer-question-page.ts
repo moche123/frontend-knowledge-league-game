@@ -68,7 +68,7 @@ export class AnswerQuestionPage {
   private readonly refresh$ = new Subject<void>();
   private readonly battleEvents$ = this.realtime
     .matchEvents(this.eventId, this.matchId)
-    .pipe(filter((event) => event.battle !== undefined));
+    .pipe(filter((event) => event.battle !== undefined || event.resync !== undefined));
   private readonly questionRefresh$ = merge(
     of(undefined),
     this.battleEvents$.pipe(map(() => undefined)),

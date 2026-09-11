@@ -20,4 +20,8 @@ export class RankingApi {
   getGlobalLeaderboard(): Observable<LeaderboardRowDto[]> {
     return this.http.get<LeaderboardRowDto[]>(this.baseUrl);
   }
+
+  getEventLeaderboard(eventId: string): Observable<LeaderboardRowDto[]> {
+    return this.http.get<LeaderboardRowDto[]>(`${this.baseUrl}/events/${eventId}`);
+  }
 }

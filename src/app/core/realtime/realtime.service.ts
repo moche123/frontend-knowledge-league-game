@@ -57,6 +57,7 @@ export class RealtimeService {
     chat?: DisputeChatMessageDto;
     battle?: BattleStateEvent;
     typing?: ChatTypingEvent;
+    resync?: boolean;
   }> {
     return defer(() => {
       const socket = this.connect();
@@ -69,10 +70,15 @@ export class RealtimeService {
       const typing$ = fromEvent<ChatTypingEvent>(socket, 'chat:typing').pipe(
         map((typing) => ({ typing })),
       );
+      // A dropped/reconnected socket can silently miss a battle.state event
+      // emitted while it was down (Socket.IO doesn't replay missed events) —
+      // force a REST resync every time the room is (re)joined so state never
+      // stays stuck on a stale question until the user manually refreshes.
+      const resync$ = fromEvent(socket, 'connect').pipe(map(() => ({ resync: true as const })));
       const room = `${eventId}:${matchId}`;
       this.joinedRooms.set(room, (this.joinedRooms.get(room) ?? 0) + 1);
       socket.emit('match:join', { eventId, matchId });
-      return merge(chat$, battle$, typing$);
+      return merge(chat$, battle$, typing$, resync$);
     }).pipe(
       share(),
       finalize(() => {

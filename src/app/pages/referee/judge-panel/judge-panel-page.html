@@ -84,10 +84,36 @@
                 </span>
               }
               <div class="flex flex-wrap gap-2 ml-auto">
-                @if (summary.loserId) {
-                  <app-button variant="gold" size="sm" (click)="askDeclareWinner()">
-                    Hacer ganar a {{ summary.loserName }} (perdedor)
-                  </app-button>
+                @if (summary.canDeclareWinner) {
+                  @if (summary.loserId) {
+                    <app-button
+                      variant="gold"
+                      size="sm"
+                      (click)="askDeclareWinner(summary.loserId, summary.loserName)"
+                    >
+                      Hacer ganar a {{ summary.loserName }} (perdedor)
+                    </app-button>
+                  } @else {
+                    <!-- No winner yet (exact tie) — nothing to "flip", offer both players directly. -->
+                    @if (summary.playerAId) {
+                      <app-button
+                        variant="gold"
+                        size="sm"
+                        (click)="askDeclareWinner(summary.playerAId, summary.playerAName)"
+                      >
+                        Declarar ganador: {{ summary.playerAName }}
+                      </app-button>
+                    }
+                    @if (summary.playerBId) {
+                      <app-button
+                        variant="gold"
+                        size="sm"
+                        (click)="askDeclareWinner(summary.playerBId, summary.playerBName)"
+                      >
+                        Declarar ganador: {{ summary.playerBName }}
+                      </app-button>
+                    }
+                  }
                 }
                 <app-button variant="ghost" size="sm" (click)="ignoreAndClose()">
                   Ignorar y cerrar
@@ -105,8 +131,8 @@
     title="Cambiar ganador"
     [message]="
       'Vas a declarar a ' +
-      (declareWinnerPending()?.loserName ?? '') +
-      ' como ganador de este match. Si ya se sorteó la siguiente etapa con el ganador anterior, corregila a mano.'
+      (declareWinnerPending()?.winnerName ?? '') +
+      ' como ganador de este match. Si la siguiente etapa ya avanzó más allá de pending con el resultado anterior, esto se va a bloquear — corregí esa etapa a mano primero.'
     "
     confirmLabel="Confirmar"
     loadingLabel="Guardando…"

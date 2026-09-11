@@ -405,6 +405,15 @@ export class JudgePanelPage {
       loserId,
       loserName: loserId ? (names[loserId] ?? '…') : null,
       claimAuthorName: claimMessage ? (names[claimMessage.authorId] ?? '…') : null,
+      // Only closed/walkover matches have a real result to dispute (matches
+      // the backend's own declareWinner gate). When there's no winner yet —
+      // an exact tie, the one case computeMatchResult leaves winnerId null —
+      // there's no "loser" to flip, so both players are offered directly.
+      canDeclareWinner: match.status === 'closed' || match.status === 'walkover',
+      playerAId: match.playerAId,
+      playerAName: match.playerAId ? (names[match.playerAId] ?? '…') : null,
+      playerBId: match.playerBId,
+      playerBName: match.playerBId ? (names[match.playerBId] ?? '…') : null,
     };
   });
 
@@ -421,20 +430,19 @@ export class JudgePanelPage {
   protected readonly declareWinnerPending = signal<{
     eventId: string;
     matchId: string;
-    loserId: string;
-    loserName: string;
+    winnerId: string;
+    winnerName: string;
   } | null>(null);
   protected readonly declareWinnerSubmitting = signal(false);
 
-  protected askDeclareWinner(): void {
+  protected askDeclareWinner(winnerId: string, winnerName: string | null): void {
     const row = this.selectedRow();
-    const summary = this.disputeSummary();
-    if (!row || !summary?.loserId) return;
+    if (!row) return;
     this.declareWinnerPending.set({
       eventId: row.eventId,
       matchId: row.matchId,
-      loserId: summary.loserId,
-      loserName: summary.loserName ?? 'the other player',
+      winnerId,
+      winnerName: winnerName ?? 'this player',
     });
   }
 
@@ -447,7 +455,7 @@ export class JudgePanelPage {
     const pending = this.declareWinnerPending();
     if (!pending) return;
     this.declareWinnerSubmitting.set(true);
-    this.matchApi.declareWinner(pending.eventId, pending.matchId, pending.loserId).subscribe({
+    this.matchApi.declareWinner(pending.eventId, pending.matchId, pending.winnerId).subscribe({
       next: () => {
         this.declareWinnerSubmitting.set(false);
         this.declareWinnerPending.set(null);

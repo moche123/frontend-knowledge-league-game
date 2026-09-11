@@ -24,8 +24,10 @@ import { DisputeChatMessageDto } from '../../shared/dto/dispute-chat.dto';
 import { MatchDto, MatchStatus } from '../../shared/dto/stage.dto';
 import { Avatar } from '../../shared/ui/avatar/avatar';
 import { Badge, BadgeVariant } from '../../shared/ui/badge/badge';
+import { Button } from '../../shared/ui/button/button';
 import { ChatMessageTone } from '../../shared/ui/chat-message/chat-message';
 import { ChatEntry, ChatPanel } from '../../shared/ui/chat-panel/chat-panel';
+import { ConfirmDialog } from '../../shared/ui/confirm-dialog/confirm-dialog';
 import { Icon } from '../../shared/ui/icon/icon';
 import { NavItem } from '../../shared/ui/nav-item/nav-item';
 import { SideNavCommon } from '../../shared/ui/side-nav-common/side-nav-common';
@@ -62,7 +64,18 @@ interface MatchSummary {
 
 @Component({
   selector: 'app-dispute-chat-page',
-  imports: [Avatar, Badge, ChatPanel, Icon, NavItem, SideNav, SideNavCommon, SideNavHeader],
+  imports: [
+    Avatar,
+    Badge,
+    Button,
+    ChatPanel,
+    ConfirmDialog,
+    Icon,
+    NavItem,
+    SideNav,
+    SideNavCommon,
+    SideNavHeader,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dispute-chat-page.html',
 })
@@ -77,9 +90,11 @@ export class DisputeChatPage {
 
   private readonly eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
   private readonly matchId = this.route.snapshot.paramMap.get('matchId') ?? '';
-  private readonly currentUserId = this.authService.currentUser()?.id ?? null;
+  private readonly currentUser = this.authService.currentUser();
+  private readonly currentUserId = this.currentUser?.id ?? null;
   private typingTimeout: ReturnType<typeof setTimeout> | undefined;
   private readonly typingEvents$ = new Subject<void>();
+  private readonly summaryRefresh$ = new Subject<void>();
 
   protected readonly statusBadge = STATUS_BADGE;
   protected readonly statusLabel = STATUS_LABEL;
@@ -103,10 +118,13 @@ export class DisputeChatPage {
   protected readonly summaryError = signal<string | null>(null);
 
   protected readonly summary = toSignal(
-    forkJoin({
-      match: this.matchApi.getMatch(this.eventId, this.matchId),
-      event: this.tournamentApi.getEvent(this.eventId),
-    }).pipe(
+    merge(of(undefined), this.summaryRefresh$).pipe(
+      switchMap(() =>
+        forkJoin({
+          match: this.matchApi.getMatch(this.eventId, this.matchId),
+          event: this.tournamentApi.getEvent(this.eventId),
+        }),
+      ),
       switchMap(({ match, event }) =>
         forkJoin({
           match: of(match),
@@ -237,6 +255,70 @@ export class DisputeChatPage {
       };
     });
   });
+
+  // Same dispute-resolution capability as judge-panel-page, surfaced here
+  // too — this is the screen admin AND the referee actually use in practice
+  // (reached via /disputes), judge-panel-page is a separate referee-only
+  // "Assignments" screen. Admin, or the match's own assigned referee, on a
+  // closed/walkover match — mirrors MatchService.declareWinner's own gate.
+  protected readonly canDeclareWinner = computed(() => {
+    const match = this.summary()?.match;
+    const role = this.currentUser?.role;
+    if (!match || !role) return false;
+    if (match.status !== 'closed' && match.status !== 'walkover') return false;
+    if (role === 'admin') return true;
+    return role === 'referee' && match.refereeId === this.currentUserId;
+  });
+
+  // If there's already a winner, only offer to flip it to the other player
+  // (matches judge-panel-page's "Hacer ganar a X (perdedor)"). If the match
+  // closed in an exact tie (winnerId null — see CLAUDE.md), there's no
+  // "loser" to flip, so both players are offered directly.
+  protected readonly winnerChoices = computed<{ id: string; name: string }[]>(() => {
+    const summary = this.summary();
+    if (!summary || !this.canDeclareWinner()) return [];
+    const { match, playerAName, playerBName } = summary;
+
+    if (match.winnerId) {
+      const loserId = match.winnerId === match.playerAId ? match.playerBId : match.playerAId;
+      if (!loserId) return [];
+      return [{ id: loserId, name: loserId === match.playerAId ? playerAName : playerBName }];
+    }
+
+    const choices: { id: string; name: string }[] = [];
+    if (match.playerAId) choices.push({ id: match.playerAId, name: playerAName });
+    if (match.playerBId) choices.push({ id: match.playerBId, name: playerBName });
+    return choices;
+  });
+
+  protected readonly declareWinnerPending = signal<{ id: string; name: string } | null>(null);
+  protected readonly declareWinnerSubmitting = signal(false);
+
+  protected askDeclareWinner(choice: { id: string; name: string }): void {
+    this.declareWinnerPending.set(choice);
+  }
+
+  protected cancelDeclareWinner(): void {
+    if (this.declareWinnerSubmitting()) return;
+    this.declareWinnerPending.set(null);
+  }
+
+  protected confirmDeclareWinner(): void {
+    const pending = this.declareWinnerPending();
+    if (!pending) return;
+    this.declareWinnerSubmitting.set(true);
+    this.matchApi.declareWinner(this.eventId, this.matchId, pending.id).subscribe({
+      next: () => {
+        this.declareWinnerSubmitting.set(false);
+        this.declareWinnerPending.set(null);
+        this.summaryRefresh$.next();
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.declareWinnerSubmitting.set(false);
+        this.toastService.error(error.error?.message ?? 'Could not update the winner.');
+      },
+    });
+  }
 
   protected onTyping(): void {
     this.typingEvents$.next();

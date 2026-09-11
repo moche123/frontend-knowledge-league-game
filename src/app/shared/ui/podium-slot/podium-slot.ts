@@ -90,12 +90,21 @@ const THEME: Record<PodiumRank, RankTheme> = {
         @if (rank() === 1) {
           <div class="absolute inset-0 rounded-full bg-gold blur-md opacity-40 animate-pulse"></div>
         }
-        <img
-          [src]="avatarUrl()"
-          [alt]="name()"
-          class="rounded-full relative z-10 bg-surface-container object-cover"
-          [class]="theme().avatarSize + ' ' + theme().ring"
-        />
+        @if (avatarUrl(); as url) {
+          <img
+            [src]="url"
+            [alt]="name()"
+            class="rounded-full relative z-10 bg-surface-container object-cover"
+            [class]="theme().avatarSize + ' ' + theme().ring"
+          />
+        } @else {
+          <div
+            class="rounded-full relative z-10 bg-secondary-container text-on-secondary-container font-bold flex items-center justify-center"
+            [class]="theme().avatarSize + ' ' + theme().ring"
+          >
+            {{ initials() }}
+          </div>
+        }
       </div>
 
       <div class="mt-3 mb-2 flex flex-col items-center">
@@ -132,10 +141,18 @@ export class PodiumSlot {
   rank = input.required<PodiumRank>();
   name = input.required<string>();
   points = input.required<string>();
-  avatarUrl = input.required<string>();
+  avatarUrl = input<string>();
   winRate = input(0);
   matches = input(0);
   isSelf = input(false);
 
   protected theme = computed(() => THEME[this.rank()]);
+  protected initials = computed(() =>
+    this.name()
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join(''),
+  );
 }

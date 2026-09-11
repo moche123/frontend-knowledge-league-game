@@ -110,6 +110,20 @@
             </div>
           </div>
         </div>
+
+        @if (winnerChoices().length > 0) {
+          <div class="flex flex-wrap gap-2 justify-end mt-4">
+            @for (choice of winnerChoices(); track choice.id) {
+              <app-button variant="gold" size="sm" (click)="askDeclareWinner(choice)">
+                {{
+                  summary()!.match.winnerId
+                    ? 'Hacer ganar a ' + choice.name + ' (perdedor)'
+                    : 'Declarar ganador: ' + choice.name
+                }}
+              </app-button>
+            }
+          </div>
+        }
       </section>
 
       <app-chat-panel
@@ -123,4 +137,20 @@
       />
     }
   </main>
+
+  <app-confirm-dialog
+    [open]="declareWinnerPending() !== null"
+    title="Cambiar ganador"
+    [message]="
+      'Vas a declarar a ' +
+      (declareWinnerPending()?.name ?? '') +
+      ' como ganador de este match. Si la siguiente etapa ya avanzó más allá de pending con el resultado anterior, esto se va a bloquear — corregí esa etapa a mano primero.'
+    "
+    confirmLabel="Confirmar"
+    loadingLabel="Guardando…"
+    variant="danger"
+    [loading]="declareWinnerSubmitting()"
+    (confirmed)="confirmDeclareWinner()"
+    (cancelled)="cancelDeclareWinner()"
+  />
 </div>
